@@ -45,3 +45,16 @@ IMÁGENES EXTERNAS HTTPS
 
 La imagen social está en images/venta-por-mudanza-share.jpg y se usa SOLO para Open Graph/Twitter/WhatsApp al compartir el link.
 El hero del sitio usa images/hero-illustration.webp, sin texto dentro de la imagen; el título y la descripción son HTML responsive.
+
+BADGE RECIÉN AGREGADO
+En Catalogo, columna badge, escribí «Recién agregado» para marcar un producto.
+Dejá la celda vacía para quitar la marca. No depende de una fecha automática.
+La categoría original del producto se conserva.
+El filtro aparece después de Todos, en desktop y en el selector mobile.
+URL para compartir (una vez publicado el cambio):
+https://ventasbrenda.netlify.app/?badge=recien-agregado
+El selector permite una categoría o el badge a la vez; si llegan ambos parámetros,
+el badge tiene prioridad. Cambiar a una categoría o Todos quita el parámetro badge.
+Si no quedan productos marcados disponibles, el enlace muestra el estado vacío.
+La búsqueda se aplica dentro del filtro seleccionado.
+La vista previa social usa el título del badge y la imagen general del catálogo.
