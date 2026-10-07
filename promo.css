@@ -1,0 +1,90 @@
+/* Approved catalog-service invitation. Shared palette remains in styles.css. */
+:root {
+  --promo-gap: clamp(12px, 1.6vw, 22px);
+  --promo-bottom: max(var(--promo-gap), env(safe-area-inset-bottom));
+  --promo-height: 64px;
+}
+.web-promo-trigger {
+  position: fixed;
+  left: max(var(--promo-gap), env(safe-area-inset-left));
+  bottom: var(--promo-bottom);
+  z-index: 29;
+  width: clamp(204px, 17vw, 224px);
+  height: var(--promo-height);
+  padding: 0 clamp(12px, 1.2vw, 16px) 0 78px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--ink);
+  box-shadow: 5px 6px 0 var(--pink);
+  font-size: clamp(.85rem, 1vw, .95rem);
+  font-weight: 950;
+  line-height: 1.12;
+  text-align: left;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.web-promo-trigger > span { white-space: nowrap; }
+.web-promo-trigger img {
+  position: absolute;
+  left: 0;
+  bottom: 3px;
+  width: 78px;
+  height: 82px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.web-promo-trigger:hover { transform: translateY(-2px); }
+.web-promo-trigger:active { transform: translate(2px, 2px); box-shadow: 3px 4px 0 var(--pink); }
+.web-promo-trigger:focus-visible, .web-promo-contact:focus-visible, .web-promo-close:focus-visible { outline: 3px solid var(--ink); outline-offset: 5px; }
+.web-promo {
+  position: fixed;
+  inset: auto;
+  left: max(var(--promo-gap), env(safe-area-inset-left));
+  bottom: calc(var(--promo-bottom) + var(--promo-height) + 24px);
+  width: clamp(0px, calc(100% - var(--promo-gap) * 2 - env(safe-area-inset-left) - env(safe-area-inset-right) - 8px), 380px);
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 28px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 7px 8px 0 var(--pink);
+  overflow: visible;
+  opacity: 0;
+  transform: translateY(12px) scale(.9);
+  transform-origin: 70px bottom;
+  transition: opacity .18s ease, transform .18s ease, display .18s allow-discrete, overlay .18s allow-discrete;
+}
+.web-promo:popover-open { opacity: 1; transform: none; animation: web-promo-pop .36s cubic-bezier(.2,.8,.25,1); }
+.web-promo::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 56px;
+  width: 20px;
+  height: 20px;
+  background: var(--paper);
+  border-right: 2px solid var(--line);
+  border-bottom: 2px solid var(--line);
+  transform: rotate(45deg);
+  box-shadow: 5px 5px 0 var(--pink);
+}
+.web-promo-content {
+  padding: clamp(22px, 2vw, 26px);
+  max-height: calc(100dvh - var(--promo-bottom) - var(--promo-height) - 52px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: inherit;
+}
+.web-promo-close { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; background: transparent; font-size: 30px; border-radius: 50%; z-index: 1; }
+.web-promo-art { display: block; width: clamp(180px, 18vw, 230px); height: 132px; object-fit: contain; margin: 0 auto clamp(12px, 1.4vw, 18px); }
+.web-promo h2 { margin: 0; font-size: clamp(1.5rem, 2vw, 1.8rem); font-weight: 950; line-height: 1.08; letter-spacing: -.04em; }
+.web-promo p { margin: clamp(14px, 1.4vw, 18px) 0; font-size: clamp(.95rem, 1.2vw, 1rem); line-height: 1.5; }
+.web-promo-contact { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 8px 10px 8px 16px; border: 2px solid var(--ink); border-radius: 999px; background: var(--ink); color: white; font-weight: 900; text-decoration: none; transition: transform .18s ease; }
+.web-promo-contact span { display: grid; place-items: center; background: var(--lime); color: var(--ink); border-radius: 50%; width: 34px; height: 34px; font-size: 25px; }
+.web-promo-contact:hover { transform: translateY(-2px); }
+.web-promo-contact:active { transform: scale(.98); }
+@keyframes web-promo-pop { 0% { opacity: 0; transform: translateY(14px) scale(.88); } 65% { opacity: 1; transform: translateY(-3px) scale(1.025); } 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .web-promo, .web-promo:popover-open, .web-promo-trigger, .web-promo-contact { animation: none; transition: none; transform: none; }
+}

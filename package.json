@@ -1,0 +1,8 @@
+{
+  "name": "ventasbrenda",
+  "private": true,
+  "devDependencies": {
+    "@netlify/edge-functions": "^3.0.0",
+    "@netlify/functions": "^6.0.2"
+  }
+}
