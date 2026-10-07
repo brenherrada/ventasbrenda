@@ -1,0 +1,28 @@
+# Local dependencies and Netlify CLI state
+node_modules/
+.netlify/
+
+# Secrets and local environment configuration
+.env
+.env.*
+!.env.example
+
+# Generated builds, caches and QA artifacts
+/dist/
+/output/
+/tmp/
+.cache/
+.playwright-cli/
+playwright-report/
+test-results/
+*.log
+
+# Obsolete distribution archives
+*.zip
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo

@@ -17,12 +17,19 @@ function escapeAttribute(value: string) {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export default async (request: Request, context: Context) => {
-  const rawCategory = new URL(request.url).searchParams.get("categoria");
-  if (!rawCategory || request.method !== "GET") return;
-  const slug = rawCategory.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+function filterSlug(value: string) {
+  return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+export default async (request: Request, context: Context) => {
+  const params = new URL(request.url).searchParams;
+  const isNewBadge = filterSlug(params.get("badge") || "") === "recien-agregado";
+  const rawCategory = isNewBadge ? "recien-agregado" : params.get("categoria");
+  if (!rawCategory || request.method !== "GET") return;
+  const slug = filterSlug(rawCategory);
   const categories = categoryMetadata();
+  if (isNewBadge) categories["recien-agregado"] = ["Recién agregado", "Artículos recién agregados al catálogo."];
   if (!Object.hasOwn(categories, slug)) return;
   const category = categories[slug];
 
@@ -31,8 +38,10 @@ export default async (request: Request, context: Context) => {
   const [name, summary] = category;
   const title = `${name} · Venta por mudanza en Mar del Plata`;
   const description = `${summary} Venta local en Mar del Plata. Entregas únicamente en Mar del Plata.`;
-  const url = `https://ventasbrenda.netlify.app/?categoria=${slug}`;
-  const image = `https://ventasbrenda.netlify.app/images/social/${slug}-v1.jpg`;
+  const url = `https://ventasbrenda.netlify.app/?${isNewBadge ? "badge" : "categoria"}=${slug}`;
+  const image = isNewBadge
+    ? "https://ventasbrenda.netlify.app/images/venta-por-mudanza-share.jpg"
+    : `https://ventasbrenda.netlify.app/images/social/${slug}-v1.jpg`;
   const replacements: Record<string, string> = {
     "description": description,
     "og:title": title,

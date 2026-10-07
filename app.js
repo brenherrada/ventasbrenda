@@ -5,6 +5,9 @@
   const STORAGE_SELECTION = "ventaMudanza.selection.v1";
   const STORAGE_BUYER = "ventaMudanza.buyer.v1";
   const CATEGORY_PARAM = "categoria";
+  const BADGE_PARAM = "badge";
+  const NEW_BADGE = "Recién agregado";
+  const NEW_BADGE_SLUG = "recien-agregado";
 
   let products = [];
   let settings = {
@@ -265,6 +268,7 @@
     const iImages = idx("imagenes", 5);
     const iCategory = idx("categoria", 6);
     const iSold = idx("vendido", 7);
+    const iBadge = idx("badge", -1);
 
     return (table.rows || []).map((row, rowIndex) => {
       const id = slug(cellValue(row, iId) || `producto-${rowIndex + 1}`);
@@ -276,7 +280,8 @@
       const vendido = isSold(rawCellValue(row, iSold));
       const images = parseImages(cellValue(row, iImages));
       const category = cellValue(row, iCategory).trim() || "Otros";
-      return { id, title, description, price, disponible, vendido, images, category };
+      const badge = categorySlug(cellValue(row, iBadge)) === NEW_BADGE_SLUG ? NEW_BADGE : "";
+      return { id, title, description, price, disponible, vendido, images, category, badge };
     }).filter((p) => p.title);
   }
 
@@ -448,10 +453,10 @@
   function getVisibleProducts() {
     const term = normalizeHeader(searchTerm);
     return products.filter((product) => {
-      const matchesCategory = activeCategory === "Todos" || product.category === activeCategory;
+      const matchesCategory = activeCategory === "Todos" || (activeCategory === NEW_BADGE ? product.badge === NEW_BADGE : product.category === activeCategory);
       if (!matchesCategory) return false;
       if (!term) return true;
-      const haystack = normalizeHeader(`${product.title} ${product.description} ${product.category}`);
+      const haystack = normalizeHeader(`${product.title} ${product.description} ${product.category} ${product.badge}`);
       return haystack.includes(term);
     });
   }
@@ -468,6 +473,20 @@
 
   function syncCategoryFromUrl({ cleanInvalid = false } = {}) {
     const url = new URL(window.location.href);
+    const rawBadge = url.searchParams.get(BADGE_PARAM);
+    if (categorySlug(rawBadge || "") === NEW_BADGE_SLUG) {
+      activeCategory = NEW_BADGE;
+      if (cleanInvalid) {
+        url.searchParams.set(BADGE_PARAM, NEW_BADGE_SLUG);
+        url.searchParams.delete(CATEGORY_PARAM);
+        window.history.replaceState({ ...(window.history.state || {}), category: activeCategory }, "", `${url.pathname}${url.search}${url.hash}`);
+      }
+      return;
+    }
+    if (cleanInvalid && rawBadge !== null) {
+      url.searchParams.delete(BADGE_PARAM);
+      window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+    }
     const rawCategory = url.searchParams.get(CATEGORY_PARAM);
     const requestedSlug = categorySlug(rawCategory || "");
     const categories = availableCategories();
@@ -490,7 +509,11 @@
 
   function updateCategoryUrl(category, { replace = false } = {}) {
     const url = new URL(window.location.href);
-    if (category === "Todos") url.searchParams.delete(CATEGORY_PARAM);
+    url.searchParams.delete(BADGE_PARAM);
+    if (category === NEW_BADGE) {
+      url.searchParams.set(BADGE_PARAM, NEW_BADGE_SLUG);
+      url.searchParams.delete(CATEGORY_PARAM);
+    } else if (category === "Todos") url.searchParams.delete(CATEGORY_PARAM);
     else url.searchParams.set(CATEGORY_PARAM, categorySlug(category));
 
     const nextUrl = `${url.pathname}${url.search}${url.hash}`;
@@ -521,8 +544,10 @@
       return ai - bi;
     });
 
-    if (activeCategory !== "Todos" && !counts.has(activeCategory)) activeCategory = "Todos";
-    return [{ label: "Todos", count: products.length }, ...categories.map((label) => ({ label, count: counts.get(label) }))];
+    if (activeCategory !== "Todos" && activeCategory !== NEW_BADGE && !counts.has(activeCategory)) activeCategory = "Todos";
+    const newCount = products.filter((product) => product.badge === NEW_BADGE).length;
+    const badges = newCount || activeCategory === NEW_BADGE ? [{ label: NEW_BADGE, count: newCount }] : [];
+    return [{ label: "Todos", count: products.length }, ...badges, ...categories.map((label) => ({ label, count: counts.get(label) }))];
   }
 
   function renderFilters() {
@@ -654,6 +679,17 @@
       const desc = document.createElement("p");
       desc.className = "desc";
       desc.textContent = product.description || "";
+      if (product.badge) {
+        const badge = document.createElement("img");
+        badge.className = "product-badge";
+        badge.src = "images/badge-recien-agregado.webp";
+        badge.alt = product.badge;
+        badge.width = 256;
+        badge.height = 248;
+        badge.decoding = "async";
+        card.classList.add("has-badge");
+        card.appendChild(badge);
+      }
       body.append(title);
       if (product.description) {
         const more = document.createElement("button");
