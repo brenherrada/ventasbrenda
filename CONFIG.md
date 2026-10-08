@@ -120,3 +120,35 @@ Los productos y fotos de productos siguen en **Catalogo**.
 | accesible_quitar | Nombre de quitar. |
 | accesible_reservado | Nombre de producto reservado. |
 | accesible_actualizado | Nombre de fecha. |
+
+## Meta dinámica · conectada en revisión 37
+
+Config!A102 contiene `meta_total` y B102 la fórmula:
+
+```
+=TEXT(SUMIF(Catalogo!B2:B,"<>",Catalogo!D2:D),"0")
+```
+
+Suma todos los artículos con título, incluidos vendidos. No reemplaces la fórmula por un monto fijo. TEXT devuelve dígitos sin separadores para que la lectura pública de Config conserve el valor; la web lo presenta en ARS. Los precios deben seguir siendo números en Catalogo!D.
+
+Lo recaudado proviene de la fila **TOTAL VENDIDO** en **Ventas** (actualmente B3), cuyo cálculo existente depende del checkbox vendido en Catalogo. No cambies ese rótulo. `SALES_SHEET` en config.js define el nombre de la pestaña. Al editar productos o vendido, la planilla recalcula; el visitante obtiene los datos nuevos al recargar el sitio.
+
+El listado y el minicart comparten el mismo estado. La selección solo muestra cuánto sumaría; no registra una venta. Si Ventas falla, se muestra — y una indicación para recargar, conservando el catálogo. Si falta meta_total, tiene un error o es cero, los bloques se ocultan. No se usa una meta de respaldo inventada.
+
+## Optimización automática de fotos de Drive
+
+Las URLs de `imagenes` siguen siendo enlaces públicos de Drive separados por `|`. No hace falta comprimir ni subir fotos al repositorio. Para reemplazar una foto, subir un archivo nuevo y cambiar su enlace en la Sheet (criterio confirmado por Bren el 8/10/2026). El nuevo ID produce otra URL de CDN; no se promete actualización inmediata de un archivo reemplazado conservando su ID.
+
+- Carrito: `srcset` de 64/128/192 px para miniaturas de 64 px y densidades 1×/2×/3×.
+- Listado: 300/450/600/900/1200 px con `sizes` responsivo y carga cerca del viewport.
+- Galería: derivado de hasta 1600 px de ancho, reservado a la vista ampliada y su precarga adyacente; conserva el detalle del zoom existente.
+- Netlify transforma un único derivado Google `w1600` a WebP, calidad 85, sin recorte (`fit=contain`). CSS conserva los recortes aprobados del listado/carrito.
+- Recuperación: Netlify → derivado Google al tamaño seleccionado → thumbnail Google → placeholder. Los proveedores fallidos no se reintentan con otros tamaños. Nunca se solicita el archivo original de Drive.
+- La allowlist en `netlify.toml` admite únicamente `https://lh3.googleusercontent.com/d/ID=w1600`. No admite hosts ni rutas arbitrarios. Los enlaces externos (por ejemplo Mercado Libre) conservan su comportamiento anterior y no pasan por el CDN.
+- Sin timestamps aleatorios ni regeneración de URLs en cada visita. El contenido y las dimensiones forman la clave estable. Google/Netlify controlan sus cachés; los headers del sitio no fijan el TTL de una fuente remota.
+
+Desarrollo: usar `netlify dev`; reiniciarlo tras modificar `[images]`. Un servidor estático simple no tiene `/.netlify/images`, pero el fallback permite seguir viendo las fotos. Pruebas del artefacto: `QA_ARTIFACT=dist QA_PORT=8768 QA_UPSTREAM_PORT=8770 node tests/serve-https.mjs` con Netlify dev escuchando en 8770. `tests/image-cdn.mjs` requiere Playwright existente y ese adaptador; no publica nada.
+
+Validación pendiente antes de producción: comportamiento real de CDN/cache/latencia y consumo en un deploy autorizado, además de dispositivos físicos. El emulador prueba las transformaciones y el flujo, no la caché de borde. La cuenta consultada es Personal (1000 créditos/ciclo); no se verificó saldo actual. Bandwidth y requests consumen créditos compartidos con el resto de la cuenta. No se modificó plan ni facturación.
+
+Documentación oficial: https://docs.netlify.com/build/image-cdn/overview/ y https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/how-credits-work/.

@@ -4,12 +4,20 @@
   const CFG = window.CATALOG_CONFIG || {};
   const STORAGE_SELECTION = "ventaMudanza.selection.v1";
   const STORAGE_BUYER = "ventaMudanza.buyer.v1";
+  const CATALOG_BATCH_SIZE = 12;
+  let catalogLimit = CATALOG_BATCH_SIZE;
+  let catalogLoaded = false;
+  let restoringCatalog = false;
+  let restorationVersion = 0;
+  let catalogScrollTimer;
   const CATEGORY_PARAM = "categoria";
   const BADGE_PARAM = "badge";
   const NEW_BADGE = "Recién agregado";
   const NEW_BADGE_SLUG = "recien-agregado";
 
   let products = [];
+  const goal = { target: null, collected: null, status: "loading" };
+  const goalRoots = [];
   let settings = {
     titulo: "Venta por mudanza",
     intro: "Estoy vendiendo algunos artículos por mudanza. Seleccioná lo que te interese y enviame tu consulta por WhatsApp para coordinar disponibilidad, pago y entrega.",
@@ -22,8 +30,9 @@
   let activeCategory = "Todos";
   let searchTerm = "";
   let activeGallery = { product: null, index: 0 };
+  let galleryRequest = 0;
+  let cancelGalleryTransition = null;
   let lastFocusedElement = null;
-  let categorySheetLastFocus = null;
   const galleryZoom = {
     scale: 1, x: 0, y: 0,
     startScale: 1, startDistance: 0,
@@ -37,6 +46,9 @@
   const $ = (sel) => document.querySelector(sel);
   const productsEl = $("#products");
   const catalogStatusEl = $("#catalogStatus");
+  const catalogPagination = $("#catalogPagination");
+  const catalogProgress = $("#catalogProgress");
+  const loadMoreProducts = $("#loadMoreProducts");
   const catalogCountEl = $("#catalogCount");
   const heroCountEl = $("#heroCount");
   const updatedBadge = $("#updatedBadge");
@@ -47,16 +59,54 @@
   const mobileCategoryTrigger = $("#mobileCategoryTrigger");
   const mobileCategoryValue = $("#mobileCategoryValue");
   const mobileCategoryCount = $("#mobileCategoryCount");
-  const mobileCategoryOptions = $("#mobileCategoryOptions");
-  const categorySheet = $("#categorySheet");
-  const categorySheetOverlay = $("#categorySheetOverlay");
+  const catalogMenu = $("#catalogMenu");
+  const catalogMenuOptions = $("#catalogMenuOptions");
   const drawer = $("#drawer");
   const overlay = $("#overlay");
   const bagCountEl = $("#bagCount");
   const bagContentEl = $("#bagContent");
   const buyerForm = $("#buyerForm");
   const buyerName = $("#buyerName");
-  const buyerNote = $("#buyerNote");
+  const copyPaymentAlias = $("#copyPaymentAlias");
+  const paymentAliasLabel = $("#paymentAliasLabel");
+  const paymentAliasValue = $("#paymentAliasValue").textContent.trim();
+  const paymentAliasStatus = $("#paymentAliasStatus");
+  const paymentAliasManual = $("#paymentAliasManual");
+  let aliasCopyPending = false;
+  let aliasCopyTimer;
+  copyPaymentAlias.addEventListener("click", async () => {
+    if (aliasCopyPending) return;
+    aliasCopyPending = true;
+    clearTimeout(aliasCopyTimer);
+    copyPaymentAlias.setAttribute("aria-busy", "true");
+    paymentAliasManual.hidden = true;
+    paymentAliasStatus.classList.remove("is-error");
+    paymentAliasStatus.textContent = "";
+    try {
+      await navigator.clipboard.writeText(paymentAliasValue);
+      copyPaymentAlias.dataset.copyState = "copied";
+      paymentAliasLabel.textContent = "¡Alias copiado!";
+      paymentAliasStatus.textContent = `Alias ${paymentAliasValue} copiado.`;
+      aliasCopyTimer = setTimeout(() => {
+        delete copyPaymentAlias.dataset.copyState;
+        paymentAliasLabel.textContent = "Copiar ALIAS:";
+      }, 2600);
+    } catch (_) {
+      delete copyPaymentAlias.dataset.copyState;
+      paymentAliasLabel.textContent = "Copiar ALIAS:";
+      paymentAliasStatus.classList.add("is-error");
+      paymentAliasStatus.textContent = "No se pudo copiar. Seleccioná y copiá el alias de abajo.";
+      paymentAliasManual.value = paymentAliasValue;
+      paymentAliasManual.hidden = false;
+      if (drawer.classList.contains("open")) {
+        paymentAliasManual.focus({ preventScroll: true });
+        paymentAliasManual.select();
+      }
+    } finally {
+      aliasCopyPending = false;
+      copyPaymentAlias.removeAttribute("aria-busy");
+    }
+  });
   const toast = $("#toast");
   const lightbox = $("#lightbox");
   const lightboxImage = $("#lightboxImage");
@@ -64,10 +114,12 @@
   const lightboxPrev = $("#lightboxPrev");
   const lightboxNext = $("#lightboxNext");
   const lightboxImageWrap = $("#lightboxImageWrap");
+  const galleryLoader = $("#galleryLoader");
   const zoomOut = $("#zoomOut");
   const zoomReset = $("#zoomReset");
   const zoomIn = $("#zoomIn");
   const openBagBtn = $("#openBag");
+  const headerWhatsApp = $("#headerWhatsApp");
   const webPromo = $("#webPromo");
   const webPromoTrigger = $("#webPromoTrigger");
   // A non-modal native popover: outside click and Escape dismiss it.
@@ -76,8 +128,8 @@
   });
   webPromo.querySelector(".web-promo-close").addEventListener("click", () => webPromoTrigger.focus());
   $("#webPromoContact").addEventListener("click", () => {
-    const seller = String(settings.whatsapp || "").replace(/\D/g, "");
-    if (seller.length < 10 || /x/i.test(settings.whatsapp || "")) {
+    const seller = sellerPhone();
+    if (!seller) {
       showToast("El contacto todavía no está disponible. Intentá nuevamente en un momento.");
       return;
     }
@@ -88,6 +140,24 @@
     // Keep legacy browsers usable without showing an uncloseable panel.
     webPromo.hidden = true;
     webPromoTrigger.addEventListener("click", () => $("#webPromoContact").click());
+  }
+
+  // Start product photos near the viewport, rather than the browser's multi-screen
+  // lazy-load margin, so they do not compete with the initial hero and fonts.
+  const pendingPhotos = new WeakMap();
+  const photoObserver = typeof IntersectionObserver === "function" ? new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      photoObserver.unobserve(entry.target);
+      const load = pendingPhotos.get(entry.target);
+      pendingPhotos.delete(entry.target);
+      load?.();
+    }
+  }, { rootMargin: "200px" }) : null;
+  function loadPhotoNearViewport(image, load) {
+    if (!photoObserver) { load(); return; }
+    pendingPhotos.set(image, load);
+    photoObserver.observe(image);
   }
 
   const descriptionPopup = $("#descriptionPopup");
@@ -108,7 +178,7 @@
     }
   };
   function openDescription(product, trigger) {
-    $("#descriptionPopupTitle").textContent = product.title;
+    $("#descriptionPopupHeading").textContent = product.title;
     $("#descriptionPopupCopy").textContent = product.description;
     descriptionLastFocus = trigger;
     descriptionScroll = document.body.style.overflow;
@@ -116,39 +186,71 @@
     descriptionPopup.showModal();
     descriptionPopup.querySelector(".description-close").focus();
   }
-  descriptionPopup?.querySelector(".description-close")?.addEventListener("click", () => descriptionPopup.close());
-  descriptionPopup?.addEventListener("click", event => {
+  descriptionPopup.querySelector(".description-close").addEventListener("click", () => descriptionPopup.close());
+  descriptionPopup.addEventListener("click", event => {
     if (event.target !== descriptionPopup) return;
     const rect = descriptionPopup.getBoundingClientRect();
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) descriptionPopup.close();
   });
-  descriptionPopup?.addEventListener("close", () => {
+  descriptionPopup.addEventListener("close", () => {
     document.body.style.overflow = descriptionScroll;
     if (descriptionLastFocus?.isConnected) descriptionLastFocus.focus();
   });
 
+  initializeGoals();
   hydrateBuyer();
   bindUI();
+  history.scrollRestoration = "manual";
+  loadMoreProducts.addEventListener("click", () => {
+    cancelCatalogRestoration();
+    const firstNewIndex = productsEl.children.length;
+    catalogLimit += CATALOG_BATCH_SIZE;
+    renderCatalog({ append: true });
+    const firstNewCard = productsEl.children[firstNewIndex];
+    if (firstNewCard) {
+      firstNewCard.tabIndex = -1;
+      const firstAction = [...firstNewCard.querySelectorAll("button")].find(button => !button.hidden);
+      (firstAction || firstNewCard).focus({ preventScroll: true });
+      firstNewCard.scrollIntoView({ block: "start", behavior: "instant" });
+    }
+    saveCatalogView();
+  });
+  window.addEventListener("scroll", () => {
+    clearTimeout(catalogScrollTimer);
+    catalogScrollTimer = setTimeout(saveCatalogView, 180);
+  }, { passive: true });
+  window.addEventListener("pagehide", saveCatalogView);
+  for (const eventName of ["pointerdown", "wheel", "keydown"]) {
+    window.addEventListener(eventName, () => {
+      if (restoringCatalog) cancelCatalogRestoration();
+    }, { passive: true });
+  }
   renderSkeletons();
   if (catalogSearch) {
     catalogSearch.addEventListener("input", () => {
+      cancelCatalogRestoration();
+      catalogLimit = CATALOG_BATCH_SIZE;
       searchTerm = catalogSearch.value || "";
       if (clearSearch) clearSearch.hidden = !searchTerm;
-      renderCatalog();
+      if (catalogLoaded) renderCatalog();
+      saveCatalogView();
     });
   }
   if (clearSearch) {
     clearSearch.addEventListener("click", () => {
+      cancelCatalogRestoration();
+      catalogLimit = CATALOG_BATCH_SIZE;
       searchTerm = "";
       if (catalogSearch) { catalogSearch.value = ""; catalogSearch.focus(); }
       clearSearch.hidden = true;
-      renderCatalog();
+      if (catalogLoaded) renderCatalog();
+      saveCatalogView();
     });
   }
   loadSettings();
   loadCatalog();
 
-  async function readTable(sheet, callbackName) {
+  async function readTable(sheet, callbackName, query = "") {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 8000);
@@ -160,18 +262,18 @@
         return data.table;
       } finally { clearTimeout(timeout); }
     } catch (_) {
-      return jsonp(sheet, callbackName);
+      return jsonp(sheet, callbackName, query);
     }
   }
 
-  function gvizUrl(sheet, callbackName) {
+  function gvizUrl(sheet, callbackName, query = "") {
     const id = encodeURIComponent(CFG.SHEET_ID || "");
     const name = encodeURIComponent(sheet);
     const cb = encodeURIComponent(callbackName);
-    return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?sheet=${name}&headers=1&tqx=responseHandler:${cb}&_=${Date.now()}`;
+    return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?sheet=${name}&headers=1&tqx=responseHandler:${cb}&_=${Date.now()}${query ? `&tq=${encodeURIComponent(query)}` : ""}`;
   }
 
-  function jsonp(sheet, callbackName) {
+  function jsonp(sheet, callbackName, query = "") {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         cleanup();
@@ -198,7 +300,7 @@
         cleanup();
         reject(new Error("No se pudo conectar con Google Sheets."));
       };
-      script.src = gvizUrl(sheet, callbackName);
+      script.src = gvizUrl(sheet, callbackName, query);
       document.head.appendChild(script);
     });
   }
@@ -210,18 +312,97 @@
     }
 
     try {
-      const table = await readTable(CFG.SETTINGS_SHEET || "Config", `settingsCallback_${Date.now()}`);
+      const table = await readTable(CFG.SETTINGS_SHEET || "Config", `settingsCallback_${Date.now()}`, "select A,B where A is not null");
       settings = { ...settings, ...parseSettings(table) };
       applySettings();
     } catch (err) {
       console.warn("No se pudo cargar Config; se usan textos por defecto.", err);
     }
 
+    await loadGoal();
+  }
+
+  // One template and one state feed both compact placements.
+  function initializeGoals() {
+    for (const id of ["catalogGoal", "bagGoal"]) {
+      const placement = document.getElementById(id);
+      const root = $("#goalTemplate").content.firstElementChild.cloneNode(true);
+      const heading = root.querySelector("h2");
+      heading.id = `${id}Heading`;
+      root.setAttribute("aria-labelledby", heading.id);
+      placement.append(root);
+      goalRoots.push(root);
+    }
+  }
+
+  async function loadGoal() {
+    // Config contains a formula returning unformatted digits, not a fixed target.
+    const rawTarget = String(settings.meta_total ?? "").trim();
+    goal.target = /^\d+(?:\.\d+)?$/.test(rawTarget) ? Number(rawTarget) : null;
+    if (!Number.isFinite(goal.target) || goal.target <= 0) {
+      goal.status = "unconfigured";
+      renderGoals();
+      return;
+    }
+    goal.status = "loading";
+    renderGoals();
+    try {
+      const table = await readTable(CFG.SALES_SHEET || "Ventas", `salesCallback_${Date.now()}`, "select A,B where A = 'TOTAL VENDIDO'");
+      const row = (table.rows || []).find(row => normalizeHeader(cellValue(row, 0)) === "total vendido");
+      const collected = row?.c?.[1]?.v;
+      if (typeof collected !== "number" || !Number.isFinite(collected) || collected < 0) {
+        throw new Error("TOTAL VENDIDO no contiene un monto válido.");
+      }
+      goal.collected = collected;
+      goal.status = "ready";
+    } catch (error) {
+      goal.collected = null;
+      goal.status = "unavailable";
+      console.warn("No se pudo actualizar la recaudación.", error);
+    }
+    renderGoals();
+  }
+
+  function renderGoals() {
+    const configured = Number.isFinite(goal.target) && goal.target > 0;
+    const ready = goal.status === "ready";
+    const complete = ready && goal.collected >= goal.target;
+    const cart = selectedProducts().reduce((sum, product) => sum + product.price, 0);
+    const contribution = document.getElementById("bagContribution");
+    contribution.hidden = !configured || cart <= 0;
+    if (!contribution.hidden) {
+      const percent = cart / goal.target * 100;
+      const label = new Intl.NumberFormat("es-AR", { maximumFractionDigits: percent < 0.1 ? 2 : 1 }).format(percent);
+      document.getElementById("bagContributionValue").textContent = `+${label}% a la meta`;
+    }
+    const projected = ready && !complete && cart > 0;
+    const currentPercent = ready ? Math.min(100, goal.collected / goal.target * 100) : 0;
+    const percentLabel = `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 }).format(Math.floor(currentPercent * 10) / 10)}%`;
+    const possiblePercent = projected ? Math.min(100 - currentPercent, cart / goal.target * 100) : 0;
+    for (const root of goalRoots) {
+      root.parentElement.hidden = !configured;
+      if (!configured) continue;
+      root.dataset.goalState = ready ? (complete ? "complete" : projected ? "projected" : "current") : "unavailable";
+      root.setAttribute("aria-busy", String(goal.status === "loading"));
+      root.style.setProperty("--mts-goal-current", `${currentPercent}%`);
+      root.style.setProperty("--mts-goal-possible", `${possiblePercent}%`);
+      root.querySelector("[data-goal-collected]").textContent = ready ? percentLabel : "—";
+      root.querySelector("[data-goal-cart]").hidden = !projected;
+      root.querySelector("[data-goal-cart-amount]").textContent = formatPrice(cart);
+      const thanks = root.querySelector("[data-goal-thanks]");
+      thanks.hidden = projected;
+      thanks.textContent = ready
+        ? (complete ? "¡Gracias por hacerlo posible!" : "Gracias por ayudarme a cumplir esta meta ❤️")
+        : goal.status === "loading" ? "Cargando lo recaudado…" : "No pudimos actualizar lo recaudado. Recargá para reintentar.";
+      root.querySelector("[data-goal-track]").setAttribute("aria-label", ready
+        ? `Recaudado: ${percentLabel}. ${projected ? `Tu selección sumaría ${formatPrice(cart)}.` : ""}`
+        : `El progreso ${goal.status === "loading" ? "está cargando" : "no está disponible"}.`);
+    }
   }
 
   async function loadCatalog() {
     try {
-      const table = await readTable(CFG.CATALOG_SHEET || "Catalogo", `catalogCallback_${Date.now()}`);
+      const table = await readTable(CFG.CATALOG_SHEET || "Catalogo", `catalogCallback_${Date.now()}`, "select A,B,C,D,E,F,G,H,I where B is not null");
       const parsed = parseCatalog(table);
       products = parsed.filter((p) => !p.vendido && isAvailable(p.disponible));
 
@@ -230,12 +411,15 @@
       saveSelection();
 
       syncCategoryFromUrl({ cleanInvalid: true });
+      catalogLoaded = true;
+      const savedView = restoreCatalogView({ initial: true });
       renderFilters();
       renderCatalog();
       renderBag();
+      if (savedView) restoreCatalogScroll(savedView);
+      else saveCatalogView();
       if (heroCountEl) heroCountEl.textContent = `${products.length} ${products.length === 1 ? "artículo disponible" : "artículos disponibles"}`;
       productsEl.setAttribute("aria-busy", "false");
-      catalogStatusEl.hidden = true;
     } catch (err) {
       console.error(err);
       showCatalogError("No pudimos cargar los productos. Volvé a intentar en unos segundos.");
@@ -319,19 +503,20 @@
       .filter(Boolean);
   }
 
-  function imageCandidates(value, variant = "card") {
+  function imageCandidates(value, variant = "card", width = variant === "gallery" ? 1600 : variant === "bag" ? 128 : 900) {
     const raw = String(value || "").trim();
     if (!raw) return [];
 
     const driveId = extractDriveFileId(raw);
     if (driveId) {
-      // Nunca solicitamos el archivo original de Drive. El listado y la galería
-      // usan derivados redimensionados servidos por Google.
-      const size = variant === "gallery" ? 1600 : 900;
-      const encoded = encodeURIComponent(driveId);
+      // One stable source per Drive ID. Never request the original Drive file.
+      // Replacing a photo means a new file/link in the Sheet, so the cache key changes.
+      const source = `https://lh3.googleusercontent.com/d/${encodeURIComponent(driveId)}=w1600`;
+      const params = new URLSearchParams({ url: source, w: String(width), fit: "contain", fm: "webp", q: "85" });
       return [
-        `https://drive.google.com/thumbnail?id=${encoded}&sz=w${size}`,
-        `https://lh3.googleusercontent.com/d/${encoded}=w${size}`
+        `/.netlify/images?${params}`,
+        source.replace(/w1600$/, `w${width}`),
+        `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w${width}`
       ];
     }
 
@@ -353,9 +538,15 @@
     return [];
   }
 
-  function setImageWithFallback(img, value, onFinalError, variant = "card") {
+  function setImageWithFallback(img, value, onFinalError, variant = "card", onReady) {
     const candidates = imageCandidates(value, variant);
     let index = 0;
+    let requestedWidth = variant === "bag" ? 128 : 900;
+    img.onload = async () => {
+      const source = img.currentSrc;
+      try { await img.decode(); } catch (_) {}
+      if (source === img.currentSrc && img.naturalWidth && typeof onReady === "function") onReady();
+    };
 
     const tryNext = () => {
       if (index >= candidates.length) {
@@ -363,7 +554,31 @@
         if (typeof onFinalError === "function") onFinalError();
         return;
       }
-      img.onerror = () => { index += 1; tryNext(); };
+      img.onerror = () => {
+        // Keep the browser-selected size when recovering; do not offer another
+        // responsive candidate from a provider that has already failed.
+        if (index === 0 && extractDriveFileId(value)) {
+          const width = Number(new URL(img.currentSrc || img.src, location.href).searchParams.get("w"));
+          if (width > 0) requestedWidth = width;
+        }
+        index += 1;
+        tryNext();
+      };
+      if (index > 0 && extractDriveFileId(value)) {
+        img.src = imageCandidates(value, variant, requestedWidth)[index];
+        img.removeAttribute("srcset");
+        img.removeAttribute("sizes");
+        return;
+      }
+      if ((variant === "card" || variant === "bag") && extractDriveFileId(value)) {
+        img.sizes = variant === "bag" ? "64px" :
+          "auto, (max-width: 373px) 142px, (max-width: 579px) 38vw, (max-width: 767px) 220px, (max-width: 1440px) 30vw, 410px";
+        const widths = variant === "bag" ? [64, 128, 192] : [300, 450, 600, 900, 1200];
+        img.srcset = widths.map(width => `${imageCandidates(value, variant, width)[index]} ${width}w`).join(", ");
+      } else {
+        img.removeAttribute("srcset");
+        img.removeAttribute("sizes");
+      }
       img.src = candidates[index];
     };
 
@@ -371,24 +586,14 @@
   }
 
   function extractDriveFileId(value) {
-    const text = String(value || "").trim();
-
-    // Formato habitual: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-    const pathMatch = text.match(/\/file\/d\/([^/?#]+)/i);
-    if (pathMatch?.[1]) return pathMatch[1];
-
-    // Formatos alternativos: open?id=FILE_ID, uc?id=FILE_ID, etc.
     try {
-      const url = new URL(text);
-      if (/drive\.google\.com$/i.test(url.hostname)) {
-        const id = url.searchParams.get("id");
-        if (id) return id;
-      }
+      const url = new URL(String(value || "").trim());
+      if (url.protocol !== "https:" || url.hostname !== "drive.google.com") return "";
+      const id = url.pathname.match(/^\/file\/d\/([A-Za-z0-9_-]+)(?:\/|$)/)?.[1] || url.searchParams.get("id") || "";
+      return /^[A-Za-z0-9_-]+$/.test(id) ? id : "";
     } catch (_) {
-      // No es una URL absoluta. Puede ser una ruta local, y eso está permitido.
+      return "";
     }
-
-    return "";
   }
 
   function isAvailable(value) {
@@ -406,31 +611,30 @@
     return normalizeHeader(product?.title || "").includes("reservad");
   }
 
+  function sellerPhone() {
+    const raw = String(settings.whatsapp || "");
+    const phone = raw.replace(/\D/g, "");
+    return phone.length >= 10 && !/x/i.test(raw) ? phone : "";
+  }
+
   function applySettings() {
-    const title = settings.titulo || "Venta por mudanza";
-    document.title = "Venta por mudanza en Mar del Plata · Muebles, libros y más";
-    const h1 = document.querySelector(".hero-title");
-    const intro = document.querySelector(".hero p");
-    const note = document.querySelector(".hero-note");
-    if (h1) {
-      const words = title.trim().split(/\s+/);
-      const accent = words.length > 1 ? words.pop() : "";
-      const primary = words.join(" ") || title;
-      h1.replaceChildren();
-      const primarySpan = document.createElement("span");
-      primarySpan.className = "hero-title-primary";
-      primarySpan.textContent = primary;
-      h1.appendChild(primarySpan);
-      if (accent) {
-        const accentSpan = document.createElement("span");
-        accentSpan.className = "hero-title-accent";
-        accentSpan.textContent = accent;
-        h1.appendChild(accentSpan);
-      }
-      h1.setAttribute("aria-label", title);
+    const seller = sellerPhone();
+    if (seller) {
+      headerWhatsApp.href = `https://wa.me/${seller}`;
+      headerWhatsApp.removeAttribute("aria-disabled");
+      headerWhatsApp.removeAttribute("tabindex");
+    } else {
+      headerWhatsApp.removeAttribute("href");
+      headerWhatsApp.setAttribute("aria-disabled", "true");
+      headerWhatsApp.setAttribute("tabindex", "-1");
     }
+
+    const title = settings.titulo || "Venta por mudanza";
+    document.title = title;
+    const intro = document.querySelector(".hero-description");
+    const notes = document.querySelectorAll(".marquee-reservation");
     if (intro && settings.intro) intro.textContent = settings.intro;
-    if (note && settings.nota_reserva) note.textContent = settings.nota_reserva;
+    if (settings.nota_reserva) notes.forEach(note => { note.textContent = settings.nota_reserva; });
     if (updatedBadge && updatedDate) {
       const rawUpdated = String(settings.actualizado || "").trim();
       const formattedUpdated = formatUpdatedAt(rawUpdated);
@@ -507,7 +711,7 @@
     }
   }
 
-  function updateCategoryUrl(category, { replace = false } = {}) {
+  function categoryUrl(category) {
     const url = new URL(window.location.href);
     url.searchParams.delete(BADGE_PARAM);
     if (category === NEW_BADGE) {
@@ -516,15 +720,27 @@
     } else if (category === "Todos") url.searchParams.delete(CATEGORY_PARAM);
     else url.searchParams.set(CATEGORY_PARAM, categorySlug(category));
 
+    return url;
+  }
+
+  function updateCategoryUrl(category, { replace = false } = {}) {
+    const url = categoryUrl(category);
     const nextUrl = `${url.pathname}${url.search}${url.hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl === currentUrl) return;
 
     const method = replace ? "replaceState" : "pushState";
-    window.history[method]({ ...(window.history.state || {}), category }, "", nextUrl);
+    window.history[method]({ ...(window.history.state || {}), category, catalogView: {
+      category, limit: catalogLimit, search: searchTerm, scrollY: window.scrollY
+    } }, "", nextUrl);
   }
 
   function selectCategory(category, { updateUrl = true } = {}) {
+    if (category !== activeCategory) {
+      saveCatalogView();
+      cancelCatalogRestoration();
+      catalogLimit = CATALOG_BATCH_SIZE;
+    }
     activeCategory = category;
     if (updateUrl) updateCategoryUrl(category);
     renderFilters();
@@ -553,11 +769,14 @@
   function renderFilters() {
     if (!categoryFiltersEl) return;
     const items = getCategoryItems();
+    const focusedCategory = categoryFiltersEl.contains(document.activeElement) ? document.activeElement.dataset.categoryLabel : null;
+    const scrollLeft = categoryFiltersEl.scrollLeft;
     categoryFiltersEl.replaceChildren();
     for (const item of items) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = `filter-chip${activeCategory === item.label ? " active" : ""}`;
+      button.dataset.categoryLabel = item.label;
       button.setAttribute("aria-pressed", activeCategory === item.label ? "true" : "false");
       const label = document.createElement("span");
       label.textContent = item.label;
@@ -567,39 +786,61 @@
       button.append(label, count);
       button.addEventListener("click", () => {
         selectCategory(item.label);
+        (catalogStatusEl.hidden ? productsEl : catalogStatusEl).scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       });
       categoryFiltersEl.appendChild(button);
+      if (focusedCategory && item.label === activeCategory) button.focus({ preventScroll: true });
     }
+    categoryFiltersEl.scrollLeft = scrollLeft;
+    $("#desktopCategoryRail").hidden = false;
 
-    if (mobileCategoryOptions) {
-      mobileCategoryOptions.replaceChildren();
+    if (catalogMenuOptions) {
+      const icons = { "Todos": "category-all", "Cocina": "category-kitchen", "Deco & textiles": "category-decor", "Muebles & organización": "category-furniture", "Hogar & exterior": "category-outdoor", "Cuidado personal": "category-care", "Tarot & oráculos": "category-tarot", "Libros": "category-books", "Ropa & Calzado": "category-clothing" };
+      catalogMenuOptions.replaceChildren();
       for (const item of items) {
-        const option = document.createElement("button");
-        const selected = activeCategory === item.label;
-        option.type = "button";
-        option.className = `category-sheet-option${selected ? " active" : ""}`;
-        option.setAttribute("role", "radio");
-        option.setAttribute("aria-checked", selected ? "true" : "false");
-
-        const label = document.createElement("span");
-        label.className = "category-sheet-option-label";
-        label.textContent = item.label;
-        const meta = document.createElement("span");
-        meta.className = "category-sheet-option-meta";
-        const count = document.createElement("span");
-        count.className = "category-sheet-option-count";
-        count.textContent = String(item.count);
-        const check = document.createElement("span");
-        check.className = "category-sheet-option-check";
-        check.setAttribute("aria-hidden", "true");
-        check.textContent = "✓";
-        meta.append(count, check);
-        option.append(label, meta);
-        option.addEventListener("click", () => {
+        const all = item.label === "Todos";
+        const link = document.createElement("a");
+        link.className = `mts-catalog-menu__item${all ? " mts-catalog-menu__item--all" : ""}`;
+        const url = categoryUrl(item.label);
+        url.hash = "catalogo";
+        link.href = url.href;
+        if (activeCategory === item.label) link.setAttribute("aria-current", "page");
+        const icon = document.createElement("span");
+        icon.className = "mts-catalog-menu__icon";
+        icon.setAttribute("aria-hidden", "true");
+        if (item.label === NEW_BADGE) {
+          const badge = document.createElement("img");
+          badge.src = "images/badge-recien-agregado.webp";
+          badge.alt = "";
+          badge.width = 256;
+          badge.height = 248;
+          icon.appendChild(badge);
+        } else {
+          const image = document.createElement("img");
+          image.src = `icons/${icons[item.label] || "catalog"}.svg?v=6`;
+          image.alt = "";
+          image.width = 40;
+          image.height = 40;
+          icon.appendChild(image);
+        }
+        const copy = document.createElement("span");
+        copy.className = "mts-catalog-menu__copy";
+        const label = document.createElement("strong");
+        label.textContent = all ? "Ver todo" : item.label;
+        const count = document.createElement("small");
+        count.textContent = `${item.count} ${item.count === 1 ? "artículo" : "artículos"}`;
+        copy.append(label, count);
+        link.append(icon, copy);
+        link.addEventListener("click", event => {
+          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
           selectCategory(item.label);
-          closeCategoryPicker();
+          if (catalogMenu.open) catalogMenu.close();
+          else catalogMenu.hidePopover();
+          productsEl.closest("main").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+          productsEl.closest("main").focus({ preventScroll: true });
         });
-        mobileCategoryOptions.appendChild(option);
+        catalogMenuOptions.appendChild(link);
       }
     }
 
@@ -608,15 +849,66 @@
     if (mobileCategoryCount) mobileCategoryCount.textContent = String(activeItem?.count || 0);
   }
 
-  function renderCatalog() {
-    descriptionObserver.disconnect();
-    productsEl.replaceChildren();
+  // Keep browsing state on the current history entry, without adding page URLs.
+  function saveCatalogView() {
+    if (!catalogLoaded || restoringCatalog) return;
+    try {
+      history.replaceState({ ...(history.state || {}), catalogView: {
+        category: activeCategory, limit: catalogLimit, search: searchTerm, scrollY: window.scrollY
+      } }, "");
+    } catch (_) { /* The catalog remains usable if history storage is unavailable. */ }
+  }
+
+  function restoreCatalogView({ initial = false } = {}) {
+    const view = history.state?.catalogView;
+    const matches = view?.category === activeCategory;
+    catalogLimit = matches && Number.isSafeInteger(view.limit) && view.limit >= CATALOG_BATCH_SIZE
+      ? Math.min(view.limit, Math.max(CATALOG_BATCH_SIZE, products.length)) : CATALOG_BATCH_SIZE;
+    searchTerm = matches && typeof view.search === "string" ? view.search : initial ? searchTerm : "";
+    catalogSearch.value = searchTerm;
+    clearSearch.hidden = !searchTerm;
+    return matches ? view : null;
+  }
+
+  function cancelCatalogRestoration() {
+    restorationVersion += 1;
+    restoringCatalog = false;
+    clearTimeout(catalogScrollTimer);
+  }
+
+  function restoreCatalogScroll(view) {
+    cancelCatalogRestoration();
+    const version = restorationVersion;
+    restoringCatalog = true;
+    const restore = () => requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (version !== restorationVersion) return;
+      window.scrollTo({ top: Number.isFinite(view?.scrollY) ? Math.max(0, view.scrollY) : 0, behavior: "instant" });
+      restoringCatalog = false;
+    }));
+    if (document.documentElement.dataset.fonts === "loading") {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.fonts === "loading") return;
+        observer.disconnect();
+        restore();
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-fonts"] });
+    } else restore();
+  }
+
+  function renderCatalog({ append = false } = {}) {
+    if (!append) {
+      descriptionObserver.disconnect();
+      photoObserver?.disconnect();
+      productsEl.replaceChildren();
+    }
     const visibleProducts = getVisibleProducts();
     const isFiltered = visibleProducts.length !== products.length || activeCategory !== "Todos" || searchTerm.trim();
     catalogCountEl.textContent = isFiltered
       ? `${visibleProducts.length} de ${products.length} artículos`
       : `${products.length} ${products.length === 1 ? "artículo" : "artículos"}`;
 
+    catalogStatusEl.classList.remove("is-error");
+    catalogPagination.hidden = !visibleProducts.length;
     if (!products.length) {
       catalogStatusEl.hidden = false;
       catalogStatusEl.textContent = "No hay artículos disponibles en este momento.";
@@ -625,12 +917,18 @@
 
     if (!visibleProducts.length) {
       catalogStatusEl.hidden = false;
-      catalogStatusEl.textContent = "No encontré artículos con ese filtro.";
+      catalogStatusEl.textContent = "No hay coincidencias. Probá con otra búsqueda o categoría.";
       return;
     }
 
     catalogStatusEl.hidden = true;
-    for (const product of visibleProducts) {
+    const shown = Math.min(catalogLimit, visibleProducts.length);
+    catalogProgress.textContent = `Mostrando 1–${shown} de ${visibleProducts.length} ${visibleProducts.length === 1 ? "artículo" : "artículos"}`;
+    const remaining = visibleProducts.length - shown;
+    loadMoreProducts.hidden = remaining === 0;
+    const nextCount = Math.min(CATALOG_BATCH_SIZE, remaining);
+    if (remaining) loadMoreProducts.textContent = `Ver ${nextCount} más`;
+    for (const product of visibleProducts.slice(append ? productsEl.children.length : 0, shown)) {
       const reserved = isReserved(product);
       const selected = !reserved && selection.includes(product.id);
       const card = document.createElement("article");
@@ -640,35 +938,57 @@
 
       const media = document.createElement("div");
       media.className = "media";
+      if (product.badge) {
+        const badge = document.createElement("img");
+        badge.className = "product-badge";
+        badge.src = "images/badge-recien-agregado.webp";
+        badge.alt = product.badge;
+        badge.width = 256;
+        badge.height = 248;
+        badge.decoding = "async";
+        media.appendChild(badge);
+      }
 
       if (product.images.length) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "media-button";
-        btn.setAttribute("aria-label", `Abrir galería de ${product.title}`);
+        btn.setAttribute("aria-label", `Abrir galería de ${product.title} · ${product.images.length} ${product.images.length === 1 ? "foto" : "fotos"}`);
         const img = document.createElement("img");
         img.alt = product.title;
         img.loading = "lazy";
         img.decoding = "async";
         img.fetchPriority = "low";
-        setImageWithFallback(img, product.images[0], () => showImagePlaceholder(media, product.title), "card");
+        media.classList.add("is-loading");
+        const placeholder = createImagePlaceholder("loading", product.title);
+        media.appendChild(placeholder);
+        loadPhotoNearViewport(img, () => setImageWithFallback(img, product.images[0], () => showImagePlaceholder(media, product.title), "card", () => {
+          media.classList.remove("is-loading");
+          placeholder.remove();
+        }));
         btn.appendChild(img);
-        btn.addEventListener("click", () => openGallery(product, 0));
+        btn.addEventListener("click", () => openGallery(product, 0, btn));
         media.appendChild(btn);
 
         const hint = document.createElement("span");
         hint.className = "gallery-hint";
-        hint.textContent = product.images.length > 1 ? `Ver ${product.images.length} fotos` : "Ver foto";
+        hint.setAttribute("aria-hidden", "true");
+        const galleryIcon = document.createElement("img");
+        galleryIcon.className = "custom-icon";
+        galleryIcon.src = "icons/photo-gallery.svg";
+        galleryIcon.alt = "";
+        galleryIcon.width = 40;
+        galleryIcon.height = 40;
+        hint.appendChild(galleryIcon);
+        if (product.images.length > 1) {
+          const photoCount = document.createElement("span");
+          photoCount.className = "bag-count";
+          photoCount.textContent = product.images.length;
+          hint.appendChild(photoCount);
+        }
         media.appendChild(hint);
       } else {
         showImagePlaceholder(media, product.title);
-      }
-
-      if (reserved) {
-        const status = document.createElement("span");
-        status.className = "product-status";
-        status.textContent = "Reservado";
-        media.appendChild(status);
       }
 
       const body = document.createElement("div");
@@ -679,61 +999,93 @@
       const desc = document.createElement("p");
       desc.className = "desc";
       desc.textContent = product.description || "";
-      if (product.badge) {
-        const badge = document.createElement("img");
-        badge.className = "product-badge";
-        badge.src = "images/badge-recien-agregado.webp";
-        badge.alt = product.badge;
-        badge.width = 256;
-        badge.height = 248;
-        badge.decoding = "async";
-        card.classList.add("has-badge");
-        card.appendChild(badge);
-      }
-      body.append(title);
+      const summary = document.createElement("div");
+      summary.className = "card-summary";
+      body.append(title, summary);
       if (product.description) {
         const more = document.createElement("button");
         more.type = "button";
         more.className = "description-more";
-        more.textContent = "Ver descripción";
+        const infoIcon = document.createElement("img");
+        infoIcon.className = "custom-icon";
+        infoIcon.src = "icons/product-info.svg";
+        infoIcon.width = 24;
+        infoIcon.height = 24;
+        infoIcon.alt = "";
+        infoIcon.setAttribute("aria-hidden", "true");
+        const moreLabel = document.createElement("span");
+        moreLabel.textContent = "Ver descripción";
+        more.append(infoIcon, moreLabel);
         more.hidden = true;
         more.setAttribute("aria-haspopup", "dialog");
         more.setAttribute("aria-controls", "descriptionPopup");
         more.setAttribute("aria-label", `Ver descripción completa de ${product.title}`);
         more.addEventListener("click", () => openDescription(product, more));
-        body.append(desc, more);
+        summary.append(desc, more);
         descriptionObserver.observe(desc);
       }
 
       const action = document.createElement("div");
       action.className = "card-action";
       const price = document.createElement("div");
-      price.className = "price";
+      price.className = "price mts-badge mts-badge--tape";
       price.textContent = formatPrice(product.price);
-      const selectBtn = document.createElement("button");
-      selectBtn.type = "button";
-      selectBtn.className = "select-btn";
-      selectBtn.disabled = reserved;
-      selectBtn.setAttribute("aria-pressed", selected ? "true" : "false");
-      selectBtn.setAttribute("aria-label", reserved
-        ? `${product.title} está reservado`
-        : `${selected ? "Quitar" : "Agregar"} ${product.title} ${selected ? "de" : "a"} mi selección`);
-      selectBtn.textContent = reserved ? "Reservado" : selected ? "Elegido" : "Elegir";
-      selectBtn.dataset.selected = selected ? "true" : "false";
-      if (!reserved) selectBtn.addEventListener("click", () => toggleSelection(product.id));
-      action.append(price, selectBtn);
+      action.appendChild(price);
+      if (reserved) {
+        const status = document.createElement("span");
+        status.className = "product-status";
+        status.textContent = "Reservado";
+        action.appendChild(status);
+      } else {
+        const selectBtn = document.createElement("button");
+        selectBtn.type = "button";
+        selectBtn.className = "select-btn";
+        updateSelectionButton(selectBtn, product);
+        selectBtn.addEventListener("click", () => toggleSelection(product.id));
+        action.appendChild(selectBtn);
+      }
 
       card.append(media, body, action);
       productsEl.appendChild(card);
     }
   }
 
+  function createImagePlaceholder(state, title, compact = false) {
+    const placeholder = document.createElement("div");
+    placeholder.className = `image-placeholder image-placeholder--${state}`;
+    placeholder.classList.toggle("image-placeholder--compact", compact);
+    if (state === "loading") placeholder.setAttribute("aria-hidden", "true");
+    const sticker = document.createElement("span");
+    sticker.className = compact ? "bag-photo-icon" : "image-placeholder__sticker";
+    const icon = document.createElement("img");
+    icon.className = "custom-icon";
+    icon.src = compact || state === "loading" ? "icons/photo-gallery.svg" : "icons/product-info.svg";
+    icon.width = 40; icon.height = 40; icon.alt = "";
+    sticker.appendChild(icon);
+    const text = document.createElement("span");
+    text.className = "image-placeholder__label";
+    text.textContent = state === "loading" ? "Ya viene la foto" : "Foto no disponible";
+    const dots = document.createElement("span");
+    dots.className = "image-placeholder__dots";
+    dots.textContent = state === "loading" ? "● ● ●" : "✳";
+    placeholder.append(sticker, text, dots);
+    if (state !== "loading") placeholder.setAttribute("aria-label", `Sin foto · ${title}`);
+    return placeholder;
+  }
+
   function showImagePlaceholder(media, title) {
-    media.replaceChildren();
-    const p = document.createElement("div");
-    p.className = "placeholder";
-    p.textContent = `Sin foto · ${title}`;
-    media.appendChild(p);
+    media.classList.remove("is-loading");
+    const badge = media.querySelector(".product-badge");
+    media.replaceChildren(createImagePlaceholder("unavailable", title));
+    if (badge) media.appendChild(badge);
+  }
+
+  function updateSelectionButton(button, product) {
+    const selected = selection.includes(product.id);
+    button.setAttribute("aria-pressed", String(selected));
+    button.setAttribute("aria-label", `${selected ? "Elegido · Quitar" : "¡LO QUIERO! · Agregar"} ${product.title} ${selected ? "de" : "a"} mi selección`);
+    button.textContent = selected ? "Elegido" : "¡LO QUIERO!";
+    button.dataset.selected = String(selected);
   }
 
   function toggleSelection(id) {
@@ -746,39 +1098,25 @@
       ? selection.filter((x) => x !== id)
       : [...selection, id];
     saveSelection();
-    renderCatalog();
+    // Update existing buttons; keep loaded photos, pagination and keyboard focus.
+    for (const card of productsEl.children) {
+      const button = card.querySelector(".select-btn");
+      if (!button) continue;
+      const item = products.find(product => product.id === card.dataset.id);
+      if (!item) continue;
+      const selected = selection.includes(item.id);
+      card.classList.toggle("selected", selected);
+      updateSelectionButton(button, item);
+    }
     renderBag();
     showToast(selection.includes(id) ? "Agregado a tu selección" : "Quitado de tu selección", selection.includes(id) ? "🛍️" : "−");
   }
 
   function saveSelection() {
-    try { localStorage.setItem(STORAGE_SELECTION, JSON.stringify(selection)); } catch (_) { /* La selección sigue funcionando sin almacenamiento. */ }
+    try { localStorage.setItem(STORAGE_SELECTION, JSON.stringify(selection)); } catch (_) { /* La selección funciona sin almacenamiento. */ }
     bagCountEl.textContent = selection.length;
+    $("#bagCountMobile").textContent = selection.length;
     if (openBagBtn) openBagBtn.classList.toggle("is-empty", selection.length === 0);
-  }
-
-  function openCategoryPicker() {
-    if (!categorySheet || !categorySheetOverlay || !mobileCategoryTrigger) return;
-    categorySheetLastFocus = document.activeElement;
-    categorySheet.classList.add("open");
-    categorySheetOverlay.classList.add("open");
-    categorySheet.setAttribute("aria-hidden", "false");
-    mobileCategoryTrigger.setAttribute("aria-expanded", "true");
-    document.body.style.overflow = "hidden";
-    requestAnimationFrame(() => {
-      const activeOption = mobileCategoryOptions?.querySelector(".category-sheet-option.active");
-      activeOption?.focus();
-    });
-  }
-
-  function closeCategoryPicker() {
-    if (!categorySheet || !categorySheetOverlay || !mobileCategoryTrigger) return;
-    categorySheet.classList.remove("open");
-    categorySheetOverlay.classList.remove("open");
-    categorySheet.setAttribute("aria-hidden", "true");
-    mobileCategoryTrigger.setAttribute("aria-expanded", "false");
-    if (!drawer.classList.contains("open") && !lightbox.classList.contains("open")) document.body.style.overflow = "";
-    if (categorySheetLastFocus && typeof categorySheetLastFocus.focus === "function") categorySheetLastFocus.focus();
   }
 
   function selectedProducts() {
@@ -788,14 +1126,35 @@
 
   function renderBag() {
     saveSelection();
+    renderGoals();
     const items = selectedProducts();
     bagContentEl.replaceChildren();
     buyerForm.hidden = !items.length;
+    $("#bagFooter").hidden = !items.length;
 
     if (!items.length) {
       const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = "Todavía no seleccionaste ningún artículo.";
+      empty.className = "bag-empty";
+      const illustration = document.createElement("span");
+      illustration.className = "image-placeholder__sticker";
+      illustration.setAttribute("aria-hidden", "true");
+      const icon = document.createElement("img");
+      icon.className = "custom-icon";
+      icon.src = "icons/photo-gallery.svg";
+      icon.width = 64; icon.height = 64; icon.alt = "";
+      illustration.append(icon);
+      const message = document.createElement("p");
+      message.textContent = "Todavía no seleccionaste ningún artículo.";
+      const browse = document.createElement("button");
+      browse.className = "bag-browse";
+      browse.type = "button";
+      browse.textContent = "Ver catálogo";
+      browse.addEventListener("click", () => {
+        closeDrawer();
+        $("#catalogo").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
+        $("#catalogo").focus({preventScroll: true});
+      });
+      empty.append(illustration, message, browse);
       bagContentEl.appendChild(empty);
       return;
     }
@@ -806,53 +1165,66 @@
       const item = document.createElement("div");
       item.className = "bag-item";
       const name = document.createElement("strong");
+      name.className = "bag-item-name";
       name.textContent = product.title;
-      const value = document.createElement("strong");
+      const value = document.createElement("span");
+      value.className = "price price--compact mts-badge mts-badge--tape";
       value.textContent = formatPrice(product.price);
       const remove = document.createElement("button");
       remove.className = "remove";
       remove.type = "button";
-      remove.textContent = "Quitar";
+      const removeIcon = document.createElement("img");
+      removeIcon.className = "custom-icon"; removeIcon.src = "icons/remove-product.svg";
+      removeIcon.alt = ""; removeIcon.setAttribute("aria-hidden", "true");
+      removeIcon.width = 25; removeIcon.height = 25;
+      remove.append(removeIcon);
       remove.addEventListener("click", () => {
         const index = Array.from(list.children).indexOf(item);
         toggleSelection(product.id);
         const remaining = bagContentEl.querySelectorAll(".remove");
-        (remaining[Math.min(index, remaining.length - 1)] || $("#closeBag")).focus();
+        (remaining[Math.min(index, remaining.length - 1)] || bagContentEl.querySelector(".bag-browse") || $("#closeBag")).focus({preventScroll: true});
       });
       remove.setAttribute("aria-label", `Quitar ${product.title} de mi selección`);
       const thumbnail = document.createElement("img");
       thumbnail.className = "bag-thumb";
       thumbnail.alt = "";
       thumbnail.width = 64;
-      thumbnail.height = 76;
+      thumbnail.height = 64;
       thumbnail.loading = "lazy";
+      const media = document.createElement("div");
+      media.className = "bag-media";
+      const placeholder = createImagePlaceholder(product.images.length ? "loading" : "unavailable", product.title, true);
+      media.append(placeholder);
       if (product.images.length) {
-        setImageWithFallback(thumbnail, product.images[0], () => { thumbnail.hidden = true; }, "card");
-      } else { thumbnail.hidden = true; }
+        media.append(thumbnail);
+        setImageWithFallback(thumbnail, product.images[0], () => {
+          thumbnail.remove();
+          media.replaceChildren(createImagePlaceholder("unavailable", product.title, true));
+        }, "bag", () => {
+          thumbnail.classList.add("is-ready");
+          placeholder.remove();
+        });
+      }
       const copy = document.createElement("div");
       copy.className = "bag-item-copy";
-      copy.append(name, value);
       const actions = document.createElement("div");
       actions.className = "bag-item-actions";
-      actions.append(remove);
-      item.append(thumbnail, copy, actions);
+      actions.append(value, remove);
+      copy.append(name, actions);
+      item.append(media, copy);
       list.appendChild(item);
     }
 
-    const total = document.createElement("div");
-    total.className = "total";
-    const totalLabel = document.createElement("span");
-    totalLabel.textContent = "Total estimado";
-    const totalValue = document.createElement("span");
-    totalValue.textContent = formatPrice(items.reduce((sum, p) => sum + (p.price || 0), 0));
-    total.append(totalLabel, totalValue);
-
-    bagContentEl.append(list, total);
+    $("#bagTotal").textContent = formatPrice(items.reduce((sum, p) => sum + (p.price || 0), 0));
+    bagContentEl.append(list);
   }
 
   const drawerBackgroundState = new Map();
-  function openDrawer() {
-    lastFocusedElement = document.activeElement;
+  function openDrawer(event) {
+    hideToast();
+    $("#bagFeedback").append(toast);
+    document.querySelectorAll("[popover]:popover-open").forEach(panel => panel.hidePopover());
+    lastFocusedElement = event?.currentTarget || document.activeElement;
     if ("popover" in HTMLElement.prototype && webPromo.matches(":popover-open")) webPromo.hidePopover();
     for (const element of document.body.children) {
       if (!(element instanceof HTMLElement) || [drawer, overlay, toast].includes(element) || element.tagName === "SCRIPT") continue;
@@ -868,6 +1240,8 @@
   }
 
   function closeDrawer() {
+    hideToast();
+    document.body.append(toast);
     drawer.inert = true;
     for (const [element, wasInert] of drawerBackgroundState) element.inert = wasInert;
     drawerBackgroundState.clear();
@@ -885,8 +1259,11 @@
   function clampGalleryPan(x = galleryZoom.x, y = galleryZoom.y, scale = galleryZoom.scale) {
     if (scale <= 1) return { x: 0, y: 0 };
     const rect = lightboxImageWrap.getBoundingClientRect();
-    const maxX = Math.max(0, (rect.width * (scale - 1)) / 2);
-    const maxY = Math.max(0, (rect.height * (scale - 1)) / 2);
+    const naturalWidth = lightboxImage.naturalWidth || rect.width;
+    const naturalHeight = lightboxImage.naturalHeight || rect.height;
+    const fit = Math.min(rect.width / naturalWidth, rect.height / naturalHeight);
+    const maxX = Math.max(0, (naturalWidth * fit * scale - rect.width) / 2);
+    const maxY = Math.max(0, (naturalHeight * fit * scale - rect.height) / 2);
     return { x: clamp(x, -maxX, maxX), y: clamp(y, -maxY, maxY) };
   }
 
@@ -944,10 +1321,11 @@
     return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
   }
 
-  function openGallery(product, index) {
+  function openGallery(product, index, trigger) {
     if (!product.images.length) return;
-    lastFocusedElement = document.activeElement;
+    lastFocusedElement = trigger || document.activeElement;
     activeGallery = { product, index };
+    lightbox.showModal();
     lightbox.classList.add("open");
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
@@ -956,45 +1334,73 @@
     requestAnimationFrame(() => $("#lightboxClose").focus());
   }
 
-  function updateGallery({ animate = true, direction = 1 } = {}) {
+  function setGalleryPlaceholder(state, title) {
+    galleryLoader.replaceChildren(createImagePlaceholder(state, title));
+    galleryLoader.setAttribute("aria-label", state === "loading" ? "Cargando foto" : "Foto no disponible");
+    galleryLoader.setAttribute("aria-hidden", "false");
+  }
+
+  function updateGallery({ animate = true } = {}) {
     const { product, index } = activeGallery;
     if (!product) return;
-
-    resetGalleryZoom({ animate: false });
-    const sourceValue = product.images[index];
-    const candidates = imageCandidates(sourceValue, "gallery");
-    lightboxMeta.textContent = `${product.title} · ${index + 1}/${product.images.length}`;
-    const multi = product.images.length > 1;
-    lightboxPrev.hidden = !multi;
-    lightboxNext.hidden = !multi;
-
-    if (!candidates.length) {
-      lightboxImage.removeAttribute("src");
-      lightboxMeta.textContent = `${product.title} · imagen no disponible`;
-      return;
-    }
-
+    cancelGalleryTransition?.();
+    const request = ++galleryRequest;
+    const candidates = imageCandidates(product.images[index], "gallery");
     const wrap = lightboxImage.parentElement;
-    if (animate) {
-      wrap.classList.remove("slide-next", "slide-prev");
-      wrap.classList.add(direction > 0 ? "slide-next" : "slide-prev", "is-loading");
-    } else {
+    const hasPhoto = lightboxImage.hasAttribute("src") && lightboxImage.naturalWidth > 0 && !wrap.classList.contains("is-loading") && !wrap.classList.contains("is-unavailable");
+    $("#lightboxTitle").textContent = product.title;
+    lightboxMeta.textContent = `${index + 1}/${product.images.length}`;
+    lightboxMeta.setAttribute("aria-label", `Foto ${index + 1} de ${product.images.length}`);
+    lightboxPrev.disabled = lightboxNext.disabled = product.images.length < 2;
+    wrap.classList.remove("is-unavailable");
+    // Keep the current photo visible while the next one downloads and decodes.
+    if (!hasPhoto) {
+      setGalleryPlaceholder("loading", product.title);
       wrap.classList.add("is-loading");
     }
-
-    loadOptimizedImage(candidates).then((src) => {
+    const isCurrent = () => request === galleryRequest && lightbox.classList.contains("open");
+    loadOptimizedImage(candidates).then(async src => {
+      if (!isCurrent()) return;
+      const fade = animate && hasPhoto && !matchMedia("(prefers-reduced-motion: reduce)").matches && typeof lightboxImage.animate === "function";
+      let outgoing = null;
+      if (fade) {
+        outgoing = lightboxImage.cloneNode(false);
+        outgoing.removeAttribute("id");
+        outgoing.className = "gallery-outgoing";
+        outgoing.alt = "";
+        outgoing.setAttribute("aria-hidden", "true");
+        wrap.appendChild(outgoing);
+      }
+      const animations = [];
+      const cleanup = () => {
+        animations.forEach(animation => animation.cancel());
+        outgoing?.remove();
+        if (cancelGalleryTransition === cleanup) cancelGalleryTransition = null;
+      };
+      cancelGalleryTransition = cleanup;
+      resetGalleryZoom({ animate: false });
       lightboxImage.alt = `${product.title} · foto ${index + 1}`;
       lightboxImage.src = src;
-      requestAnimationFrame(() => {
-        wrap.classList.remove("is-loading");
-        wrap.classList.add("is-ready");
-        window.setTimeout(() => wrap.classList.remove("is-ready", "slide-next", "slide-prev"), 320);
-      });
+      try { await lightboxImage.decode(); } catch (_) {}
+      if (!isCurrent()) { cleanup(); return; }
+      wrap.classList.remove("is-loading");
+      galleryLoader.setAttribute("aria-hidden", "true");
+      if (fade) {
+        const timing = { duration: 240, easing: "ease-out" };
+        animations.push(lightboxImage.animate([{ opacity: 0 }, { opacity: 1 }], timing));
+        animations.push(outgoing.animate([{ opacity: 1 }, { opacity: 0 }], timing));
+        Promise.all(animations.map(animation => animation.finished)).then(cleanup, cleanup);
+      } else cleanup();
       preloadAdjacentOptimized(product, index);
     }).catch(() => {
-      wrap.classList.remove("is-loading", "is-ready", "slide-next", "slide-prev");
+      if (!isCurrent()) return;
+      cancelGalleryTransition?.();
+      resetGalleryZoom({ animate: false });
+      wrap.classList.remove("is-loading");
+      setGalleryPlaceholder("unavailable", product.title);
+      wrap.classList.add("is-unavailable");
       lightboxImage.removeAttribute("src");
-      lightboxMeta.textContent = `${product.title} · imagen no disponible`;
+      lightboxMeta.setAttribute("aria-label", `Foto ${index + 1} de ${product.images.length}, imagen no disponible`);
     });
   }
 
@@ -1035,17 +1441,24 @@
     const product = activeGallery.product;
     if (!product || product.images.length < 2) return;
     activeGallery.index = (activeGallery.index + direction + product.images.length) % product.images.length;
-    updateGallery({ animate: true, direction });
+    updateGallery({ animate: true });
   }
 
+  lightbox.addEventListener("cancel", event => { event.preventDefault(); closeGallery(); });
+
   function closeGallery() {
+    if (!lightbox.open || lightbox.classList.contains("closing")) return;
+    ++galleryRequest;
+    cancelGalleryTransition?.();
     lightbox.classList.add("closing");
     window.setTimeout(() => {
+      lightbox.close();
       lightbox.classList.remove("open", "closing");
       lightbox.setAttribute("aria-hidden", "true");
       lightboxImage.src = "";
       resetGalleryZoom({ animate: false });
-      lightboxImage.parentElement.classList.remove("is-loading", "is-ready", "slide-next", "slide-prev");
+      lightboxImage.parentElement.classList.remove("is-loading", "is-unavailable");
+      galleryLoader.setAttribute("aria-hidden", "true");
       activeGallery = { product: null, index: 0 };
       if (!drawer.classList.contains("open")) document.body.style.overflow = "";
       if (lastFocusedElement && typeof lastFocusedElement.focus === "function") lastFocusedElement.focus();
@@ -1056,13 +1469,14 @@
     window.addEventListener("popstate", () => {
       if (!products.length) return;
       syncCategoryFromUrl({ cleanInvalid: true });
-      selectCategory(activeCategory, { updateUrl: false });
+      const view = restoreCatalogView();
+      renderFilters();
+      renderCatalog();
+      restoreCatalogScroll(view);
     });
 
     openBagBtn.addEventListener("click", openDrawer);
-    mobileCategoryTrigger?.addEventListener("click", openCategoryPicker);
-    $("#closeCategorySheet")?.addEventListener("click", closeCategoryPicker);
-    categorySheetOverlay?.addEventListener("click", closeCategoryPicker);
+    $("#openBagMobile")?.addEventListener("click", openDrawer);
     $("#closeBag").addEventListener("click", closeDrawer);
     overlay.addEventListener("click", closeDrawer);
     $("#lightboxClose").addEventListener("click", closeGallery);
@@ -1213,11 +1627,16 @@
     }, { passive: false });
 
     document.addEventListener("keydown", (e) => {
-      if (drawer.classList.contains("open") && e.key === "Tab") {
-        const controls = Array.from(drawer.querySelectorAll('button, input, textarea, [tabindex="0"]')).filter(el => !el.disabled && el.getClientRects().length);
-        const first = controls[0], last = controls[controls.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      const modal = lightbox.open ? lightbox : drawer.classList.contains("open") ? drawer : null;
+      if (modal && e.key === "Tab") {
+        const controls = [...modal.querySelectorAll('button, input, textarea, a[href], [tabindex="0"]')]
+          .filter(el => !el.disabled && !el.closest('[inert]') && el.getClientRects().length);
+        if (controls.length) {
+          e.preventDefault();
+          const index = controls.indexOf(document.activeElement);
+          const next = (index + (e.shiftKey ? -1 : 1) + controls.length) % controls.length;
+          controls[next].focus();
+        }
       }
       if (lightbox.classList.contains("open")) {
         if (e.key === "Escape") closeGallery();
@@ -1226,8 +1645,7 @@
         if (e.key === "+" || e.key === "=") setGalleryZoom(galleryZoom.scale + .5);
         if (e.key === "-") setGalleryZoom(galleryZoom.scale - .5);
         if (e.key === "0") resetGalleryZoom({ animate: true });
-      } else if (categorySheet?.classList.contains("open") && e.key === "Escape") {
-        closeCategoryPicker();
+
       } else if (drawer.classList.contains("open") && e.key === "Escape") {
         closeDrawer();
       }
@@ -1259,8 +1677,8 @@
       return;
     }
 
-    const seller = String(settings.whatsapp || "").replace(/\D/g, "");
-    if (seller.length < 10 || /x/i.test(settings.whatsapp || "")) {
+    const seller = sellerPhone();
+    if (!seller) {
       showToast("Falta completar el WhatsApp en la pestaña Config");
       return;
     }
@@ -1275,7 +1693,6 @@
       ...items.map((p, i) => `${i + 1}. ${p.title} — ${formatPrice(p.price)}`),
       "",
       `Total estimado: ${formatPrice(total)}`,
-      buyerNote.value.trim() ? `\nComentario: ${buyerNote.value.trim()}` : "",
       "",
       "¿Me confirmás disponibilidad y coordinamos pago/entrega?"
     ].filter(Boolean);
@@ -1285,16 +1702,13 @@
   }
 
   function saveBuyer() {
-    try { localStorage.setItem(STORAGE_BUYER, JSON.stringify({
-      name: buyerName.value,
-      note: buyerNote.value
-    })); } catch (_) { /* No bloquear consultas en navegadores con almacenamiento restringido. */ }
+    try { localStorage.setItem(STORAGE_BUYER, JSON.stringify({ name: buyerName.value })); }
+    catch (_) { /* No bloquear consultas con almacenamiento restringido. */ }
   }
 
   function hydrateBuyer() {
     const data = readJSON(STORAGE_BUYER, {});
     buyerName.value = data.name || "";
-    buyerNote.value = data.note || "";
   }
 
   function readJSON(key, fallback) {
@@ -1321,33 +1735,74 @@
   }
 
   let toastTimer;
+  let toastReturnFocus;
+  function hideToast() {
+    clearTimeout(toastTimer);
+    if (toast.contains(document.activeElement)) {
+      const fallback = drawer.classList.contains("open") ? $("#closeBag") : matchMedia("(max-width:767px)").matches ? $("#openBagMobile") : $("#openBag");
+      (toastReturnFocus?.isConnected && toastReturnFocus !== document.body ? toastReturnFocus : fallback).focus({ preventScroll: true });
+    }
+    toast.classList.remove("show");
+    toast.inert = true;
+  }
+  function scheduleToastDismissal() {
+    clearTimeout(toastTimer);
+    if (!toast.matches(":hover, :focus-within")) toastTimer = setTimeout(hideToast, 2200);
+  }
+  $("#closeToast").addEventListener("click", hideToast);
+  toast.addEventListener("pointerenter", () => clearTimeout(toastTimer));
+  toast.addEventListener("focusin", () => clearTimeout(toastTimer));
+  toast.addEventListener("pointerleave", scheduleToastDismissal);
+  toast.addEventListener("focusout", () => queueMicrotask(scheduleToastDismissal));
+  toast.addEventListener("keydown", event => {
+    if (event.key === "Escape") { event.stopPropagation(); hideToast(); }
+  });
   function showToast(message, symbol = "i") {
     const icon = document.createElement("span");
     icon.setAttribute("aria-hidden", "true");
-    icon.textContent = symbol;
-    toast.replaceChildren(icon, document.createTextNode(message));
+    icon.className = "toast-icon";
+    const pictogram = document.createElement("img");
+    pictogram.className = "custom-icon";
+    pictogram.src = symbol === "🛍️" ? "icons/cart-bag.svg" : symbol === "−" ? "icons/remove-product.svg" : "icons/product-info.svg";
+    pictogram.alt = "";
+    icon.appendChild(pictogram);
+    const copy = document.createElement("span");
+    copy.textContent = message;
+    $("#toastMessage").replaceChildren(icon, copy);
+    if (!toast.contains(document.activeElement)) toastReturnFocus = document.activeElement;
+    toast.inert = false;
     toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    scheduleToastDismissal();
   }
 
   function showCatalogError(message) {
+    catalogLoaded = false;
+    catalogPagination.hidden = true;
     descriptionObserver.disconnect();
+    photoObserver?.disconnect();
     productsEl.replaceChildren();
     productsEl.setAttribute("aria-busy", "false");
     catalogStatusEl.hidden = false;
-    catalogStatusEl.textContent = message;
+    catalogStatusEl.classList.add("is-error");
+    const messageText = document.createElement("span");
+    messageText.textContent = message;
+    catalogStatusEl.replaceChildren(messageText);
     const retry = document.createElement("button");
     retry.type = "button";
+    retry.className = "bag-browse catalog-retry";
     retry.textContent = "Volver a intentar";
     retry.addEventListener("click", () => { renderSkeletons(); loadCatalog(); });
-    catalogStatusEl.append(" ", retry);
+    catalogStatusEl.append(retry);
     catalogCountEl.textContent = "";
   }
 
   function renderSkeletons() {
+    catalogLoaded = false;
+    catalogPagination.hidden = true;
     descriptionObserver.disconnect();
+    photoObserver?.disconnect();
     productsEl.replaceChildren();
+    productsEl.setAttribute("aria-busy", "true");
     catalogStatusEl.hidden = true;
     for (let index = 0; index < 4; index += 1) {
       const skeleton = document.createElement("article");
@@ -1357,8 +1812,10 @@
         <div class="skeleton-media skeleton-shimmer"></div>
         <div class="skeleton-body">
           <span class="skeleton-line skeleton-title skeleton-shimmer"></span>
-          <span class="skeleton-line skeleton-copy skeleton-shimmer"></span>
-          <span class="skeleton-line skeleton-copy short skeleton-shimmer"></span>
+          <div class="skeleton-summary">
+            <span class="skeleton-line skeleton-copy skeleton-shimmer"></span>
+            <span class="skeleton-line skeleton-copy short skeleton-shimmer"></span>
+          </div>
         </div>
         <div class="skeleton-action">
           <span class="skeleton-price skeleton-shimmer"></span>

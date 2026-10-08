@@ -2,12 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f6f0e8" />
+  <meta name="theme-color" content="#fff9e6" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-  <title>Venta por mudanza en Mar del Plata · Muebles, libros y más</title>
+  <title>Venta por mudanza</title>
   <meta name="description" content="Venta local por mudanza en Mar del Plata · muebles, cocina, deco y más. Entregas únicamente en Mar del Plata." />
   <link rel="canonical" href="https://ventasbrenda.netlify.app/" />
   <meta property="og:type" content="website" />
@@ -26,112 +27,133 @@
   <meta name="twitter:title" content="Venta por mudanza" />
   <meta name="twitter:description" content="Venta local en Mar del Plata · muebles, cocina, deco y más. Entregas únicamente en Mar del Plata." />
   <meta name="twitter:image" content="https://ventasbrenda.netlify.app/images/venta-por-mudanza-share.jpg" />
-  <link rel="preload" as="image" href="images/hero-illustration.webp" type="image/webp" />
-  <link rel="stylesheet" href="styles.css?v=20261007-toolbar-mts" />
-  <link rel="stylesheet" href="promo.css?v=20261003-consolidado-1841" />
+
+  <link rel="preload" href="fonts/playpen-latin-400-800.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/latin-3.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/latin-7.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/latin-9.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="fonts/fonts.css?v=20261008-qa3" />
+  <script src="fonts/font-loading.js?v=20261007-mts-v43"></script>
+  <link rel="stylesheet" href="tokens.css?v=20261008-qa" />
+  <link rel="stylesheet" href="styles.css?v=20261008-image-cdn" />
+  <link rel="stylesheet" href="promo.css?v=20261007-mts-v41" />
 </head>
 <body>
-  <header class="shell">
+  <div class="font-splash" role="status" aria-label="Cargando catálogo">
+    <img src="images/logo-desktop.webp" srcset="images/logo-mobile.webp 240w, images/logo-desktop.webp 480w" sizes="clamp(180px, 22vw, 260px)" width="480" height="320" alt="" fetchpriority="high" />
+  </div>
+  <a class="skip-link" href="#catalogo">Ir al catálogo</a>
+  <div class="site-alert">✳ VENTA POR MUDANZA ✳ VENTA LOCAL EN MAR DEL PLATA ✳</div>
+  <nav class="site-nav" aria-label="Navegación principal"><div class="shell nav-inner">
+    <a class="header-icon-button header-whatsapp" id="headerWhatsApp" role="link" aria-label="Consultar por WhatsApp" aria-disabled="true" tabindex="-1" target="_blank" rel="noopener noreferrer"><img class="custom-icon" src="icons/whatsapp.svg" width="40" height="40" alt="" aria-hidden="true"></a>
+    <a class="site-logo" href="#" aria-label="Manifest That Shit — inicio"><img src="images/logo-desktop.webp" srcset="images/logo-mobile.webp 240w, images/logo-desktop.webp 480w" sizes="150px" width="480" height="320" alt="Manifest That Shit" decoding="async"></a>
+    <div class="header-links"><button class="nav-link catalog-trigger" type="button" popovertarget="catalogMenu" aria-controls="catalogMenu" aria-expanded="false"><img class="custom-icon" src="icons/catalog.svg" width="40" height="40" alt="" aria-hidden="true"> Catálogo</button><button class="header-delivery" type="button" popovertarget="deliveryPopup" aria-controls="deliveryPopup" aria-expanded="false" aria-label="Ver información de entregas"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"></button></div>
+    <div class="header-actions"><button class="header-icon-button search-trigger" id="openSiteSearch" type="button" aria-label="Abrir búsqueda" aria-controls="siteSearch" aria-expanded="false"><img class="custom-icon" src="icons/search.svg" width="40" height="40" alt="" aria-hidden="true"></button>      <div class="header-search" id="siteSearch">
+        <div class="search-field"><img class="custom-icon" src="icons/search.svg" width="40" height="40" alt="" aria-hidden="true"><input id="catalogSearch" class="catalog-search" type="search" placeholder="Buscar artículo…" autocomplete="off" aria-label="Buscar artículos" />
+        <button id="clearSearch" class="clear-search" type="button" aria-label="Limpiar búsqueda" hidden>✕</button></div>
+      <button class="dismiss-button search-close" id="closeSiteSearch" type="button" aria-label="Cerrar búsqueda"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button><button class="search-submit" id="submitSiteSearch" type="button">BUSCAR</button></div>   <button class="bag-fab is-empty" id="openBag" type="button" aria-label="Mi selección">
+    <img class="bag-icon custom-icon" src="icons/cart-bag.svg" width="40" height="40" alt="" aria-hidden="true">
+    <span class="bag-label">Mi selección</span><span class="bag-count" id="bagCount">0</span>
+  </button></div>
+  </div></nav>
+  <header class="hero-wrap"><div class="shell">
     <section class="hero">
-      <div class="hero-copy">
-        <h1 class="hero-title" aria-label="Venta por mudanza">
-          <span class="hero-title-primary">Venta por</span>
-          <span class="hero-title-accent">mudanza</span>
-        </h1>
-        <p>Estoy vendiendo algunos artículos por mudanza. Seleccioná lo que te interese y enviame tu consulta por WhatsApp para coordinar disponibilidad, pago y entrega.</p>
-        <div class="hero-local" role="note" aria-label="Venta local en Mar del Plata">
-          <span class="hero-local-icon" aria-hidden="true">⌖</span>
-          <span><strong>Venta local en Mar del Plata</strong><small>Entregas únicamente dentro de Mar del Plata.</small></span>
-        </div>
+      <div class="hero-copy"><span class="mts-badge mts-badge--pink mts-badge--tape">⚡ VENTA POR MUDANZA</span>
+        <h1 class="hero-title"><span class="hero-title-primary">DE MI <mark>CASA</mark></span><span class="hero-title-accent">A LA TUYA.</span></h1>
+        <p class="hero-description">Seleccioná lo que te interese y enviame tu consulta por WhatsApp para coordinar disponibilidad, pago y entrega.</p>
+
         <div class="hero-actions">
-          <a class="hero-cta" href="#catalogo">Ver artículos <span aria-hidden="true">↓</span></a>
+          <a class="hero-cta" href="#catalogo">Ver artículos <span aria-hidden="true">👀</span></a>
           <span class="hero-count" id="heroCount">Catálogo actualizado</span>
         </div>
-        <div class="hero-note">Elegir un artículo no lo reserva automáticamente.</div>
+
+
       </div>
       <div class="hero-visual" aria-hidden="true">
-        <div class="hero-orbit hero-orbit-a"></div>
-        <div class="hero-orbit hero-orbit-b"></div>
-        <img src="images/hero-illustration.webp" alt="" fetchpriority="high" decoding="async" />
+
+
+        <picture><source type="image/avif" media="(max-width: 680px)" srcset="images/mts-hero-mobile-horizontal-540.avif 540w, images/mts-hero-mobile-horizontal-720.avif 720w, images/mts-hero-mobile-horizontal.avif 1080w" sizes="calc(100vw - 24px)" width="1080" height="363"><source media="(max-width: 680px)" srcset="images/mts-hero-mobile-horizontal-540.webp 540w, images/mts-hero-mobile-horizontal-720.webp 720w, images/mts-hero-mobile-horizontal.webp 1080w" sizes="calc(100vw - 24px)" width="1080" height="363"><source type="image/avif" media="(max-width: 1020px)" srcset="images/mts-hero-tablet.avif"><source media="(max-width: 1020px)" srcset="images/mts-hero-tablet.webp"><source type="image/avif" srcset="images/mts-hero-desktop.avif"><img src="images/mts-hero-desktop.webp" width="1672" height="941" alt="" fetchpriority="high" decoding="async"></picture>
       </div>
     </section>
-  </header>
+  </div></header>
+  <section class="local-strip" aria-label="Información de la venta">
+    <div class="marquee-track">
+      <div class="marquee-group"><span>Venta local en Mar del Plata</span><span><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true">Entregas únicamente dentro de Mar del Plata.</span><span class="marquee-reservation">Elegir un artículo no lo reserva automáticamente.</span><span>Consultas por WhatsApp</span></div>
+      <div class="marquee-group" aria-hidden="true"><span>Venta local en Mar del Plata</span><span><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="">Entregas únicamente dentro de Mar del Plata.</span><span class="marquee-reservation">Elegir un artículo no lo reserva automáticamente.</span><span>Consultas por WhatsApp</span></div>
+    </div>
+    <button class="marquee-pause" type="button" aria-label="Pausar avisos y leer todo" aria-pressed="false"><span aria-hidden="true">⏸</span></button>
+  </section>
 
-  <main class="shell" id="catalogo">
+  <main class="shell" id="catalogo" tabindex="-1">
     <div class="section-head">
-      <div>
-        <h2>Artículos disponibles</h2>
-        <p id="catalogCount"></p>
-      </div>
       <div class="section-meta">
-        <div class="updated-badge" id="updatedBadge" hidden aria-label="Última actualización del catálogo">
+        <div class="updated-badge mts-badge mts-badge--tape" id="updatedBadge" hidden aria-label="Última actualización del catálogo">
           <span class="updated-dot" aria-hidden="true"></span>
           <span class="updated-label">Actualizado</span>
           <span class="updated-date" id="updatedDate"></span>
         </div>
       </div>
+      <div>
+        <h2 id="catalogCount"></h2>
+      </div>
     </div>
 
     <section class="catalog-tools" aria-label="Buscar y filtrar artículos">
-      <div class="catalog-search-wrap">
-        <input id="catalogSearch" class="catalog-search" type="search" placeholder="Buscar artículo…" autocomplete="off" aria-label="Buscar artículos" />
-        <button id="clearSearch" class="clear-search" type="button" aria-label="Limpiar búsqueda" hidden>✕</button>
+
+      <div class="category-rail" id="desktopCategoryRail" data-overflow="false" hidden>
+        <button class="category-scroll category-scroll--prev" id="previousCategories" type="button" aria-label="Ver categorías anteriores" aria-controls="categoryFilters" aria-disabled="true"><img src="icons/slider-arrow.svg" width="24" height="24" alt="" aria-hidden="true"></button>
+        <div id="categoryFilters" class="category-filters" role="group" aria-label="Filtrar por categoría"></div>
+        <button class="category-scroll" id="nextCategories" type="button" aria-label="Ver más categorías" aria-controls="categoryFilters" aria-disabled="true"><img src="icons/slider-arrow.svg" width="24" height="24" alt="" aria-hidden="true"></button>
       </div>
-      <div id="categoryFilters" class="category-filters" role="group" aria-label="Filtrar por categoría"></div>
-      <button class="mobile-category-trigger" id="mobileCategoryTrigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="categorySheet">
+      <button class="mobile-category-trigger" id="mobileCategoryTrigger" type="button" popovertarget="catalogMenu" aria-expanded="false" aria-controls="catalogMenu">
         <span class="mobile-category-copy">
           <span class="mobile-category-eyebrow">Categoría</span>
           <span class="mobile-category-value" id="mobileCategoryValue">Todos</span>
         </span>
         <span class="mobile-category-count" id="mobileCategoryCount">0</span>
-        <svg class="mobile-category-chevron" aria-hidden="true" viewBox="0 0 20 20">
-          <path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <img class="mobile-category-icon" src="icons/category-filter.svg" width="28" height="28" alt="" aria-hidden="true" />
       </button>
     </section>
 
-    <div id="catalogStatus" class="catalog-status">Cargando catálogo…</div>
-    <section id="products" class="list" aria-live="polite" aria-busy="true"></section>
+    <div id="catalogStatus" class="catalog-status" role="status">Cargando catálogo…</div>
+    <section id="products" class="list" aria-labelledby="catalogCount" aria-busy="true"></section>
+    <div class="catalog-pagination" id="catalogPagination" hidden>
+      <p class="catalog-progress" id="catalogProgress" role="status" aria-live="polite" aria-atomic="true"></p>
+      <button class="bag-browse catalog-more" id="loadMoreProducts" type="button" aria-controls="products" aria-describedby="catalogProgress">Ver 12 más</button>
+    </div>
+    <div class="goal-placement" id="catalogGoal" hidden></div>
   </main>
 
-  <button class="bag-fab is-empty" id="openBag" type="button" aria-label="Abrir mi selección">
-    <span class="bag-icon" aria-hidden="true">🛍️</span>
-    <span class="bag-label">Mi selección</span><span class="bag-count" id="bagCount">0</span>
-  </button>
+
 
   <button class="web-promo-trigger" id="webPromoTrigger" type="button" popovertarget="webPromo" aria-controls="webPromo" aria-expanded="false">
-    <img src="images/protagonista-cabeza.webp" width="320" height="314" alt="" decoding="async" />
-    <span>¿Querés<br />una web así?</span>
+    <img src="images/perrito-cabeza-134.webp" srcset="images/perrito-cabeza-67.webp 67w, images/perrito-cabeza-134.webp 134w, images/perrito-cabeza-201.webp 201w" sizes="67px" width="320" height="292" alt="" decoding="async" />
+    <span>¿Querés vender tus cosas?</span>
   </button>
   <aside class="web-promo" id="webPromo" popover="auto" aria-labelledby="webPromoTitle">
-    <button class="web-promo-close" type="button" popovertarget="webPromo" popovertargetaction="hide" aria-label="Cerrar invitación">×</button>
+    <button class="dismiss-button web-promo-close" type="button" popovertarget="webPromo" popovertargetaction="hide" aria-label="Cerrar invitación"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button>
     <div class="web-promo-content">
       <img class="web-promo-art" src="images/ilustracion-catalogo.webp" width="560" height="222" alt="" loading="lazy" decoding="async" />
       <h2 id="webPromoTitle">¿Querés vender tus cosas con una web así?</h2>
       <p>Soy diseñadora web. Te entrego tu catálogo publicado y una plantilla de ejemplo para que cargues tus productos, fotos y precios. Vos mantenés la información actualizada; las consultas llegan por WhatsApp.</p>
-      <button class="web-promo-contact" id="webPromoContact" type="button">Quiero mi catálogo <span aria-hidden="true">→</span></button>
+      <button class="web-promo-contact" id="webPromoContact" type="button">Quiero mi catálogo <span aria-hidden="true">👀</span></button>
     </div>
   </aside>
 
-  <div class="category-sheet-overlay" id="categorySheetOverlay"></div>
-  <section class="category-sheet" id="categorySheet" role="dialog" aria-modal="true" aria-labelledby="categorySheetTitle" aria-hidden="true">
-    <div class="category-sheet-handle" aria-hidden="true"></div>
-    <div class="category-sheet-head">
-      <div>
-        <span class="category-sheet-eyebrow">Filtrar productos</span>
-        <h3 id="categorySheetTitle">Elegí una categoría</h3>
-      </div>
-      <button class="icon-btn" id="closeCategorySheet" type="button" aria-label="Cerrar categorías">✕</button>
+  <dialog class="mts-catalog-menu anchored-popover" id="catalogMenu" popover="auto" aria-labelledby="catalogMenuTitle">
+    <div class="mts-catalog-menu__top"><h2 id="catalogMenuTitle"><span class="catalog-title-desktop">¿POR DÓNDE EMPEZAMOS?</span><span class="catalog-title-mobile">Elegí una categoría</span></h2><button class="dismiss-button popup-close" type="button" popovertarget="catalogMenu" popovertargetaction="hide" aria-label="Cerrar menú de categorías"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div>
+    <div class="mts-catalog-menu__scroll">
+      <nav class="mts-catalog-menu__grid" id="catalogMenuOptions" aria-label="Categorías del catálogo"></nav>
     </div>
-    <div class="category-sheet-options" id="mobileCategoryOptions" role="radiogroup" aria-label="Categorías"></div>
-  </section>
+  </dialog>
 
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="selectionTitle" aria-hidden="true" inert>
     <div class="drawer-head">
       <h3 id="selectionTitle">Tu selección</h3>
-      <button class="icon-btn drawer-close" id="closeBag" type="button" aria-label="Cerrar selección"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <button class="dismiss-button drawer-close" id="closeBag" type="button" aria-label="Cerrar selección"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button>
     </div>
+    <div class="drawer-feedback" id="bagFeedback"></div>
     <div class="drawer-body">
       <div id="bagContent"></div>
       <form id="buyerForm" novalidate>
@@ -139,45 +161,93 @@
           <input id="buyerName" autocomplete="name" required aria-describedby="buyerNameError" placeholder="Ej. Ana Pérez" />
           <span id="buyerNameError" class="fine" hidden>Completá tu nombre para armar la consulta.</span>
         </label>
-        <label>Mensaje opcional
-          <textarea id="buyerNote" placeholder="Horario, zona, dudas, etc."></textarea>
-        </label>
-        <button class="send" type="submit">Consultar por WhatsApp</button>
-        <p class="fine">Se abrirá WhatsApp con el mensaje ya armado. La operación se confirma después de coordinar.</p>
+        <p class="fine bag-notice">Se abrirá WhatsApp con el mensaje ya armado. La operación se confirma después de coordinar.</p>
       </form>
+      <div class="goal-placement" id="bagGoal" hidden></div>
+    </div>
+    <div class="drawer-footer" id="bagFooter" hidden>
+      <div class="total"><span>Total estimado</span><span id="bagTotal"></span></div>
+      <p class="bag-contribution" id="bagContribution" hidden><span>Tu compra aportaría</span><strong id="bagContributionValue"></strong></p>
+      <div class="payment-alias">
+        <button class="payment-alias__button" id="copyPaymentAlias" type="button" aria-describedby="paymentAliasStatus">
+          <img class="custom-icon payment-alias__brand" src="icons/mercado-pago.svg" width="40" height="40" alt="" aria-hidden="true">
+          <span class="payment-alias__copy"><span id="paymentAliasLabel">Copiar ALIAS:</span><strong id="paymentAliasValue">bren.herrada.mp</strong></span>
+          <img class="payment-alias__copy-icon" src="icons/copy.svg" width="24" height="24" alt="" aria-hidden="true">
+        </button>
+        <p class="payment-alias__status fine" id="paymentAliasStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+        <input id="paymentAliasManual" type="text" aria-label="Alias de Mercado Pago para copiar manualmente" readonly hidden>
+      </div>
+      <button class="send" type="submit" form="buyerForm">Consultar por WhatsApp</button>
     </div>
   </aside>
 
-  <div class="lightbox" id="lightbox" aria-hidden="true">
-    <div class="lightbox-stage" role="dialog" aria-modal="true" aria-label="Galería de producto">
-      <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Cerrar galería">✕</button>
-      <button class="lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="Foto anterior">‹</button>
-      <div class="lightbox-image-wrap" id="lightboxImageWrap">
-        <div class="gallery-loader" id="galleryLoader" role="status" aria-live="polite">
-          <span class="gallery-loader-ring" aria-hidden="true"></span>
-          <span class="gallery-loader-label">Cargando foto</span>
+  <dialog class="lightbox" id="lightbox" aria-labelledby="lightboxTitle">
+    <div class="lightbox-stage">
+      <header class="lightbox-header">
+        <img class="custom-icon lightbox-gallery-icon" src="icons/photo-gallery.svg" width="40" height="40" alt="" aria-hidden="true">
+        <h2 class="lightbox-title" id="lightboxTitle">Galería de producto</h2>
+        <button class="dismiss-button lightbox-close" id="lightboxClose" type="button" aria-label="Cerrar galería"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button>
+      </header>
+      <div class="lightbox-viewer">
+        <div class="lightbox-image-wrap" id="lightboxImageWrap">
+          <div class="gallery-loader" id="galleryLoader" role="status" aria-live="polite" aria-hidden="true"></div>
+          <img id="lightboxImage" src="" alt="" draggable="false" />
         </div>
-        <img id="lightboxImage" src="" alt="" draggable="false" />
       </div>
-      <button class="lightbox-nav lightbox-next" id="lightboxNext" type="button" aria-label="Foto siguiente">›</button>
-      <div class="lightbox-toolbar" id="lightboxToolbar" role="group" aria-label="Controles de zoom">
-        <button class="zoom-btn" id="zoomOut" type="button" aria-label="Alejar imagen">−</button>
-        <button class="zoom-reset" id="zoomReset" type="button" aria-label="Restablecer zoom">100%</button>
-        <button class="zoom-btn" id="zoomIn" type="button" aria-label="Acercar imagen">+</button>
-      </div>
-      <div class="lightbox-meta" id="lightboxMeta"></div>
+      <footer class="lightbox-footer">
+        <div class="lightbox-toolbar" id="lightboxToolbar" role="group" aria-label="Controles de zoom">
+          <button class="gallery-control zoom-btn" id="zoomOut" type="button" aria-label="Alejar imagen" title="Alejar imagen"><img class="custom-icon" src="icons/zoom-out.svg" width="40" height="40" alt="" aria-hidden="true"></button>
+          <button class="gallery-control zoom-reset" id="zoomReset" type="button" aria-label="Restablecer zoom al tamaño original" title="Restablecer zoom">100%</button>
+          <button class="gallery-control zoom-btn" id="zoomIn" type="button" aria-label="Acercar imagen" title="Acercar imagen"><img class="custom-icon" src="icons/zoom-in.svg" width="40" height="40" alt="" aria-hidden="true"></button>
+        </div>
+        <div class="lightbox-pagination" role="group" aria-label="Navegar fotos">
+          <button class="gallery-control lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="Foto anterior"><img class="custom-icon" src="icons/slider-arrow.svg" width="40" height="40" alt="" aria-hidden="true"></button>
+          <div class="lightbox-meta" id="lightboxMeta" role="status" aria-live="polite" aria-atomic="true"></div>
+          <button class="gallery-control lightbox-nav lightbox-next" id="lightboxNext" type="button" aria-label="Foto siguiente"><img class="custom-icon" src="icons/slider-arrow.svg" width="40" height="40" alt="" aria-hidden="true"></button>
+        </div>
+      </footer>
     </div>
-  </div>
+  </dialog>
 
-  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">Selección actualizada</div>
+  <div class="toast" id="toast" inert><div class="toast-message" id="toastMessage" role="status" aria-live="polite" aria-atomic="true"></div><button class="dismiss-button" id="closeToast" type="button" aria-label="Cerrar aviso"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div>
 
   <dialog class="description-popup" id="descriptionPopup" aria-labelledby="descriptionPopupTitle">
-    <button class="description-close" type="button" aria-label="Cerrar descripción">×</button>
-    <h2 id="descriptionPopupTitle"></h2>
+    <div class="description-popup__head">
+    <h2 id="descriptionPopupTitle"><span id="descriptionPopupHeading"></span></h2><button class="dismiss-button description-close" type="button" aria-label="Cerrar descripción"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div>
     <div class="description-popup-copy" id="descriptionPopupCopy"></div>
   </dialog>
+  <aside class="delivery-popup anchored-popover" id="deliveryPopup" popover="auto" aria-labelledby="deliveryPopupTitle"><div class="delivery-popup__head"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"><h2 id="deliveryPopupTitle">ENTREGAS EN MAR DEL PLATA</h2><button class="dismiss-button" type="button" popovertarget="deliveryPopup" popovertargetaction="hide" aria-label="Cerrar información de entregas"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div><div class="delivery-popup__inner"><p>Entregas únicamente dentro de Mar del Plata.</p><p>Consultá por WhatsApp para coordinar disponibilidad, pago y entrega.</p></div></aside>
+  <footer class="footer-delivery" id="entregas"><div class="shell"><a class="footer-logo" href="#" aria-label="Manifest That Shit — inicio"><img src="images/logo-mobile.webp" width="240" height="160" alt="Manifest That Shit" loading="lazy"></a><div><h2>ENTREGAS</h2><p>Entregas únicamente dentro de Mar del Plata.<br>Disponibilidad, pago y entrega se coordinan por WhatsApp.</p></div></div></footer>
+  <nav class="mobile-nav" aria-label="Navegación móvil">
+    <button type="button" class="catalog-trigger" popovertarget="catalogMenu" aria-controls="catalogMenu" aria-expanded="false"><img class="custom-icon" src="icons/catalog.svg" width="40" height="40" alt="" aria-hidden="true"><span>Catálogo</span></button>
+    <button type="button" popovertarget="deliveryPopup" aria-controls="deliveryPopup" aria-expanded="false"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"><span>Entregas</span></button>
+    <button type="button" id="openBagMobile" aria-label="Mi selección"><img class="custom-icon" src="icons/cart-bag.svg" width="40" height="40" alt="" aria-hidden="true"><span>Mi selección</span><span class="bag-count" id="bagCountMobile" aria-hidden="true">0</span></button>
+  </nav>
   <noscript><link rel="stylesheet" href="no-script.css"><p class="catalog-status">Para cargar los productos, activá JavaScript en este navegador y recargá la página.</p></noscript>
-  <script src="config.js?v=20261003-loadfix"></script>
-  <script src="app.js?v=20261007-toolbar-mts"></script>
+  <script src="config.js"></script>
+  <template id="goalTemplate">
+    <section class="mts-goal mts-goal--compact" data-mts-goal data-goal-state="current">
+      <div class="mts-goal__content">
+        <div class="mts-goal__overview">
+          <div class="mts-goal__amount-block">
+            <h2>Recaudado</h2>
+            <strong class="mts-goal__collected" data-goal-collected></strong>
+          </div>
+        </div>
+        <div class="mts-goal__progress">
+          <div class="mts-goal__track" role="img" data-goal-track>
+            <span class="mts-goal__track-current"></span><span class="mts-goal__track-projected"></span>
+          </div>
+          <p class="mts-goal__purpose">META: Nueva vida ✈️</p>
+        </div>
+        <div class="mts-goal__outcome">
+          <p class="mts-goal__cart" data-goal-cart hidden><small data-goal-cart-label>Tu compra sumaría</small><strong data-goal-cart-amount></strong></p>
+          <p class="mts-goal__thanks" data-goal-thanks>Gracias por ayudarme a cumplir esta meta ❤️</p>
+        </div>
+      </div>
+    </section>
+  </template>
+  <script src="app.js?v=20261008-image-cdn"></script>
+  <script src="navigation.js?v=20261008-qa2"></script>
 </body>
 </html>

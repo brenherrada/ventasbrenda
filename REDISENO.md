@@ -1,0 +1,326 @@
+# Venta por mudanza · revisión 40
+
+7 de octubre de 2026. Proyecto local y ZIP funcional; sin publicación en Netlify.
+
+## Meta compacta · revisión 37
+
+Se reutiliza la estructura y el sistema visual de .mts-goal--compact, desde assets/css/goal.css, assets/js/goal.js e inc/goal.php del theme activo MTS. Una plantilla HTML, un estado compartido y un único render alimentan el bloque debajo de todo el listado y el bloque dentro del área desplazable del minicart. Se conservan butter, borde ink de 2 px, radio y sombra estándar, Playpen/Space Mono, progreso amarillo y proyección magenta rayada. La composición responde al ancho del bloque mediante container query; los valores fluidos tienen un solo clamp en su fuente. No se importan assets de la variante full ni lógica WooCommerce innecesaria. Ningún contenedor nuevo usa overflow hidden.
+
+Meta: Config!A102 = meta_total; Config!B102 = `=TEXT(SUMIF(Catalogo!B2:B,"<>",Catalogo!D2:D),"0")`. Se suman los precios de todas las filas con título, incluidos vendidos, como confirmó Bren. Rangos abiertos incluyen productos nuevos. TEXT mantiene el resultado compatible con la columna de valores de Config, que Google Visualization interpreta como texto; no convierte la fórmula en un monto fijo. Formula, valor efectivo y formato nativo verificados, más inspección visual de Config al 100%. Suma independiente de 82 artículos: 1.925.000 ARS.
+
+Recaudación: Ventas!B3 (TOTAL VENDIDO), conservando su fórmula existente `=SUM(B6:B)`, actualmente 515.000 ARS. La web solicita únicamente la fila de ese agregado público. Cada carga/recarga obtiene Config y luego Catálogo/Ventas en paralelo; una falla de Ventas no bloquea el catálogo. No hay polling ni suscripción en vivo: una edición de la Sheet se ve al recargar. Seleccionar artículos nunca escribe en la Sheet ni altera lo vendido. “Tu selección sumaría” es una proyección; la barra se limita al espacio restante.
+
+Carga/falla: recaudado muestra — mientras no hay un dato válido; carga y error tienen textos explícitos y barra neutra. Recargar recupera el dato. Meta ausente, inválida o cero oculta ambos bloques. Sin selección aparece el agradecimiento; meta alcanzada muestra el cierre y barra al 100%, sin proyección adicional.
+
+QA Chromium: 320×568, 390×844, 639/640/641×900, 768×1024, 1440×900 y 844×390. Sin overflow horizontal ni CTA de WhatsApp fuera de pantalla. Inspección visual de listado, minicart poblado/vacío, escritorio/mobile/horizontal y falla de Ventas. Agregar/quitar y último artículo actualizan ambos bloques; búsqueda no reduce la meta. Pruebas aisladas con recaudación 0, meta alcanzada/superada, proyección mayor que el restante, falla de red, meta cero y recuperación al recargar. Movimiento reducido: transiciones 0 s. Sin errores JavaScript. Fixtures de QA solo en navegador aislado, sin modificar datos reales de ventas. Evidencia: v37-qa.txt y capturas v37-*.png, fuera del ZIP. Dispositivos físicos, lectores de pantalla, Safari y Firefox pendientes.
+
+Referencias: [SUMIF de Google Sheets](https://support.google.com/docs/answer/3093583), [container queries](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries).
+
+
+QA adicional v37: container de 600/601/602 px (viewport 651/652/653): transición de dos filas a tres columnas correcta y sin overflow. Estado de carga probado reteniendo solo la respuesta de Ventas: — y Cargando lo recaudado; al liberar la respuesta se recupera $515.000. Referencia compacta comprobada en sus fuentes canónicas; checkout MTS redirige al carrito vacío en la sesión de QA.
+
+## Fuente de verdad
+Referencia literal: theme activo de Manifest That Shit en `ManifestThatShit/local/theme/manifest-that-shit/`, render real de localhost:8088, header.php, navigation.js y estilos de navegación, foundations y storefront. Se recuperaron logos, hero, tipografías, tokens e iconos SVG originales. El ZIP original y ventasbrenda.netlify.app se usaron como referencia de información y funcionalidades.
+
+## Bordes de items como MTS
+Cada bag-item usa border-top:1px dashed var(--color-border), tomado literalmente de la fila del minicart en ManifestThatShit/local/theme/manifest-that-shit/assets/css/theme/03-commerce-primitives.css. Se sustituye el borde inferior continuo anterior; no se agregan marcos ni dobles separadores.
+
+Chrome 320, 390 y 1440 px: los tres items con borde superior dashed de 1 px ink y sin bordes inferiores o laterales. Render mobile y desktop inspeccionado: v34-bordes-390.png y v34-bordes-1440.png. Tras quitar un artículo, los dos restantes conservan el borde. Vistas locales y ZIP actualizados; sin publicación. Otros navegadores y dispositivos físicos no probados.
+
+## Precio compacto y nombre del minicart
+El nombre comparte fuente Playpen Sans y peso 600 con los títulos del listado, preservando su tamaño compacto. El precio usa una variante compacta del mismo tape: fuente de 12 a 13 px, padding horizontal de 6 a 10 px y vertical de 4 px. Los tamaños fluidos se definen en las variables de la variante y se consumen en la única regla price; no se sobrescriben mediante breakpoints. El precio del listado conserva sus valores.
+
+Chrome 320, 390 y 1440 px: fuente del nombre idéntica al listado, precio de 12 a 12,946 px frente a 14 a 15,892 px del listado. Badge de 28,8 a 30,1 px de alto; sin overflow horizontal. Render poblado de tres productos inspeccionado mobile y desktop: v33-minicart-390.png y v33-minicart-1440.png. Quitar un artículo reduce tres a dos correctamente. Sintaxis JavaScript validada. Vistas locales y ZIP actualizados; sin publicación. Otros navegadores y dispositivos físicos no probados.
+
+## Menú desktop neutro con selección amarilla
+Se eliminaron las asignaciones de color por categoría y sus variables. Items e iconos tienen fondo blanco; únicamente el item con aria-current=page pasa a amarillo. Ver todo sigue la misma regla. La sombra ink se mantiene igual al seleccionar, enfocar, hacer hover y presionar; se retiraron la sombra cobalt y los desplazamientos de esos estados. El foco de teclado conserva un contorno ink accesible, independiente de la selección. Se preservan estructura de dos columnas, iconos, título, geometría y bottom sheet mobile.
+
+Chrome: render desktop 1440×1000 y mobile 390×900 inspeccionado. Nueve items con fondo blanco salvo Tarot activo amarillo, fondos de iconos blancos y sombras ink idénticas. Hover sin cambios de fondo/sombra/posición. Seleccionar Cocina actualiza URL y traslada solo el fondo amarillo; reapertura y Escape correctos. Mobile sigue siendo el sheet sobrio de una columna. Capturas v32-menu-neutro-desktop.png y v32-menu-mobile.png. Vista local y ZIP actualizados; sin publicación. Otros navegadores y dispositivos físicos no probados.
+
+## Disparador de invitación redondeado
+¿Querés una web así? comparte la regla border-radius:44px de ¡LO QUIERO!, reemplazando su radio anterior de 14 px. Se conservan ilustración, contenido, colores, sombras y comportamiento. El badge Reservado conserva su regla posterior de radio cero.
+
+Chrome 390 y 1440 px: ambos botones con radio computado 44 px; render inspeccionado y apertura/cierre del globito verificados. Capturas v31-boton-390.png y v31-boton-1440.png. Vistas locales y ZIP actualizados. Otros navegadores y dispositivos físicos no probados. Sin publicación.
+
+## CTA Quiero mi catálogo centrado y lime
+El botón hereda la alineación centrada horizontal y vertical de la primitiva compartida: se eliminó space-between. Texto en mayúsculas con text-transform y fondo --color-lime. El emoji conserva su lugar a la derecha del texto, centrados como grupo. Se mantienen tamaño, borde, sombra, foco, hover y comportamiento existente.
+
+Chrome 320, 390 y 1440 px: justify-content/align-items center, uppercase, fondo rgb(204,255,0) y ausencia de overflow comprobados. Render mobile y desktop inspeccionado; a 320 el texto ocupa dos líneas sin recortes. Capturas v30-cta-320.png, v30-cta-390.png y v30-cta-1440.png. No se activó el envío de contacto. Vistas locales y ZIP actualizados; sin publicación. Dispositivos físicos y otros navegadores no probados.
+
+## Precios y quitar en el minicart
+Cada precio de producto reutiliza exactamente price + mts-badge + mts-badge--tape del listado, sin duplicar estilos: amarillo, laterales tape, sombra ink, tipografía y tamaño fluido, sin rotación. Se conserva el total estimado.
+
+Quitar queda sin texto visible, con etiqueta accesible específica del producto. Fuente literal: ManifestThatShit/local/theme/manifest-that-shit/assets/css/theme/03-commerce-primitives.css y assets/js/storefront/feedback.js. Botón circular blanco de 40 px, borde ink de 2 px, sombra estándar 3 px, icono remove-product.svg de 25 px, hover/foco magenta y sin desplazamiento. El SVG local se comparó byte a byte con el original de MTS. Una extensión transparente conserva un área táctil de 44 px sin alterar el círculo visual.
+
+QA Chrome 320, 390 y 1440 px: precio del minicart y del listado con estilos computados idénticos; botón sin texto, icono de 25 px, hover magenta y transform none; sin overflow horizontal. Render poblado con tres productos inspeccionado en mobile y desktop: v29-minicart-390.png y v29-minicart-1440.png. Quitar con Enter reduce tres a dos, restaura foco en el siguiente control; quitar hasta el último recupera el estado vacío. No se envió WhatsApp. Vistas locales y ZIP actualizados. Safari, Firefox y dispositivos físicos no probados; sin publicación.
+
+## Pop compartido en el popup de descripción
+La descripción reutiliza la animación exacta del globito ¿Querés una web así?: duración 360 ms, curva cubic-bezier(.2,.8,.25,1), entrada desde escala .88 y desplazamiento vertical 14 px, pequeño rebote a escala 1.025 / -3 px y reposo sin transformación. La regla y keyframes son compartidos, trasladados a estilos comunes; no hay una copia de la animación. Se conserva el origen propio de cada panel. Movimiento reducido desactiva la animación.
+
+Chrome 390×900 y 1440×900: apertura, animación activa popup-pop, duración 360 ms, rebote a los 234 ms, reapertura, cierre explícito y Escape verificados. El globito sigue usando los mismos keyframes y curva. Movimiento reducido: cero animaciones y transform none. Render de ambos tamaños inspeccionado en el rebote: v28-pop-390.png y v28-pop-1440.png. Overflow visible conservado. Safari, Firefox y dispositivos físicos no probados. Vistas locales y ZIP actualizados, sin publicación.
+
+## Ver descripción con Info y texto cobalt
+Se reutiliza icons/product-info.svg a la izquierda del texto. El botón se alinea al borde izquierdo de la descripción, con padding y margin en cero, texto --color-cobalt y área táctil mínima de 44 px. Mantiene el diálogo, etiqueta accesible y visibilidad condicionada al truncamiento de la descripción.
+
+Chrome sobre /?categoria=tarot-oraculos#catalogo: alineación exacta, padding/margin 0, icono correcto y color rgb(35,67,223) verificados a 320, 390 y 1440 px. Apertura y cierre de descripción comprobados en los tres tamaños. Render desktop/mobile inspeccionado: v27-descripcion-1440.png y v27-descripcion-390.png. Ambas vistas locales actualizadas; ZIP verificado. Safari, Firefox y dispositivos físicos no probados. Sin publicación.
+
+## Menú desktop original recuperado
+Se corrigió el alcance de la revisión 23: el listado sobrio solicitado para el selector mobile se había aplicado también al menú desktop. Se recuperaron del respaldo de la revisión 22 el título «¿POR DÓNDE EMPEZAMOS?», las dos columnas, Ver todo a ancho completo, iconos, colores, tipografías, bordes, sombras y estados del menú original. El bottom sheet mobile conserva su diseño sobrio de una fila por categoría. Ambos utilizan el mismo renderer y enlaces; los estilos de cada presentación se delimitan por el estado modal, sin sobrescribir medidas fluidas en breakpoints.
+
+Se mantienen el cierre compartido de Entregas, el encabezado fuera del scroll y el contenedor sin overflow hidden. No se modificaron el catálogo, sus datos ni otros componentes. Chrome: render inspeccionado desktop 1440 y mobile 390; comprobaciones a 320, 390, 799, 800, 801 y 1440 px, incluyendo pantalla de 500 px de alto a 801. Menú desktop de dos columnas con nueve iconos; sheet de una columna sin iconos. Filtro Cocina, URL, reapertura y Escape verificados. Cierre de 44 px y overflow visible comprobados. Evidencia: v26-menu-desktop.png y v26-menu-mobile.png. Safari, Firefox y dispositivos físicos no probados. ZIP actualizado; sin publicación en Netlify.
+
+## Cierres unificados con Entregas
+Una única clase compartida define los ocho cierres: Entregas, categorías, búsqueda mobile, invitación, selección/minicart, galería, descripción y aviso de selección. Referencia literal: círculo blanco de 44 × 44 px, borde ink de 3 px, sombra ink 3 × 3 px y cruz roja del popup de Entregas. Se eliminaron las variantes visuales anteriores y se conservaron las etiquetas accesibles específicas.
+
+Los contenedores de estos paneles no usan overflow hidden ni clip. Los encabezados de Entregas y descripción quedaron fuera del contenido desplazable. Categorías, selección e invitación mantienen el cierre fuera del scroll interior. La galería permite overflow auto en la imagen ampliada y conserva sus controles fuera de ese contenedor. El bloqueo de scroll del documento mientras hay un modal abierto se mantiene.
+
+El aviso de selección incorpora el mismo cierre. Conserva el cierre automático a los 2,2 segundos, pausado durante hover o foco; admite Escape y restaura foco. El aviso oculto queda inerte. No cambian productos, precios, filtros ni conexión de datos.
+
+QA Chrome sobre localhost:8765/?categoria=cocina#catalogo: 23 aperturas y cierres verificados en 320×568, 390×900 y 1440×900. Todos miden 44 × 44, comparten estilos computados, reciben click y no tienen ancestros de panel con overflow hidden/clip. Scroll interior, galería a 150%, cierre explícito y revisión visual de capturas. Entregas, categorías e invitación también probados a 390, 799, 800 y 801 px de ancho con 390 px de alto; Tab y Escape correctos. Toast: pausa con foco, Escape y cierre automático probados. Sintaxis JavaScript validada. La descripción desktop se abrió en mobile y se redimensionó porque las descripciones de Cocina caben completas en las cards desktop.
+
+Evidencia: v25-entrega-mobile.png, v25-categorias-mobile.png, v25-descripcion-mobile.png, v25-seleccion-mobile.png, v25-busqueda-mobile.png, v25-aviso-mobile.png, v25-invitacion-desktop.png y v25-galeria-desktop.png. Vista integrada actualizada conservando Tarot & oráculos. Safari, Firefox, lectores de pantalla y dispositivos físicos no probados. Entrega local y ZIP; sin publicación.
+
+## Selector de categoría sticky en mobile
+El selector queda fijo al recorrer el catálogo, 8 px debajo del header, dentro del límite del catálogo. Su top utiliza el mismo token de altura fluida que nav-inner; la fórmula se movió a una única fuente compartida. Fondo opaco y capa debajo del header y del bottom sheet. El cambio se aplica al layout mobile hasta 800 px, donde existe el dropdown.
+
+Chrome: scroll entre productos en 320, 390, 799 y 800 px: selector a y=88 con header terminando en y=80. A 801 y 1440 el layout desktop permanece estático para las categorías del cuerpo. Abrir bottom sheet desde el selector fijo, filtrar Cocina, volver a recorrer productos, abrir y cerrar con Escape verificados; foco devuelto al selector. Render mobile inspeccionado en 390×844: v24-categoria-sticky-mobile.png. Vista local y ZIP actualizados; sin publicación. Safari, Firefox y dispositivos físicos pendientes.
+
+## Categorías en bottom sheet sobrio
+Se recuperó del proyecto original la presentación desde abajo en mobile y el listado de una categoría por fila. El mismo menú y renderer compartidos sirven al selector Categoría y la navegación; no existe un segundo listado. Se retiraron los iconos multicolor y las variantes por posición. Fondo crema, filas blancas, selección ink, cantidades visibles y cierre monocromático. El título vuelve a «Elegí una categoría». Desktop conserva el anclaje al disparador con el mismo listado sobrio.
+
+El contenedor es un dialog modal nativo hasta 800 px y popover anclado por encima. El fondo queda inerte en modal; el documento bloquea scroll mientras está abierto. Encabezado y cierre permanecen fuera del scroll de opciones. Escape, cierre explícito y toque en backdrop funcionan; Tab/Shift+Tab recorren el panel. Al reabrir, la categoría activa tiene foco y queda visible. Las categorías mantienen sus enlaces, URL, conteos y lógica de filtrado. Se preservan las propiedades fluidas en una sola fuente y los cambios de composición no duplican renderers.
+
+Referencia oficial consultada: https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/showModal
+
+QA Chrome: Cocina muestra 13 artículos y actualiza la URL; Ropa & Calzado muestra 3 y Ver todo recupera 64. Escape devuelve foco al selector y aria-expanded=false. Cierre por backdrop, botón y selección; trap de foco y categoría activa visible en 320×568. Sheet encajado al borde inferior en 319/320/321, 390, 799 y 800; popover dentro del viewport a 801 y 1440. Una columna en todos los casos; 799×390 también admite scroll interno. Apertura desde la barra móvil, movimiento reducido con transición 0 s y cambio de breakpoint verificados. Sintaxis JS validada. Capturas v23-categorias-mobile.png, v23-categorias-320.png y v23-categorias-desktop.png. Vista integrada abierta en el nuevo sheet, conservando el filtro Tarot & oráculos del usuario. ZIP verificado; sin publicación. Safari, Firefox y dispositivos físicos pendientes.
+
+## Reservado con estilo tape sin rotación
+Reservado comparte con el tape badge sus bordes laterales discontinuos y esquinas rectas. Se eliminó el marco interior discontinuo anterior. Mantiene magenta, sombra estándar ink, ubicación y geometría compartida con el botón. Transformación explícita none; no se duplicó la regla de bordes tape.
+
+Chrome: render inspeccionado en 390×844 y 1440×1100. Laterales dashed, borde superior solid, radio 0, transform none y sin pseudoelemento interior; alturas iguales a ¡LO QUIERO! (48 y 50.875 px). Capturas v22-reservado-390.png y v22-reservado-1440.png. Vista local actualizada y ZIP verificado; sin publicación. Safari, Firefox y dispositivos físicos pendientes.
+
+## Precio sin rotación
+El badge del precio queda recto mediante transform:none en su regla específica; los otros tape badges conservan su estilo. Se mantiene la tipografía ampliada de 14 a 16 px.
+
+Chrome 390×844 y 1440×1100: render inspeccionado y los 64 precios con transform:none. Capturas v21-precio-390.png y v21-precio-1440.png. Vista local actualizada y ZIP verificado, sin publicación.
+
+## Precio ligeramente más grande
+La tipografía del precio aumenta de 12 px a una única escala clamp de 14 a 16 px. El padding horizontal del precio usa su propia escala de 8 a 16 px para conservar espacio en mobile, sin modificar otros tape badges. Sin overrides en breakpoints.
+
+Chrome: importes completos en una sola línea, sin overflow en 300/301, 320, 390, 540, 800/801 y 1440 px. Render inspeccionado en 390×844 y 1440×1100. Capturas v20-precio-390.png y v20-precio-1440.png. Vista local actualizada, ZIP verificado; sin publicación. Safari, Firefox y dispositivos físicos pendientes.
+
+## Reservado magenta con sombra ink
+El badge usa el magenta existente color-pink (#ff40a1) y hereda la sombra estándar ink compartida con las acciones: shadow de 5 px en desktop y shadow-sm de 3 px hasta 540 px. Se retiró la sombra cobalt exclusiva. Posición, alto y borde interior conservados.
+
+Chrome: render revisado en 390×844 y 1440×1100; fondo rgb(255,64,161), sombra rgb(18,18,18) y altura igual al botón (48 y 50.875 px respectivamente). Capturas v19-reservado-390.png y v19-reservado-1440.png. Vista integrada actualizada y ZIP verificado. Safari, Firefox y dispositivos físicos pendientes; sin publicación.
+
+## Reservado en el lugar del botón de selección
+El badge Reservado se renderiza en card-action inmediatamente después del precio, ocupando el mismo lugar del botón ¡LO QUIERO!. Comparte sus reglas de geometría, padding y tipografía; conserva lavanda y borde interior discontinuo. Se retiraron la posición absoluta y el giro para igualar exactamente el alto visible del botón. Es texto informativo sin interacción. Se eliminó la lógica obsoleta de conservar el sello dentro de la imagen ante errores de carga.
+
+Chrome: todos los badges medidos con la misma altura del botón en 299/300/301, 320, 390, 539/540/541, 799/800/801 y 1440 px: 48 px hasta 801 y 50.875 px a 1440. Mismo lugar después del precio; cero botones de selección en reservados, cero badges sobre fotos y sin overflow horizontal. Render inspeccionado en 390×844 y 1440×1100, sintaxis JS validada. Capturas v18-reservado-390.png y v18-reservado-1440.png. Vista local actualizada y ZIP verificado. Safari, Firefox y dispositivos físicos pendientes; sin publicación.
+
+## Precio con tape badge amarillo
+Los precios del catálogo reutilizan mts-badge y mts-badge--tape: amarillo, tipografía monoespaciada en negrita, bordes laterales discontinuos, sombra negra y giro de 2 grados. Se retiró la tipografía exclusiva anterior y se alineó el badge al inicio para que ajuste al importe. No se duplicó el componente ni se cambiaron los valores.
+
+Chrome: los 64 precios observados tienen fondo amarillo, una sola línea y no desbordan en 300/301, 320, 390, 540/541, 800/801 y 1440 px. Render inspeccionado en 390×844 y 1440×1100; disponibles y reservados comparten badge. Sintaxis JS validada. Capturas v17-precio-390.png y v17-precio-1440.png. Vista integrada actualizada, ZIP verificado; sin publicación. Safari, Firefox y dispositivos físicos pendientes.
+
+## Título junto a la descripción en el listado mobile
+El título vuelve a su card-body existente, en la columna derecha junto con la descripción, sin cambiar el orden HTML ni el contenido. La foto conserva su marco cuadrado; la fila de precio y selección continúa debajo de ambas columnas. El separador vertical pertenece al cuerpo y recorre toda la fila incluso con títulos largos. Skeletons reutilizan la misma composición. Por debajo de 301 px se conserva el reflow apilado. No se añadieron overrides de dimensiones fluidas.
+
+Chrome: 64 productos observados, fotos cuadradas, títulos dentro del cuerpo y sin overflow horizontal en 299/300/301, 320, 390, 539/540/541, 799/800/801 y 1440 px. Render revisado en 390×844, 320×844 con título de 79 caracteres y 1440×1100. Abrir/cerrar descripción completa del Molinillo verificado. Capturas v16-titulo-mobile.png, v16-titulo-largo-320.png y v16-titulo-desktop.png. Safari, Firefox y dispositivos físicos pendientes. ZIP verificado, sin publicación.
+
+## Hover del botón de selección restaurado
+Se restauró el comportamiento de botones de MTS (03-commerce-primitives.css): hover/focus-visible con desplazamiento de 3 px y sombra de 2 px; pulsación de 5 px sin sombra; reversa de 180 ms. El botón reutiliza las reglas compartidas existentes. Cards y fotos permanecen fijas y sus sombras constantes; cyan y estado Elegido conservados.
+
+Chrome 1440×1100 y 390×844: hover, pulsación y reversa verificados; card y foto sin transformación en todos esos estados. Tab muestra el contorno visible; Enter permite seleccionar y deseleccionar con el botón enfocado. Movimiento reducido: transición de 0 s. Evidencia v15-hover-1440.png y v15-hover-390.png. Safari, Firefox y dispositivos físicos pendientes. Vista local y ZIP actualizados, sin publicación.
+
+## Ícono del placeholder de carga
+El estado «Ya viene la foto» reutiliza icons/photo-gallery.svg, el mismo SVG custom del botón de galería. Se corrigió la referencia en el componente compartido de listado y galería, conservando el fondo neutro. Chrome: imágenes retenidas para inspeccionar el render de carga en 390×844 y 1440×1100; los 63 placeholders observados y la galería usan el SVG correcto. Fotos liberadas: placeholder reemplazado correctamente por la imagen. Sintaxis JS validada. Capturas v14-placeholder-mobile.png, v14-placeholder-desktop.png y v14-placeholder-galeria.png. Vista local actualizada, ZIP verificado; sin publicación.
+
+## Ítems sin movimiento al interactuar
+Se retiraron las transformaciones de hover, foco y pulsación de la card, el zoom de la foto y las transformaciones del botón de selección. Las sombras quedan constantes y el foco accesible de teclado se conserva. La transición de carga de la foto sigue limitada a opacidad. Se eliminaron las reglas desde su fuente, sin overrides ni duplicación de estilos; no se modificaron datos ni lógica.
+
+Chrome: render real en 1440×1100 y 390×844. Se compararon posición, dimensiones, transformaciones y sombras de card, foto y botón antes y durante hover, foco, pulsación, selección y deselección: geometría idéntica en cada ancho, sin transformaciones. Foco con Tab visible, contorno de 3 px. Vista integrada actualizada conservando la selección. Capturas v13-sin-hover-desktop.png y v13-sin-hover-mobile.png. Safari, Firefox y dispositivos físicos pendientes; sin publicación en Netlify.
+
+## Fondo neutro de placeholders
+Se usa el token neutro existente color-toolbar (#f0ede7) en todos los placeholders de listado y galería, tanto durante carga como en fallos. Se retiraron las alternancias por posición (lavanda/sky/peach/lime) y la variable exclusiva de esas variantes. El fondo base de media también es neutro para que la transición de la foto no muestre lavanda. La trama usa puntos blancos; icono, sticker, etiqueta y motion conservados. El sello de Reservado conserva su lavanda aprobada.
+
+Chrome: render con imágenes retenidas en mobile 390×844 y desktop 1440×1100; galería abierta por tap. Todos los fondos computados coinciden en rgb(240,237,231), incluyendo base de foto y fallback de error. Cuadros cuadrados y sin overflow; controles de galería abren/cierran. Capturas v12-placeholder-mobile.png, v12-placeholder-desktop.png y v12-placeholder-galeria.png. Cambio exclusivo de fondos/variantes CSS, sin cambios de geometría, datos o JS. Vista integrada actualizada; ZIP completo verificado. Safari, Firefox y dispositivos físicos pendientes; sin publicación en Netlify.
+
+## Listado replanteado para todos los artículos
+Problema: la imagen mobile se extendía sobre contenido y acciones; una descripción truncada con su botón de lectura aumentaba el alto y producía un marco estrecho y largo. Se reemplazó esa composición en el componente compartido: título completo a todo el ancho, imagen cuadrada junto al resumen y fila inferior independiente para precio/acción. La foto mantiene aspect-ratio 1 y cover; no abarca las filas del título o botón. La columna usa una única fórmula clamp(142px,38vw,220px), sin overrides de sus límites. A 390 px, Molinillo tiene foto de 148.19×148.19 px y acción debajo, frente al marco alargado anterior.
+
+Se añadió card-summary para reunir descripción y su botón; ResizeObserver conserva el mismo contrato padre/hijo. Los skeletons reutilizan la composición con su propio resumen. Los títulos completos se presentan encima para que los nombres extensos de libros/oráculos no determinen la altura de la foto. El padding de acciones se normalizó en su fuente y los márgenes redundantes del título se retiraron; desktop mantiene sus tres columnas, fuentes y demás estilos. Menos de 301 px usa una composición apilada para reflow estrecho; conserva la foto cuadrada. Se ajustó sizes a la columna nueva y se subió ligeramente el sello dentro de la foto para separarlo del icono de galería. La sombra de seleccionados sigue siendo la misma.
+
+QA: 63 productos vivos, todos con foto cuadrada, sin desbordes de botón ni sello, sin colisión entre sello/icono. Mediciones en 280, 299/300/301, 320, 359/360/361, 390, 539/540/541, 579/580, 679/680/681 y 799/800/801, más desktop 1440. Se inspeccionaron renders reales del Molinillo, muebles, Maceta/Florero y los oráculos con nombres extensos; título de 79 caracteres completo en 320 px. Todos los títulos sin truncamiento. Vista integrada: 63 fotos cuadradas, una selección existente conservada. No hay artículos sin descripción en los datos observados; la estructura no inventa texto para datos vacíos.
+
+Chrome desktop 1440×1100, mobile 390×844 y 320×844. Emulación touch con movimiento reducido: abrir/cerrar galería, agregar/quitar, abrir/cerrar descripción completa y recuperar imágenes después de fallos. La sombra en touch antes/después de elegir permanece negra de 5×5 px. Teclado: descripción completa del Molinillo, Escape/foco; Enter abre su galería 1/2, siguiente 2/2, Escape/foco. Reservados sin CTA, disponibles cyan, Elegido negro/amarillo. Placeholder y skeleton cuadrados verificados con red retenida; error de ambas fuentes muestra fallback, y recargar con conexión restablecida recupera las fotos.
+
+Evidencia: v11-molinillo-mobile.png, v11-listado-mobile.png, v11-titulos-largos-320.png, v11-desktop.png, v11-skeleton-mobile.png, v11-carga-mobile.png y v11-error-mobile.png. Clamps añadidos/modificados en una única fuente; breakpoints cambian composición, sin repetir estilos de producto por posición/categoría. Sintaxis JS y ZIP verificados; configuración original idéntica. Safari/WebKit, Firefox y dispositivos físicos pendientes. No se editó Sheet ni se enviaron mensajes o publicó en Netlify.
+
+## Sombra consistente al elegir
+Se eliminó la única regla `.card.selected` que cambiaba la sombra de la card a rosa. Elegidos y disponibles heredan ahora exactamente la misma sombra normal, hover y foco de `.card`; el botón Elegido y el contador conservan su feedback. No se añadieron variantes ni overrides.
+
+Chrome desktop 1440×1100 y mobile 390×844: comparación antes/después de agregar y quitar, con sombras idénticas en cada estado. Desktop normal 9×9 px negro; mobile normal 5×5 px negro; hover/foco 12×12 px negro en ambos tamaños. Render inspeccionado con un elegido junto a disponibles. Capturas v10-elegido-desktop.png y v10-elegido-mobile.png. Vista integrada actualizada conservando selección. Sin cambios de datos, lógica ni geometría. ZIP completo verificado; Safari, Firefox y dispositivos físicos pendientes; sin publicación en Netlify.
+
+## Listado mobile e icono de galería
+Se inspeccionó producción real en https://ventasbrenda.netlify.app/ (Chrome 390×844 y CSS publicado): una columna, imagen a la izquierda extendida sobre dos filas y contenido/acción a la derecha. Ese patrón se aplica hasta 800 px sobre el mismo DOM de producto; desktop conserva su grilla. La columna de fotos usa una sola fórmula clamp(104px,30vw,160px), fotos cover y marco lateral con el mismo grosor que la card. Los skeletons comparten composición; las descripciones se resumen a dos líneas en mobile y conservan su popup completo.
+
+Se creó icons/photo-gallery.svg como extensión puntual de la familia custom: dos fotografías superpuestas, bordes negros redondeados de 2.5 px, papel crema, cielo cyan pastel y lavanda/rosa tomados de los SVG originales. Vector editable y sin dependencias. Reemplaza el cartel textual en todos los artículos; la cantidad aparece cuando hay más de una foto. El indicador queda dentro del botón de la foto, con superficie visible mínima de 44 px, y el botón accesible anuncia artículo y número de fotos. Se oculta mientras carga para evitar superponerlo con el placeholder. El zoom de hover se limita a la foto y no escala el icono.
+
+El sello lavanda escala ahora desde el ancho de la imagen, conservando su inclinación y borde doble en el listado estrecho. Se ajustaron los límites de sus clamps en su única fuente, sin sobrescribirlos en media queries. El sizes de imágenes refleja la nueva columna móvil; srcset y carga diferida originales se conservan. Se observó la variante w300 en 390 px, acorde al tamaño de la miniatura. No se modificaron datos de Sheet, contenido, configuración ni despliegue.
+
+QA de revisión 9: Chrome desktop 1440×1100 y mobile 390×844/320×844; mediciones 320, 359/360/361, 539/540/541, 679/680/681 y 799/800/801. Sin overflow; textos, botones y todos los sellos dentro de sus contenedores. Grosor exterior/lateral 3 px hasta 540 y 4 px por encima. Fotos reales cargadas e icono legible a 28 px. La vista integrada se actualizó y conservó la selección existente. Emulación touch + movimiento reducido: tap abre/cierra galería y agrega/quita artículos. Keyboard Enter abre Tostadora 1/3, siguiente 2/3, Escape cierra y vuelve a la foto; click sobre el icono abre Maceta 1/1. Se verificaron descripción completa, Elegido negro/amarillo y regreso a cyan. En el catálogo local observado: 63 artículos, 7 reservados y 56 CTA; conteos vivos.
+
+Carga de imágenes retenida: placeholders en columna lateral sin superposición del icono. Fallo forzado de ambas fuentes: Foto no disponible y CTA operable; recuperación al restaurar red y recargar. Sin cambios de JS fuera del indicador accesible y sizes. Validación de sintaxis, SVG XML y ZIP completo; configuración original byte a byte. Capturas: v9-listado-mobile.png, v9-listado-320.png, v9-reservado-mobile.png, v9-catalogo-desktop.png, v9-carga-mobile.png y v9-error-mobile.png. Safari/WebKit, Firefox y dispositivos físicos pendientes. Sin envío real de WhatsApp ni publicación en Netlify.
+
+Referencias de implementación: [CSS Grid en MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/grid-template-areas) y [sizes de imágenes en MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/img#sizes).
+
+## Balance de amarillo
+El amarillo acumulado en cada foto y sello competía con las acciones cyan. Se mantienen los acentos canónicos del hero, marquee y navegación MTS. El sello RESERVADO usa lavanda MTS; las etiquetas Ver fotos, crema; y la promo flotante, peach. Se modificaron únicamente tres fondos en sus fuentes existentes: sin colores nuevos, cambios de dimensiones, clamps, contenido ni lógica. El sello conserva tamaño, giro, bordes y sombra cobalt. El texto negro mantiene contraste alto sobre las tres superficies.
+
+Chrome: render real de catálogo con fotos cargadas en desktop 1440×1100 y mobile 390×844; CTA cyan, 7 reservados sin botón, sin overflow horizontal. Promo mobile abre dentro del viewport y cierra con Escape. Vista local integrada actualizada. Capturas v8-catalogo-desktop.png y v8-catalogo-mobile.png. Safari, Firefox y dispositivos físicos pendientes. ZIP validado contra todos los archivos fuente y configuración original intacta; sin publicación en Netlify.
+
+## Sello de reservado
+El distintivo pasa a ocupar el 90% de la foto, centrado y girado −12°, con Playpen Sans, amarillo MTS, marco negro, borde interior discontinuo y sombra cobalt. Sus dimensiones se calculan desde el ancho real de cada card con una única fuente clamp; no se duplican estilos en breakpoints. No bloquea el botón de la foto y conserva el texto accesible existente. Cambio limitado al sello y versión de recursos; contenido y lógica intactos.
+
+Chrome: render real desktop 1440×1100 y mobile 390×844. Medidas en 320, 359/360/361, 539/540/541, 799/800/801 y 1440 px: sello y texto dentro de la imagen, sin overflow horizontal. Click sobre el sello abre la galería; Escape cierra y devuelve foco. Los 7 reservados siguen sin botón de selección. Capturas v7-reservado-desktop.png, v7-reservado-mobile.png y v7-sello.png. Safari, Firefox y dispositivos físicos pendientes.
+
+## CTA cyan y artículos reservados
+Todos los botones con texto ¡LO QUIERO! usan el token cyan de MTS. Se retiraron los colores alternados por posición. El estado Elegido conserva el contraste negro/amarillo aprobado; al quitarlo vuelve a cyan. Para artículos reservados, el renderer no crea el botón de selección; el precio, título y distintivo Reservado en la foto se mantienen. Se eliminaron las ramas y estilos exclusivos del botón deshabilitado que dejó de existir.
+
+Chrome desktop 1440×1100 y mobile 390×844: 63 artículos en la Sheet al revisar, 7 reservados sin botón y 56 ¡LO QUIERO! cyan. Buscar reservad devolvió 7 artículos y ningún botón; limpiar recuperó el catálogo. Agregar/quitar preservó selección y color. Sin overflow horizontal. Capturas: v6-reservados-desktop.png y v6-reservados-mobile.png. Los conteos de las revisiones anteriores reflejan el estado vivo observado entonces. Safari, Firefox y dispositivos físicos pendientes.
+
+## Consistencia del buscador
+Causa: el botón Limpiar de 44 px entraba en el flujo flex y aumentaba el buscador desktop de 50 a 64 px. Se añadió una única fila compartida de búsqueda, con el botón anclado dentro del control y su espacio reservado permanentemente. El botón sigue oculto y fuera de tabulación cuando no hay texto; su target es de 44×44 px.
+
+Chrome: medición del contenedor y del input vacíos, con texto, después de limpiar y con texto largo en 320, 390, 799, 800, 801, 1020 y 1440 px. Geometría idéntica dentro de cada ancho: desktop 50 px, panel mobile 142 px y campo mobile 48 px; sin overflow. Render de estados sin foco, foco vacío y texto en desktop; panel con texto en mobile. Limpiar devuelve el foco al input y recupera los 64 artículos; Enter con Tostadora muestra 1 resultado, cierra búsqueda mobile y enfoca catálogo. Cambio limitado a HTML/CSS del buscador, sin nuevas dependencias, cambios de clamps ni lógica de filtrado. Capturas de comparación: v5-input-vacio.png y v5-input-texto.png. Safari, Firefox y dispositivos físicos pendientes.
+
+## Corrección del título
+Se recuperó literalmente DE MI CASA / A LA TUYA. de front-page.php del theme activo. CASA conserva el mark amarillo, borde y sombra originales. Se retiró la reconstrucción del hero desde el título de la Sheet; Config.titulo sigue controlando el título de la pestaña. Las dos líneas se conservan en anchos intermedios.
+
+Chrome: comparación del título con MTS en 1440 px: Playpen Sans 700, 96.7 px, interlineado 84.129 px y mismo padding del mark. Render inspeccionado en 1440×1000, 390×844 y 681×900; mediciones en 320, 359/360/361, 679/680/681 y 799/800/801, sin overflow horizontal. Se verificó después de cargar los 64 productos de la Sheet y se actualizó la vista integrada sin borrar la selección. Capturas: v4-hero-desktop.png y v4-hero-mobile.png. Safari, Firefox y dispositivos físicos pendientes.
+
+## Cambios de la revisión anterior
+- Se quitó Inicio. El header abre el menú Catálogo de MTS: título, Ver todo, grilla de categorías con iconos, cantidades, superficies, bordes, sombra, foco y hover. Usa las ocho categorías reales de la Sheet; los tamaños mínimos se adaptaron para evitar cortar sus nombres.
+- Barra móvil con Catálogo, Entregas y Mi selección. Todos los disparadores de categorías comparten el mismo menú y datos; no hay un segundo selector paralelo.
+- Los dos avisos peach se retiraron del catálogo. Sus textos están en la marquee amarilla, junto con venta local y consultas por WhatsApp. Pausar muestra los mensajes completos; el movimiento reducido los presenta estáticos.
+- CTA de productos: ¡LO QUIERO!; Elegido y Reservado conservan su función. La etiqueta accesible incluye el texto visible.
+- Placeholder de carga con la bolsa custom de MTS, sticker, trama de puntos, etiqueta amarilla y fondos alternados de la paleta. Se reemplaza después de cargar/decodificar la foto, conservando el marco. Listado y galería comparten el mismo componente. Fallos muestran Foto no disponible; en cards se conserva la marca de Reservado.
+- Aviso de entregas con la motito, anclado al botón que lo abre. Se ubica debajo o encima según el espacio y permite scroll interno en pantallas bajas. El panel permanece dentro de la pantalla.
+- Scrollbar rosa sobre crema, bordes negros y hover cyan tomados de MTS. Incluye los paneles que requieren scroll interno.
+- Se conservan logo, hero responsive, fotos que cubren sus cards, galería de foto completa, estados y feedback custom de la revisión anterior. La promoción flotante queda por encima de la barra móvil.
+
+## Información y funcionamiento conservados
+Google Sheet, conexión y configuración originales. Productos, precios, descripciones, categorías, disponibilidad/reservados, filtros por URL, búsqueda, selección persistente, nombre/comentario, galería, zoom y consulta WhatsApp. No se editó la planilla ni se enviaron mensajes. En la revisión se observaron 64 artículos y 7 reservados; son datos en vivo, no una copia congelada.
+
+config.js, CONFIG.md y _headers se verificaron idénticos al ZIP original. HTML/CSS/JavaScript estáticos, sin dependencias ni build. Imágenes Drive con derivados 300/450/900 y carga diferida; galería hasta 1600 con respaldo reducido. No-referrer original también declarado en HTML para la vista local. Fuentes locales y licencias incluidas.
+
+## QA ejecutado
+Chrome/Chromium y navegador integrado de Codex. Render real de hero, catálogo, menú y entregas en desktop 1440×1000/1100 y mobile 390×844. Menú inspeccionado con scroll hasta su última categoría en 320×568 y horizontal 844×390. Vista integrada actualizada, con la selección existente conservada y scrollbar rosa visible.
+
+Mediciones antes/en/después de límites: 359/360/361, 539/540/541, 679/680/681 y 799/800/801 px, además de 320, 390 y 1440. Sin overflow horizontal; nombres de categorías completos y última opción alcanzable. Auditoría de declaraciones fluidas: los clamps añadidos tienen una única fuente, sin sobrescrituras en breakpoints; los breakpoints cambian composición y comportamiento.
+
+Recorridos de esta revisión:
+- Menú de Catálogo, Cocina con 14 resultados, URL categoria=cocina, foco en catálogo y retorno a Todos con 64 resultados.
+- Escape cierra el menú y devuelve el foco al disparador; el panel comparte estado entre todos sus botones.
+- Búsqueda Tostadora, Enter, 1 resultado, foco en catálogo, limpiar y recuperar 64. Apertura del menú después de buscar.
+- Agregar/quitar desde el catálogo, contador móvil, selección y regreso de foco a Mi selección. Consulta WhatsApp interceptada, con artículo, nombre y comentario correctos; sin envío real.
+- Carga lenta de fotos reales de Drive retenida durante la captura y luego liberada; placeholders reemplazados por fotos reales.
+- Fallo forzado de imágenes de listado y galería, fallback visible, CTA operable y recuperación al restablecer conexión.
+- Galería Tostadora 1/3, zoom 150%, Escape para restablecer zoom y cerrar, retorno al botón de la foto.
+- Entregas ancladas en desktop y mobile, cierre con Escape. Paneles dentro de viewport, scroll interno en poca altura.
+- Marquee pausada: todos los avisos legibles. Movimiento reducido: avisos estáticos, sin animaciones; la promoción no invade la barra inferior.
+- Recursos locales, identificadores únicos, sintaxis JS, integridad del ZIP y contratos originales. Sin excepciones JS en la prueba de galería; los errores de red durante el ensayo de fallos fueron intencionales.
+
+La revisión anterior además comprobó descripciones completas, persistencia, validación de nombre, reservados y error/recuperación de Sheets; esos contratos se conservan. Las capturas nuevas están junto al ZIP: v3-desktop.png, v3-catalogo-desktop.png, v3-catalogo-mobile.png, v3-menu-desktop.png, v3-menu-mobile.png, v3-entregas-desktop.png, v3-entregas-mobile.png y v3-carga-mobile.png.
+
+## Límites reales
+Safari/WebKit, Firefox y dispositivos físicos pendientes. No se realizó envío real por WhatsApp ni verificación de una nueva publicación. Sheets/Drive siguen requiriendo conexión y lectura pública, como antes. La visibilidad del scrollbar depende de las preferencias del sistema. No se declara conformidad global de áreas fuera de este rediseño.
+
+## Uso del ZIP
+Descomprimir y servir por HTTP para revisar. index.html está en la raíz. Publicación futura sin build, usando el contenido completo; no se publicó esta entrega. Mantenimiento desde la misma Sheet como explican README.txt y CONFIG.md.
+
+## Minicart · revisión 35
+Se aplicaron los seis hallazgos del QA y se retiró el mensaje opcional, incluido de persistencia y composición del mensaje de WhatsApp. Footer fuera del scroll, formulario asociado mediante el atributo HTML form, miniatura estable y placeholder de galería neutro; nombre a ancho completo de su columna y precio/quitar debajo. El toast reutiliza su componente dentro de una región bajo el encabezado y reserva espacio. Vacío con icono y retorno al catálogo. Se mantienen tokens MTS, fuente de títulos, precio tape compacto, separadores dashed y controles de cierre.
+
+## Selector sticky · revisión 36
+El fondo del botón mobileCategoryTrigger usa var(--color-toolbar), el mismo token de mts-catalog__toolbar en el theme MTS (personalidad expresiva: #f0ede7). Se cambió únicamente el fondo del disparador, conservando menú, selección, geometría y sticky. Chrome: 320, 390, 799 y 800 px; selector visible y sticky con fondo rgb(240,237,231). En 801 y 1440 permanece oculto como antes. Abrir/cerrar sheet con Escape y retorno al selector verificados. Evidencia v36-selector-mobile.png. Vistas locales y ZIP actualizados; sin publicación. Otros navegadores y dispositivos físicos no probados.
+
+## Minicart · revisión 38
+
+El bloque de meta se ubica después de los productos y antes del formulario de nombre. Se conserva el componente y su lógica compartida. Separación con el formulario mediante el token --space existente. Chromium 320×568, 390×844 y 1440×900: orden DOM y visual verificado, sin overflow horizontal y WhatsApp visible. Capturas v38-bag-mobile.png y v38-bag-desktop.png. Sin publicación; dispositivos físicos y otros navegadores pendientes.
+
+## Minicart · revisión 39
+
+La meta aparece al comienzo del cuerpo del minicart, antes del listado de artículos. Formulario debajo del listado. Se conserva la composición del estado vacío con la meta arriba; margen superior cero por ubicación y separación inferior mediante --space. El espacio fluido del bloque bajo el catálogo permanece en su única fuente, sin overrides de propiedades fluidas. QA visual Chromium 320×568, 390×844 y 1440×900, poblado y vacío: orden verificado, sin overflow horizontal y CTA visible. Capturas v39-bag-*.png. Dispositivos físicos y otros navegadores pendientes; sin publicación.
+
+## Cierres centrados · revisión 40
+
+El contenido anterior era el emoji ❌ dentro de una caja de texto de 16×21,5 px centrada. La medición de los píxeles rojos confirmó centro x=24, y=22 dentro del botón de 44×44: dibujo desplazado 2 px a la derecha. Se sustituye por un único SVG decorativo de 20×20 en los ocho cierres, manteniendo rojo, tamaño visual, círculo blanco, borde, sombra y nombres accesibles. La medición posterior da centro x=22, y=22; la caja del icono tiene desplazamientos 0/0. No se agregan correcciones particulares por popup ni offsets artificiales.
+
+Flujo probado: catálogo local → abrir drawer/popup/galería/búsqueda/aviso → comprobar cierre centrado → cerrar. Chromium localhost:8765/?categoria=tarot-oraculos#catalogo, 320×568, 390×844 y 1440×900 para drawer, Entregas y categorías; también búsqueda, promo, descripción, galería y toast. Los ocho usan el mismo SVG; 14 mediciones de controles visibles con centros coincidentes, icono cargado, botón 44×44 y overflow visible. Apertura/cierre operativos y ningún pageerror. Render mobile y desktop inspeccionado, página con contenido normal sin overlay de framework. Playwright existente como ruta de QA; skill Browser no disponible en el catálogo de skills.
+
+Evidencia: v40-close-before.png, v40-close-after.png, v40-drawer-320.png, v40-drawer-390.png, v40-drawer-1440.png, v40-delivery-mobile.png y v40-qa.txt fuera del proyecto distribuido. No se modificó JavaScript ni se envió WhatsApp. ZIP raíz byte-verificado con el SVG compartido incluido. Safari, Firefox y dispositivos físicos pendientes. Sin publicación en Netlify. Referencia técnica: [line-height](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/line-height).
+
+
+## Migración al repo standalone · revisión 41
+
+Por instrucción de Bren, la única fuente activa es `/Users/brenherrada/Sites/ManifestThatShit/standalone`, rama `feat/redisenio-mts` (base 37f8d12). Se trasladaron todos los archivos de la revisión 40 conservando la funcionalidad reciente: badge Recién agregado con `?badge=recien-agregado`, búsqueda, historial, enlaces y previews sociales; exclusión de vendidos; API con respaldo directo de Sheets; reintento y protecciones de almacenamiento/ResizeObserver. El backend lee Ventas solo para TOTAL VENDIDO, conservando la meta dinámica aprobada.
+
+Se corrigió el mensaje vacío oculto al cargar un filtro sin resultados y se preserva el badge si falla la foto. Logo, assets custom, fuentes, hero aprobado, layout, estados, minicart, meta, cierres y motion conservan la revisión 40.
+
+Fuente anterior archivada en `output/backups/redesign-v40-source`, con manifest SHA-256 y ZIP del HEAD anterior. QA real y capturas en `output/qa/migracion-redisenio/QA.md` (solo locales, fuera del ZIP). Preview local en http://localhost:8765/. No hubo commit, push ni publicación. Safari, Firefox y dispositivos físicos pendientes.
+
+
+## v43 — Carga estable de fuentes locales
+
+Las cuatro fuentes Latin críticas se precargan en el head. fonts/fonts.css tiene un único consumidor directo en index.html; styles.css conserva únicamente el import de tokens. fonts/font-loading.js ejecuta la espera antes de construir el body y carga los pesos usados de Playpen Sans, Nunito y Space Mono. Mientras espera, la interfaz permanece oculta y se muestra el logo original sobre crema, sin animación ni duración mínima artificial.
+
+El límite es de 2.000 ms. Un fallo, ausencia de Font Loading API o límite superado elige tokens de fuentes del sistema y los mantiene durante esa visita; una descarga tardía no cambia esa elección. Al recargar se vuelve a intentar. El bootstrap es externo y respeta la CSP existente. Si ese script no se descarga o JavaScript está deshabilitado, la pantalla de espera no se activa y se conserva el render de base; en esos casos degradados puede existir el swap normal de fuentes. No se promete funcionalidad del catálogo sin JavaScript.
+
+QA: Chrome 154, 1440×1000 y 390×844; descargas retenidas y liberadas, timeout seguido de descarga tardía, fallo WOFF2, fallo del CSS de fuentes, fallo del bootstrap, API ausente y JavaScript deshabilitado. Validado el logo, contenido oculto durante la espera, fuentes aprobadas en el camino normal, geometría estable tras llegada tardía en fallback, ausencia de overflow horizontal y apertura/cierre del minicart. URL directa de Tarot y movimiento reducido conservan filtro y ancla. Evidencia en output/qa/font-gate/. Los cambios de layout posteriores por datos/skeletons del catálogo son independientes de las fuentes y no se incluyen como CLS cero global. Safari, Firefox y dispositivos físicos pendientes.
+
+
+## v44 — WhatsApp custom en el header mobile
+
+icons/whatsapp.svg extiende la familia de 40×40: globo lima, teléfono blanco y trazo ink con remates redondeados. El enlace queda a la izquierda del logo hasta 800 px y comparte header-icon-button con el buscador: 48×48, fondo blanco, borde, radio y sombra idénticos. Desktop conserva su composición. El href nativo se completa desde Config.whatsapp, con target blank y noopener/noreferrer; mientras el número no es válido queda deshabilitado y sin URL. sellerPhone centraliza la validación ya usada por promo y minicart.
+
+QA Chrome 154: 320, 390, 799, 800, 801 y 1440 px; paridad de estilos, centrado del logo y ausencia de overlap/overflow; búsqueda y Escape; enlace por click y Enter; destinos de header, promo y minicart interceptados para verificar URL sin contactar al servidor de WhatsApp. Config inválida simulada conserva el enlace deshabilitado. Sin errores JS del recorrido. Capturas y logs en output/qa/header-whatsapp/. Safari, Firefox y dispositivos físicos pendientes. Cambios exclusivamente en el repo; sin generar ZIP.
+
+## v45 — Copiar alias de Mercado Pago en el minicart
+
+Acción secundaria debajo del total estimado y antes de Consultar por WhatsApp. El formulario conserva su ubicación en el cuerpo desplazable. Botón nativo con ícono custom de Mercado Pago, texto «Copiar ALIAS: bren.herrada.mp» y pictograma de copiar; fondo blanco, borde y sombra estándar, hover celeste y foco visible. La confirmación «¡Alias copiado!» usa lima y conserva el alias, alto y posición. El alias tiene una única fuente en el texto visible; solo se escribe ese valor al activar el botón, sin leer el portapapeles del visitante ni agregar lógica de cobro.
+
+Clipboard.writeText confirma éxito solo tras resolverse. Un fallo o API ausente muestra un campo readonly con el alias seleccionado y una indicación de copia manual; un nuevo intento exitoso retira esa recuperación. Estado anunciado con región live, protección de clics durante la espera y restauración del texto a los 2,6 segundos. La acción desaparece con el footer cuando la selección queda vacía.
+
+QA Chrome 154 en localhost:8765: 320×568, 390×844, 799/800/801×900 y 1440×900. Copia real y lectura de verificación del valor escrito por QA; click, Enter y Espacio; estado pendiente y doble click; retorno del texto, fallo NotAllowedError y API ausente simulados, selección completa del alias, recuperación y navegación al CTA por Tab; cerrar/reabrir y selección vacía. Alto/posición estables al copiar, ícono cargado, sin overflow horizontal, transiciones eliminadas con reduced motion y consola sin errores. Render normal, copiado y error inspeccionado; evidencia en output/qa/payment-alias/. Safari, Firefox y dispositivos físicos pendientes. Sin commit, push, deploy ni ZIP.
+
+## v46 — Meta debajo de la barra
+
+El template compartido agrupa barra y meta en mts-goal__progress. Meta se muestra debajo y centrada respecto de la barra tanto en el catálogo como en el minicart; el grupo evita una fila vacía bajo los bloques laterales del banner ancho. Datos, formato, recaudación y proyección conservan sus contratos.
+
+QA local Chrome 154: catálogo a 320, 390, 799, 800, 801 y 1440 px; minicart a 320×568, 390×900 y 1440×900; container a 600/601/602 px alrededor de su breakpoint. En todas las mediciones los centros coinciden y la separación es 6–8 px, sin overflow horizontal. Capturas inspeccionadas tras estabilizar datos y transición del drawer; estados carga, recaudación actual y selección proyectada. git diff --check pasa, consola sin errores. Evidencia en output/qa/goal-meta/. Safari, Firefox y dispositivos físicos pendientes; sin publicación ni ZIP.
+
+
+## v47 — Filtros desktop compactos y sticky
+
+Los filtros del cuerpo pasan de varias filas a una fila horizontal en una superficie color-toolbar, con botones blancos, categoría activa amarilla y contadores originales. Flechas custom existentes de la galería permiten recorrer todas las categorías; también se conserva el scroll horizontal nativo y el acceso por Tab. La scrollbar de esta fila se omite visualmente porque dispone de controles explícitos; las scrollbars custom del resto del sitio se conservan. Targets de 44 px y padding interior para no cortar el foco. La barra se mantiene 8 px debajo del header durante el catálogo. El selector y el menú de mobile conservan su composición.
+
+Navigation controla overflow, extremos, recorrido y visibilidad de la categoría activa; MutationObserver y ResizeObserver actualizan medidas ante cambios de datos o tamaño, con fallback de resize. App conserva el foco al reconstruir filtros y al volver por historial. Al filtrar se muestra el inicio de los resultados, o el aviso vacío, debajo de la barra usando su altura real. No cambian datos, nombres, categorías, contadores, parámetros de URL, backend ni dependencias.
+
+QA Chrome 154 local: desktop 801/1024/1280/1440/1920×900 y mobile 320/390/799/800×844. Sticky comprobado a scroll 1200/2400 y al final del catálogo; fila única de 68–74 px, targets >=44 px, sin overflow horizontal de la página. Click, Enter, Espacio y Tab a los diez filtros; flechas en ambos extremos con scroll normal y reduced motion; rueda horizontal y vertical verificadas por separado. URLs de Ropa, Libros y badge=recien-agregado, Atrás y enlace directo a Tarot; activo visible, foco conservado y primeros resultados/aviso vacío fuera del área sticky. Menú desktop, sheet mobile con Escape y drawer sobre la barra inspeccionados. Evidencia en output/qa/desktop-categories/. Sintaxis JS y git diff --check pasan; cero errores de consola. Se observaron cuatro avisos de preload de fuentes existentes. Safari, Firefox, trackpad y dispositivos físicos pendientes. Sin commit, push, deploy ni ZIP.
+
+
+## v48 — Ver más por tandas de 12
+
+El catálogo muestra 12 productos al empezar y un contador «Mostrando 1–12 de N artículos»; Ver 12 más agrega tarjetas sin reconstruir las anteriores. La última tanda muestra su cantidad real y al completar se oculta el botón. El control extiende bag-browse y comparte feedback de MTS; sin cambios de sistema visual ni dependencias. Búsqueda y categorías operan sobre todos los disponibles; el minicart puede conservar productos de cualquier tanda, con la meta y recaudación originales. Cambiar filtro/búsqueda reinicia a 12; historial y recarga recuperan cantidad, búsqueda y scroll mediante catalogView, sin nuevo parámetro de URL. Selección actualiza tarjetas existentes para preservar fotos y foco. Primer artículo nuevo accesible debajo del sticky, incluso reservado sin foto; estados carga/vacío/error/reintento conservados. El API sigue obteniendo el catálogo completo: no se afirma reducir la descarga de Sheets ni haber medido Core Web Vitals.
+
+QA Chrome 154 local: 320/390/799/800/801/1024/1440×844 y landscape 844×390; click, doble click, Enter, Espacio, hover/foco, movimiento reducido; tandas hasta 63, últimos 3; enlace Tarot 16, badge 9, búsqueda completa y aviso vacío; Atrás y recargar conservan 36 tarjetas y scroll exacto después de estabilizar descripciones. Selección desde segunda tanda, minicart/total/meta y galería; respuesta lenta, catálogo vacío/corto/reservado sin foto y fallas de API+JSONP con recuperación simuladas. Sin overflow horizontal ni pageerrors del recorrido final. Sintaxis JS y diff pasan; avisos existentes de preload de fuentes, fallas de red inducidas registradas. Evidencia y límites en output/qa/catalog-load-more/QA.md. Safari, Firefox, lector de pantalla, zoom nativo y dispositivos físicos pendientes. Cambios concurrentes de color conservados. Sin commit, push, deploy ni ZIP.
+
+
+## v49 — Avisos del catálogo con menor peso visual
+
+.catalog-status deja de compartir borde, sombra, fondo y tipografía de toast/empty. Reutiliza la base de padding común y recibe fondo butter, borde de 1 px con mezcla del token ink, radio sm, Nunito 600 y el Info custom de 20 px. Sin sombra. Un único clamp por tamaño, gap y padding; sin overrides responsive. El error conserva fondo neutro y borde ink; el reintento extiende bag-browse con fondo blanco, separado del mensaje y alineado a su texto, target de 52,5 px. Mensajes y contratos de datos intactos. Se retira is-error antes de resolver también los estados vacíos para evitar que el borde de error persista después de recuperarse. El toast conserva sus estilos.
+
+QA Chrome 154: filtro sin resultados en Muebles & organización, 320/390/799/800/801/1440×900, capturas finales desktop/mobile. Fondo rgb(255,253,240), borde 1 px, shadow none, altura 47–68 px según viewport/contenido y sin overflow. API y JSONP bloqueados para revisar error 320/390/801/1440, retry por Enter hacia catálogo vacío y por click hacia catálogo real, mensaje sin error residual y status oculto al recuperarse. JavaScript desactivado en 390×844 usa la misma variante neutra. Toast verificado con borde 4 px/sombra 9 px/lima conservados. Sintaxis JS y diff pasan, sin pageerrors; errores de red inducidos y avisos de preload existentes diferenciados. Evidencia output/qa/catalog-status/. Safari, Firefox y dispositivos físicos pendientes. Sin publicación ni ZIP.
