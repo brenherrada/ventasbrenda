@@ -1,5 +1,12 @@
 [build]
-  publish = "."
+  command = "npm run build"
+  publish = "dist"
 
 [functions]
   directory = "netlify/functions"
+
+[dev]
+  publish = "."
+
+[images]
+  remote_images = ['^https://lh3\.googleusercontent\.com/d/[A-Za-z0-9_-]+=w1600$']

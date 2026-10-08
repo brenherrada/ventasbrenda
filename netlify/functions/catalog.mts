@@ -1,12 +1,19 @@
 export default async (request: Request) => {
   const sheet = new URL(request.url).searchParams.get("sheet") || "Catalogo";
-  if (!["Catalogo", "Config"].includes(sheet)) return new Response("Not found", { status: 404 });
+  if (!["Catalogo", "Config", "Ventas"].includes(sheet)) return new Response("Not found", { status: 404 });
   if (request.method !== "GET") return new Response("Method not allowed", { status: 405 });
   const headers = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" };
   try {
     const url = new URL("https://docs.google.com/spreadsheets/d/18tOI0_8yoLwXR4za7XVvsOUjVrktexYldoMAlRJ1BMA/gviz/tq");
     url.searchParams.set("sheet", sheet);
     url.searchParams.set("headers", "1");
+    // Only the aggregate is needed for the goal; never return the sales detail.
+    const queries: Record<string, string> = {
+      Catalogo: "select A,B,C,D,E,F,G,H,I where B is not null",
+      Config: "select A,B where A is not null",
+      Ventas: "select A,B where A = 'TOTAL VENDIDO'",
+    };
+    url.searchParams.set("tq", queries[sheet]);
     url.searchParams.set("tqx", "out:json");
     const response = await fetch(url, { signal: AbortSignal.timeout(6000) });
     if (!response.ok) throw new Error("Upstream unavailable");

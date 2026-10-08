@@ -1,0 +1,18 @@
+/* Default expressive tokens from the actual MTS theme. */
+:root{--color-ink:#121212;--color-border:#121212;--color-cream:#fff9e6;--color-butter:#fffdf0;--color-toolbar:#f0ede7;--color-white:#fff;--color-yellow:#f6ff00;--color-cobalt:#2343df;--color-pink:#ff74c8;--color-cyan:#00ffea;--color-lavender:#d8b4f8;--color-orange:#ffaf40;--color-peach:#ffe5cc;--color-sky:#bde7ff;--color-lime:#ccff00;--color-green:#38ef7d;--product-image-ratio:4/5;--product-image-listing-ratio:1/1.2;--action-primary-bg:var(--color-ink);--action-primary-fg:var(--color-yellow);--action-purchase-bg:var(--color-green);--action-purchase-fg:var(--color-ink);--action-secondary-bg:var(--color-cyan);--action-secondary-fg:var(--color-ink);--action-support-bg:var(--color-yellow);--action-support-fg:var(--color-ink);--font-display:'Playpen Sans',cursive;--font-body:'Nunito',sans-serif;--font-mono:'Space Mono',monospace;--font-hand:'Caveat',cursive;--font-emoji:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;--line:3px solid var(--color-border);--line-heavy:4px solid var(--color-border);--shadow-xs:1.5px 1.5px 0 var(--color-ink);--shadow-sm:3px 3px 0 var(--color-ink);--shadow:5px 5px 0 var(--color-ink);--shadow-lg:9px 9px 0 var(--color-ink);--shadow-hover:2px 2px 0 var(--color-ink);--shadow-cobalt:6px 6px 0 var(--color-cobalt);--shadow-orange:6px 6px 0 var(--color-orange);--radius-sm:10px;--radius:18px;--radius-lg:28px;--logo-header-height:clamp(70px,7vw,100px);--logo-footer-height:48px;--container:1280px;--space-1:.5rem;--space-2:1rem;--space-3:1.5rem;--space-4:2rem;--space-5:3rem;--space-6:4rem;--ease:cubic-bezier(.2,.8,.2,1);--ease-pop:cubic-bezier(.34,1.56,.64,1);--motion-fast:400ms;--motion-modal:500ms;--motion-category:500ms}
+/* Button type roles: journey and purchase actions use display; compact utilities use mono. */
+:root{--font-action:var(--font-display);--font-utility-action:var(--font-mono)}
+/* Semantic colors shared by both personalities. Border geometry stays in components. */
+:root{
+  --color-on-accent:var(--color-white);
+  --color-field-focus:#fff9cc;--color-field-selected:#e8fbf7;
+  --color-placeholder:#666;--color-text-muted:#555;--color-price-note:#5c3650;
+  --color-discount-value:#b0003c;
+  --color-cart-discount-bg:#ff2a85;--color-cart-discount-fg:var(--color-white);--color-cart-discount-value:var(--color-white);
+  --color-tape-highlight:#fff6;--color-overlay:#121212bd;--color-art-shadow:rgba(18,18,18,.22);--color-tape-shadow:rgba(0,0,0,.15);
+  --color-step-bg:color-mix(in srgb,var(--color-yellow) 90%,transparent);
+  --color-upsell-bg:color-mix(in srgb,var(--color-pink) 85%,transparent);
+}
+
+
+:root{--bg:var(--color-cream);--paper:var(--color-butter);--ink:var(--color-ink);--muted:var(--color-text-muted);--pink:var(--color-pink);--lime:var(--color-lime);--blue:var(--color-cyan);--orange:var(--color-orange);--violet:var(--color-lavender);--yellow:var(--color-yellow);--cobalt:var(--color-cobalt);--modal-overlay:var(--color-overlay);--modal-blur:4px;--space:clamp(16px,2vw,20px);--card-space:clamp(10px,1.18vw,15px)}

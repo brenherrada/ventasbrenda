@@ -1,0 +1,14 @@
+# Standalone — fuente y alcance
+
+Por instrucción explícita de Bren del 7/10/2026, este repo es la única fuente activa del catálogo standalone. Las instrucciones del AGENTS.md padre que describen WordPress, WooCommerce, Docker o theme.css generado no aplican a este runtime. No modificar el theme de WooCommerce para resolver tareas de este proyecto.
+
+- Stack: HTML, CSS y JavaScript sin framework; Google Sheets pública; selección local y consultas por WhatsApp. Netlify sirve estáticos, /api/catalog y las vistas previas sociales de filtros.
+- Leer y aplicar ../../standards/UX-UI-STANDARD.md, ENGINEERING-DELIVERY-STANDARD.md, SECURITY-DATA-STANDARD.md y adapters/html-css.md.
+- Fuente visual: rediseño aprobado de este chat (REDISENO.md), tokens.css, componentes reales y assets custom; el theme MTS es referencia de lectura, no runtime ni destino de cambios.
+- styles.css, tokens.css, promo.css y fonts/fonts.css son fuentes directas. No hay bundler de frontend; preservar package.json, lockfile, Netlify y el contrato existente de Sheets.
+- Trabajar desde la raíz de este repo, comprobar rama/diff antes de editar y preservar cambios ajenos. Implementar no autoriza commit, push ni despliegue.
+- Mantener badge=recien-agregado, categoria, búsqueda, historial, selección, reservados, vendidos, galería, carga/error/reintento y meta dinámica. Meta suma todo Catalogo, incluidos vendidos; recaudado solo TOTAL VENDIDO de Ventas. No retornar detalles de ventas desde la API.
+- Reutilizar componentes y tokens. Un único clamp en la fuente para cada valor fluido, sin overrides en breakpoints. Cards y fotos no se desplazan con hover; los botones conservan feedback aprobado.
+- Revisar render desktop/mobile, teclado, cierres, foco, overflow, sticky, red y movimiento reducido. Todos los cierres usan dismiss-button e icons/dismiss.svg. Panels exteriores sin overflow hidden; scroll interior cuando corresponda.
+- Evidencia en output/qa/; backups en output/backups/. No incluir output, .git, node_modules, secretos o archivos históricos en dist. No se entrega ZIP.
+- Registrar navegador, tamaños y limitaciones concretas; no declarar conformidad global ni validación física a partir de capturas o tests.

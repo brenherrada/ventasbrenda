@@ -4,5 +4,12 @@
   "devDependencies": {
     "@netlify/edge-functions": "^3.0.0",
     "@netlify/functions": "^6.0.2"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "test:visual": "node tests/visual-audit.mjs",
+    "test:resilience": "node tests/resilience.mjs",
+    "test:interactions": "node tests/interactions.mjs"
   }
 }
