@@ -76,6 +76,7 @@ for(const engine of engines){
  const footer = await page.locator('.lightbox-footer').boundingBox();
  assert.ok(bounds.y + bounds.height <= footer.y + 1, 'Photo overlaps the gallery controls');
  const meta=await page.locator('#lightboxMeta').innerText();await page.locator('#lightboxNext').click();assert.notEqual(await page.locator('#lightboxMeta').innerText(),meta);
+ await page.waitForFunction(()=>document.querySelector('#lightboxImage').alt.endsWith('foto 2') && document.querySelector('#lightboxImage').complete);
  await page.locator('#zoomIn').click();assert.match(await page.locator('#zoomReset').innerText(),/150/);
  await page.locator('#zoomReset').click();assert.match(await page.locator('#zoomReset').innerText(),/100/);
  await page.screenshot({path:`${output}/${tag}-gallery.png`});

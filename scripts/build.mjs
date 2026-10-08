@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const root = process.cwd();
@@ -10,9 +10,11 @@ const files = [
 ];
 const images = [
   'badge-recien-agregado.webp', 'ilustracion-catalogo.webp',
+  'mts-hero-mobile-horizontal-540.avif', 'mts-hero-mobile-horizontal-720.avif',
+  'mts-hero-mobile-horizontal.avif', 'mts-hero-tablet.avif', 'mts-hero-desktop.avif',
   'logo-desktop.webp', 'logo-mobile.webp', 'mts-hero-desktop.webp',
   'mts-hero-mobile-horizontal-540.webp', 'mts-hero-mobile-horizontal-720.webp', 'mts-hero-mobile-horizontal.webp',
-  'mts-hero-tablet.webp', 'perrito-cabeza.webp', 'venta-por-mudanza-share.jpg',
+  'mts-hero-tablet.webp', 'perrito-cabeza-67.webp', 'perrito-cabeza-134.webp', 'perrito-cabeza-201.webp', 'venta-por-mudanza-share.jpg',
 ];
 
 // Only this generated directory is replaced. Source and QA evidence are preserved.
@@ -34,6 +36,19 @@ await cp('images/social', path.join(out, 'images/social'), {
   recursive: true,
   filter: source => !source.endsWith('.DS_Store'),
 });
+
+// Preserve source order and URLs while delivering one render-blocking stylesheet.
+const stylesheets = ['fonts/fonts.css', 'tokens.css', 'styles.css', 'promo.css'];
+const styles = await Promise.all(stylesheets.map(async file => {
+  const css = await readFile(path.join(root, file), 'utf8');
+  return file.startsWith('fonts/') ? css.replace(/url\(([^)]+)\)/g, 'url(fonts/$1)') : css;
+}));
+await writeFile(path.join(out, 'site.css'), styles.join('\n'));
+let page = await readFile(path.join(out, 'index.html'), 'utf8');
+page = page.replace(/  <link rel="stylesheet" href="(?:fonts\/fonts|tokens|styles|promo)\.css[^"]*" \/>\n/g, '');
+page = page.replace('  <script src="fonts/font-loading.js', '  <link rel="stylesheet" href="site.css?v=20261008-performance" />\n  <script src="fonts/font-loading.js');
+await writeFile(path.join(out, 'index.html'), page);
+for (const file of stylesheets) await rm(path.join(out, file));
 
 let count = 0;
 let bytes = 0;

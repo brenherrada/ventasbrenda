@@ -105,3 +105,14 @@ Integrada en imageCandidates/setImageWithFallback, sin pipeline duplicado ni cam
 ### Revalidación del alta de artículos — 8/10/2026
 
 Por pedido de Bren se repitieron las pruebas sobre dist: E2E 54/54, recuperación 15/15, seis combinaciones CDN reales locales Chromium/Firefox/WebKit × desktop/mobile DPR3, tres fallas acotadas y cambio de ID. Caso adicional: una fila nueva inyectada solo en la respuesta de prueba aparece después de recargar; dos enlaces reales públicos de Drive (file/d y open?id), transformación local CDN, segunda foto de galería y minicart aprobados. Hash de dist/app.js idéntico antes/después: no requiere rebuild por alta. Sheet/Drive no modificados. Captura revisada: output/qa/image-cdn/new-item-gallery.png; resultados en new-item-result.json y recheck-*.log. Artefacto: 70 archivos públicos, 7 rutas privadas excluidas. Sin publicación; prueba del edge CDN y dispositivos físicos sigue pendiente.
+
+## Mobile performance — 2026-10-08
+
+- Hero: AVIF sources for mobile/tablet/desktop, retaining WebP fallback and the approved composition. Mobile 720 px: 51,842 → 29,747 bytes; desktop: 244,570 → 109,599 bytes.
+- Promo dog: 67/134/201 px responsive sources; 134 px is 8,470 bytes versus the former 41,146-byte image. Logos and WebP fallback assets recompressed.
+- Build combines the four CSS sources, in their original cascade order, into `dist/site.css`; font URLs are rebased. Source CSS stays independently editable. No new runtime/build dependencies. The browser downloads one selected hero format, not both; the fallback does increase artifact size.
+- Local fonts, preload hints and stable timeout fallback remain intact. Additional font reduction was investigated but not retained because savings did not justify changes to glyphs/weights. No JS minifier dependency was introduced for the small estimated saving.
+- Preview: `https://redisenio-mts-preview--ventasbrenda.netlify.app/`, deploy `6ac7cdb59be4fb008e98af58`. Production remains deploy `6ac68b4acf5ff0000808347b`.
+- Lighthouse 13.4.1, three sequential mobile runs: 96 / 94 / 93; median 94 (before 92). LCP median 2.709 s (before 3.021 s). CLS 0.004–0.010; TBT 0–0.5 ms. Desktop 100, LCP 0.7 s. Accessibility, best practices and SEO remain 100. The mobile LCP <2.5 s goal is not consistently achieved.
+- E2E: 54/54 in Chromium, Firefox and WebKit, desktop/mobile. Resilience: 15/15 including failed fonts. Artifact: 74 public files and seven private paths excluded. Gallery test now waits for the second image to load before testing its zoom, avoiding a race with slide loading.
+- Render inspected at 390, 680, 681, 1020, 1021 and 1440 px; remote Chromium desktop and WebKit mobile checked. Evidence and Lighthouse reports: `output/qa/mobile-performance/`. No physical phone verification.
