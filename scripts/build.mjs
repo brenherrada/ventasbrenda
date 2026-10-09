@@ -6,13 +6,13 @@ const out = path.join(root, 'dist');
 const files = [
   'index.html', 'app.js', 'navigation.js', 'config.js', 'styles.css',
   'tokens.css', 'promo.css', 'no-script.css', '_headers', 'robots.txt',
-  'favicon.svg', 'favicon-32.png', 'apple-touch-icon.png',
+  'favicon-192.png', 'favicon-32.png', 'apple-touch-icon.png',
 ];
 const images = [
   'badge-recien-agregado.webp', 'ilustracion-catalogo.webp',
   'mts-hero-mobile-horizontal-540.avif', 'mts-hero-mobile-horizontal-720.avif',
   'mts-hero-mobile-horizontal.avif', 'mts-hero-tablet.avif', 'mts-hero-desktop.avif',
-  'segunda-vuelta-desktop.webp', 'segunda-vuelta-mobile.webp', 'mts-hero-desktop.webp',
+  'plot-twist-desktop.webp', 'plot-twist-mobile.webp', 'mts-hero-desktop.webp',
   'mts-hero-mobile-horizontal-540.webp', 'mts-hero-mobile-horizontal-720.webp', 'mts-hero-mobile-horizontal.webp',
   'mts-hero-tablet.webp', 'perrito-cabeza-67.webp', 'perrito-cabeza-134.webp', 'perrito-cabeza-201.webp', 'venta-por-mudanza-share.jpg',
 ];
