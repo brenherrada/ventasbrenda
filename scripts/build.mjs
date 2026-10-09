@@ -12,7 +12,7 @@ const images = [
   'badge-recien-agregado.webp', 'ilustracion-catalogo.webp',
   'mts-hero-mobile-horizontal-540.avif', 'mts-hero-mobile-horizontal-720.avif',
   'mts-hero-mobile-horizontal.avif', 'mts-hero-tablet.avif', 'mts-hero-desktop.avif',
-  'logo-desktop.webp', 'logo-mobile.webp', 'mts-hero-desktop.webp',
+  'segunda-vuelta-desktop.webp', 'segunda-vuelta-mobile.webp', 'mts-hero-desktop.webp',
   'mts-hero-mobile-horizontal-540.webp', 'mts-hero-mobile-horizontal-720.webp', 'mts-hero-mobile-horizontal.webp',
   'mts-hero-tablet.webp', 'perrito-cabeza-67.webp', 'perrito-cabeza-134.webp', 'perrito-cabeza-201.webp', 'venta-por-mudanza-share.jpg',
 ];
