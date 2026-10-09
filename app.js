@@ -1084,7 +1084,7 @@
     const selected = selection.includes(product.id);
     button.setAttribute("aria-pressed", String(selected));
     button.setAttribute("aria-label", `${selected ? "Elegido · Quitar" : "¡LO QUIERO! · Agregar"} ${product.title} ${selected ? "de" : "a"} mi selección`);
-    button.textContent = selected ? "Elegido" : "¡LO QUIERO!";
+    button.textContent = selected ? "❌ Ya no lo quiero ❌" : "¡LO QUIERO!";
     button.dataset.selected = String(selected);
   }
 
@@ -1466,6 +1466,30 @@
   }
 
   function bindUI() {
+    document.querySelectorAll(".site-logo, .footer-logo").forEach((logo) => {
+      logo.addEventListener("click", (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        saveCatalogView();
+        cancelCatalogRestoration();
+        const hadFilters = activeCategory !== "Todos" || Boolean(searchTerm) || catalogLimit !== CATALOG_BATCH_SIZE;
+        activeCategory = "Todos";
+        searchTerm = "";
+        catalogLimit = CATALOG_BATCH_SIZE;
+        catalogSearch.value = "";
+        clearSearch.hidden = true;
+        const url = categoryUrl("Todos");
+        url.hash = "";
+        const nextUrl = `${url.pathname}${url.search}`;
+        const method = hadFilters || window.location.hash ? "pushState" : "replaceState";
+        window.history[method]({ ...(window.history.state || {}), category: activeCategory,
+          catalogView: { category: activeCategory, limit: catalogLimit, search: "", scrollY: 0 }
+        }, "", nextUrl);
+        renderFilters();
+        if (catalogLoaded) renderCatalog();
+        window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      });
+    });
     window.addEventListener("popstate", () => {
       if (!products.length) return;
       syncCategoryFromUrl({ cleanInvalid: true });

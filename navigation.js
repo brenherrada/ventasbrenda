@@ -193,4 +193,32 @@
     pause.setAttribute("aria-label", paused ? "Reanudar avisos" : "Pausar avisos y leer todo");
     pause.firstElementChild.textContent = paused ? "▶" : "⏸";
   });
+  const countdown = document.getElementById("purchaseCountdown");
+  if (countdown) {
+    const deadline = Date.parse(countdown.dataset.deadline);
+    const fields = Object.fromEntries([...countdown.querySelectorAll("[data-countdown]")].map(field => [field.dataset.countdown, field]));
+    let countdownInterval;
+    function updateCountdown() {
+      const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      const values = { days: Math.floor(remaining / 86400), hours: Math.floor(remaining / 3600) % 24,
+        minutes: Math.floor(remaining / 60) % 60, seconds: remaining % 60 };
+      Object.entries(values).forEach(([unit, value]) => {
+        const text = String(value).padStart(2, "0");
+        if (fields[unit].textContent !== text) fields[unit].textContent = text;
+      });
+      if (!remaining) {
+        countdown.dataset.expired = "true";
+        document.getElementById("purchaseCountdownLabel").textContent = "El plazo para comprar finalizó";
+        clearInterval(countdownInterval);
+      }
+    }
+    function resumeCountdown() {
+      clearInterval(countdownInterval);
+      updateCountdown();
+      if (!document.hidden && !countdown.dataset.expired) countdownInterval = setInterval(updateCountdown, 1000);
+    }
+    document.addEventListener("visibilitychange", resumeCountdown);
+    window.addEventListener("pageshow", resumeCountdown);
+    resumeCountdown();
+  }
 })();
