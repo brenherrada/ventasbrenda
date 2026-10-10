@@ -24,7 +24,7 @@ Los productos y fotos de productos siguen en **Catalogo**.
 | intro | Introducción del hero. |
 | nota_reserva | Aviso debajo del hero. |
 | whatsapp | Número de consultas por productos, con país y área; sin + ni espacios. |
-| actualizado | Fecha de actualización. Conserva tu fórmula existente. |
+| actualizado | Fecha fija de la última edición, escrita por `scripts/catalog-updated.gs`. No usar `NOW()`/`AHORA()`. |
 | titulo_linea_1 | Opcional: primera parte del título. Vacío = separación automática del título. |
 | titulo_linea_2 | Opcional: parte destacada del título. |
 | moneda | Código de moneda, por ejemplo ARS, USD o EUR. |
@@ -152,3 +152,7 @@ Desarrollo: usar `netlify dev`; reiniciarlo tras modificar `[images]`. Un servid
 Validación pendiente antes de producción: comportamiento real de CDN/cache/latencia y consumo en un deploy autorizado, además de dispositivos físicos. El emulador prueba las transformaciones y el flujo, no la caché de borde. La cuenta consultada es Personal (1000 créditos/ciclo); no se verificó saldo actual. Bandwidth y requests consumen créditos compartidos con el resto de la cuenta. No se modificó plan ni facturación.
 
 Documentación oficial: https://docs.netlify.com/build/image-cdn/overview/ y https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/how-credits-work/.
+
+## Fecha real de actualización
+
+El script vinculado `scripts/catalog-updated.gs` registra las ediciones manuales de valores en Catalogo, Config y Ventas, incluyendo pegados y borrado de contenido. Abrir la web o recalcular fórmulas no modifica la fecha. Los cambios por API/otros scripts no disparan `onEdit`: esas integraciones deben escribir también Config.actualizado. Cambios exclusivamente estructurales o de formato tampoco disparan este handler. La hora usa la zona horaria de la Sheet.

@@ -12,3 +12,5 @@ Por instrucción explícita de Bren del 7/10/2026, este repo es la única fuente
 - Revisar render desktop/mobile, teclado, cierres, foco, overflow, sticky, red y movimiento reducido. Todos los cierres usan dismiss-button e icons/dismiss.svg. Panels exteriores sin overflow hidden; scroll interior cuando corresponda.
 - Evidencia en output/qa/; backups en output/backups/. No incluir output, .git, node_modules, secretos o archivos históricos en dist. No se entrega ZIP.
 - Registrar navegador, tamaños y limitaciones concretas; no declarar conformidad global ni validación física a partir de capturas o tests.
+
+- Higiene solicitada por Bren: no acumular capturas, propuestas ni reportes generados de QA. Usar `npm run clean:qa` al terminar su revisión y antes de un nuevo ciclo; conservar tests y backups. No dejar artefactos temporales en la raíz.

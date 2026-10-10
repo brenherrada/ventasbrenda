@@ -10,6 +10,7 @@
     "test:e2e": "node tests/e2e.mjs",
     "test:visual": "node tests/visual-audit.mjs",
     "test:resilience": "node tests/resilience.mjs",
-    "test:interactions": "node tests/interactions.mjs"
+    "test:interactions": "node tests/interactions.mjs",
+    "clean:qa": "node scripts/clean-qa.mjs"
   }
 }
