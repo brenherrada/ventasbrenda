@@ -15,7 +15,7 @@ ESTILOS · SASS
    - imagenes → podés pegar links de Google Drive o cualquier URL HTTPS directa de imagen.
    - varias imágenes → separalas con |
    - categoria → elegí una opción del dropdown; la web crea los filtros automáticamente.
-3. Config conserva la conexión existente para el título de la pestaña, introducción, nota de reserva, WhatsApp y actualización. El título visual del hero es el aprobado de MTS: DE MI CASA / A LA TUYA. Las claves nuevas ya están cargadas en la planilla; meta_total está vinculada a la meta. El resto conserva el alcance anterior.
+3. Config contiene solo las seis claves activas: titulo, intro, nota_reserva, whatsapp, actualizado y meta_total. El título visual del hero se mantiene en el código; titulo cambia la pestaña del navegador. Guía actual en CONFIG.md.
 
 IMPORTANTE
 - La Google Sheet debe ser pública en lectura. Las imágenes de Drive deben poder ser leídas por “Cualquier persona con el enlace”. Las URLs externas deben permitir carga pública/hotlink.
@@ -170,3 +170,8 @@ Fotos de Drive: optimización automática mediante Netlify Image CDN.
 Al reemplazar una foto, subí un archivo nuevo y actualizá su enlace en la Sheet.
 No hace falta comprimirla ni copiarla al repositorio. Ver CONFIG.md para tamaños,
 recuperación, validación y límites. Reiniciar netlify dev al cambiar netlify.toml.
+
+AUTOMATIZACIÓN DEL CATÁLOGO
+- Al activar installCatalogAutomation en Apps Script, los productos nuevos reciben fecha_alta y Recién agregado por 7 días. Los existentes conservan sus estados.
+- vendido = TRUE sincroniza disponible = no; desmarcar vendido no republica automáticamente.
+- Instalación, recuperación y verificación nativa en CONFIG.md. Prueba local: npm run test:catalog-automation.

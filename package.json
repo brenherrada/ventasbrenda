@@ -12,6 +12,7 @@
     "styles:watch": "node scripts/styles.mjs --watch",
     "styles:check": "node scripts/styles.mjs --check",
     "test:styles": "node tests/styles.mjs",
+    "test:catalog-automation": "node tests/catalog-automation.mjs",
     "test:e2e": "node tests/e2e.mjs",
     "test:visual": "node tests/visual-audit.mjs",
     "test:resilience": "node tests/resilience.mjs",
