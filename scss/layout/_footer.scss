@@ -1,0 +1,54 @@
+// Detalles de iconos compartidos y pie de página
+// ────────────────────────────────────────────────────────────────────
+
+.lightbox-prev .custom-icon {
+  transform: scaleX(-1);
+}
+.remove .custom-icon {
+  display: block;
+  flex: none;
+  width: 25px;
+  height: 25px;
+}
+.description-popup h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  & .custom-icon {
+    width: 28px;
+    flex: none;
+  }
+}
+.footer-delivery {
+  background: var(--color-ink);
+  color: var(--color-white);
+  padding: 24px 0 calc(100px + var(--mobile-nav-space));
+
+  & .shell {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    justify-content: center;
+  }
+}
+.footer-logo {
+  width: clamp(140px, 15vw, 180px);
+  flex: none;
+
+  & img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+.footer-delivery h2 {
+  font: 400 11px var(--font-mono);
+  color: var(--color-yellow);
+  margin-bottom: 8px;
+  display: none;
+}
+.footer-delivery p {
+  margin: 0;
+  font: 400 13px/1.5 var(--font-mono);
+}

@@ -1,6 +1,12 @@
 VENTA POR MUDANZA · NETLIFY
 
 Mantenimiento cotidiano:
+ESTILOS · SASS
+- Editar scss/, nunca los CSS generados. Ver scss/README.md para el mapa de módulos.
+- npm run styles:watch recompila al guardar; usarlo mientras se trabaja en localhost.
+- npm run styles:build compila una vez; npm run styles:check detecta salidas desactualizadas.
+- npm run build compila Sass y prepara dist. El navegador recibe CSS; no se publica Sass.
+
 1. Editá la Google Sheet “Catálogo · Venta por mudanza”.
 2. En Catalogo:
    - disponible = si → aparece

@@ -1,0 +1,62 @@
+// ESTILOS DEL CATÁLOGO · fuente editable
+// Orden de módulos = orden de cascada aprobado. No reordenar sin QA.
+
+// Carga inicial y fallback de fuentes
+@use 'base/font-loading';
+
+// Reset, elementos y controles compartidos
+@use 'base/elements';
+
+// Toolbar, filtros y lectura de descripciones
+@use 'catalog/filters';
+
+// Estado de carga del catálogo
+@use 'catalog/skeletons';
+
+// Drawer, selección, formulario y alias de pago
+@use 'cart/drawer';
+
+// Galería, zoom, paginación y carga
+@use 'gallery/lightbox';
+
+// Animación pop y diálogo de descripción
+@use 'overlays/description';
+
+// Página, encabezado, búsqueda y logo
+@use 'layout/header';
+
+// Hero e ilustración responsive
+@use 'layout/hero';
+
+// Badges y acciones compartidas
+@use 'components/actions';
+
+// Listado, productos, precio y selección
+@use 'catalog/products';
+
+// Mensajes, toast y popup de entregas
+@use 'overlays/feedback';
+
+// Detalles de iconos compartidos y pie de página
+@use 'layout/footer';
+
+// Scrollbar, popovers y menú de categorías
+@use 'navigation/menus';
+
+// Placeholder de imágenes
+@use 'catalog/placeholders';
+
+// Tira de información y pausa
+@use 'layout/marquee';
+
+// Composición mobile y movimiento reducido
+@use 'responsive/composition';
+
+// Meta compacta y composición por contenedor
+@use 'components/goal';
+
+// Imágenes de categorías
+@use 'navigation/category-icons';
+
+// Tiempo restante para comprar
+@use 'components/countdown';

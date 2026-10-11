@@ -1,5 +1,6 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import * as sass from 'sass';
 
 const root = process.cwd();
 const out = path.join(root, 'dist');
@@ -43,7 +44,12 @@ const styles = await Promise.all(stylesheets.map(async file => {
   const css = await readFile(path.join(root, file), 'utf8');
   return file.startsWith('fonts/') ? css.replace(/url\(([^)]+)\)/g, 'url(fonts/$1)') : css;
 }));
-await writeFile(path.join(out, 'site.css'), styles.join('\n'));
+const publicStyles = sass.compileString(styles.join('\n'), {
+  syntax: 'css',
+  style: 'compressed',
+  charset: false,
+}).css;
+await writeFile(path.join(out, 'site.css'), publicStyles);
 let page = await readFile(path.join(out, 'index.html'), 'utf8');
 page = page.replace(/  <link rel="stylesheet" href="(?:fonts\/fonts|tokens|styles|promo)\.css[^"]*" \/>\n/g, '');
 page = page.replace('  <script src="fonts/font-loading.js', '  <link rel="stylesheet" href="site.css?v=20261008-performance" />\n  <script src="fonts/font-loading.js');

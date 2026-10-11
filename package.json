@@ -3,10 +3,15 @@
   "private": true,
   "devDependencies": {
     "@netlify/edge-functions": "^3.0.0",
-    "@netlify/functions": "^6.0.2"
+    "@netlify/functions": "^6.0.2",
+    "sass": "1.105.1"
   },
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "npm run styles:build && node scripts/build.mjs",
+    "styles:build": "node scripts/styles.mjs",
+    "styles:watch": "node scripts/styles.mjs --watch",
+    "styles:check": "node scripts/styles.mjs --check",
+    "test:styles": "node tests/styles.mjs",
     "test:e2e": "node tests/e2e.mjs",
     "test:visual": "node tests/visual-audit.mjs",
     "test:resilience": "node tests/resilience.mjs",

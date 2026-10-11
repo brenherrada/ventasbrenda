@@ -1,0 +1,60 @@
+// Placeholder de imágenes
+// ────────────────────────────────────────────────────────────────────
+
+/* Full-width loading frame with a reusable sticker from the custom icon family. */
+.image-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(9px, 1.1vw, 16px);
+  padding: 12px;
+  background-color: var(--color-toolbar);
+  background-image: radial-gradient(var(--color-white) 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+  color: var(--color-ink);
+  pointer-events: none;
+
+  &__sticker {
+    display: grid;
+    place-items: center;
+    width: clamp(58px, 6vw, 86px);
+    aspect-ratio: 1;
+    background: var(--color-butter);
+    border: var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    transform: rotate(-8deg);
+
+    & .custom-icon {
+      width: 65%;
+    }
+  }
+
+  &__label {
+    padding: 6px 8px;
+    border: 2px dashed var(--color-border);
+    background: var(--color-yellow);
+    font: 700 clamp(9px, 0.8vw, 12px)/1.2 var(--font-mono);
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(2deg);
+  }
+
+  &__dots {
+    font: 700 10px var(--font-mono);
+    letter-spacing: 5px;
+    animation: photo-wait 1s ease-in-out infinite;
+  }
+
+  &--unavailable .image-placeholder__dots {
+    animation: none;
+  }
+}
+@keyframes photo-wait {
+  50% {
+    opacity: 0.25;
+  }
+}

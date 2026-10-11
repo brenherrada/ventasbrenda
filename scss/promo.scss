@@ -1,0 +1,166 @@
+// Invitación a crear un catálogo
+// ────────────────────────────────────────────────────────────────────
+
+/* Approved catalog-service invitation. Shared palette remains in styles.css. */
+:root {
+  --promo-gap: clamp(12px, 1.6vw, 22px);
+  --promo-bottom: calc(
+    max(var(--promo-gap), env(safe-area-inset-bottom)) + var(--mobile-nav-space, 0px)
+  );
+  --promo-height: 55px;
+}
+.web-promo-trigger {
+  position: fixed;
+  left: max(var(--promo-gap), env(safe-area-inset-left));
+  bottom: var(--promo-bottom);
+  z-index: 29;
+  height: var(--promo-height);
+  padding: 0 clamp(25px, 1.2vw, 30px) 0 70px;
+  border: none;
+  background: var(--color-ink);
+  color: var(--color-white);
+  box-shadow: 3px 4px 0 var(--color-green);
+  font-size: clamp(0.85rem, 1vw, 0.95rem);
+  font-weight: 800;
+  line-height: 1.12;
+  text-align: left;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+
+  & > span {
+    white-space: nowrap;
+  }
+
+  & img {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 67px;
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+    aspect-ratio: 80 / 73;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translate(2px, 2px);
+  }
+}
+.web-promo-trigger:focus-visible,
+.web-promo-contact:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 5px;
+}
+.web-promo {
+  position: fixed;
+  inset: auto;
+  left: max(var(--promo-gap), env(safe-area-inset-left));
+  bottom: calc(var(--promo-bottom) + var(--promo-height) + 24px);
+  width: clamp(
+    0px,
+    calc(
+      100% - var(--promo-gap) *
+        2 - env(safe-area-inset-left) - env(safe-area-inset-right) - 8px
+    ),
+    380px
+  );
+  margin: 0;
+  padding: 0;
+  border: var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 7px 8px 0 var(--ink);
+  overflow: visible;
+  opacity: 0;
+  transform: translateY(12px) scale(0.9);
+  transform-origin: 70px bottom;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    display 0.18s allow-discrete,
+    overlay 0.18s allow-discrete;
+
+  &:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 56px;
+    width: 20px;
+    height: 20px;
+    background: var(--paper);
+    border-right: var(--line);
+    border-bottom: var(--line);
+    transform: rotate(45deg);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  &-content {
+    padding: clamp(22px, 2vw, 26px);
+    max-height: calc(100dvh - var(--promo-bottom) - var(--promo-height) - 52px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: inherit;
+  }
+
+  &-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+  }
+
+  &-art {
+    display: block;
+    width: clamp(180px, 18vw, 230px);
+    height: 132px;
+    object-fit: contain;
+    margin: 0 auto clamp(12px, 1.4vw, 18px);
+  }
+
+  & h2 {
+    font-family: var(--font-display);
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.58rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+
+  & p {
+    margin: clamp(14px, 1.4vw, 18px) 0;
+    font-size: clamp(0.95rem, 1.2vw, 1rem);
+    line-height: 1.5;
+  }
+
+  &-contact {
+    width: 100%;
+    text-transform: uppercase;
+    background: var(--color-green);
+    padding: 8px 20px;
+
+    & span {
+      font-size: 25px;
+      font-family: var(--font-emoji);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .web-promo,
+  .web-promo:popover-open,
+  .web-promo-trigger,
+  .web-promo-contact {
+    animation: none;
+    transition: none;
+  }
+}

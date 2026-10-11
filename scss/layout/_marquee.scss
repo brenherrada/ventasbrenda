@@ -1,0 +1,83 @@
+// Tira de información y pausa
+// ────────────────────────────────────────────────────────────────────
+
+/* Same marquee rhythm as MTS; the repeated group is decorative for screen readers. */
+.local-strip {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-yellow);
+  margin: 0;
+  padding-right: var(--marquee-control-space, 52px);
+  border-block: var(--line);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  font: 700 clamp(14px, calc(12.4px + 0.67vw), 15px) var(--font-mono);
+  animation: catalog-marquee 65s linear infinite;
+}
+.marquee-group {
+  display: flex;
+  flex: none;
+  align-items: center;
+
+  & > span {
+    display: flex;
+    align-items: center;
+    flex: none;
+    padding: 5px 0;
+    text-transform: uppercase;
+
+    &::after {
+      content: '✳';
+      padding-inline: 20px;
+    }
+  }
+
+  & .custom-icon {
+    width: 28px;
+  }
+}
+.marquee-pause {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  padding: 0;
+  background: var(--color-yellow);
+  border: 0;
+  border-left: var(--line-heavy);
+  font: 20px var(--font-emoji);
+  display: none;
+}
+.local-strip:hover .marquee-track,
+.local-strip:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+.local-strip.is-paused .marquee-track {
+  width: auto;
+  white-space: normal;
+  animation: none;
+  transform: none;
+}
+.local-strip.is-paused .marquee-group {
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  padding-inline: 12px;
+
+  & > span {
+    flex-shrink: 1;
+  }
+
+  &[aria-hidden='true'] {
+    display: none;
+  }
+}
+@keyframes catalog-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}

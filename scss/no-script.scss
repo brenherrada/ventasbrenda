@@ -1,0 +1,9 @@
+// Fallback sin JavaScript
+// ────────────────────────────────────────────────────────────────────
+
+/* Solo se carga cuando JavaScript está desactivado. */
+#catalogStatus,
+#heroCount,
+#products[aria-busy='true'] {
+  display: none !important;
+}

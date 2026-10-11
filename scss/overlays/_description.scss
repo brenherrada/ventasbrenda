@@ -1,0 +1,64 @@
+// Animación pop y diálogo de descripción
+// ────────────────────────────────────────────────────────────────────
+
+.web-promo:popover-open,
+.description-popup[open] {
+  animation: popup-pop 0.36s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+@keyframes popup-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.88);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.025);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.description-popup {
+  width: min(560px, calc(100vw - 36px));
+  max-height: calc(100dvh - 48px);
+  padding: clamp(24px, 3vw, 36px);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--pink);
+  overflow: visible;
+
+  &[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    flex: none;
+  }
+
+  &::backdrop {
+    background: var(--modal-overlay);
+  }
+
+  & h2 {
+    font-size: clamp(1.2rem, 2vw, 1.5rem);
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &-copy {
+    min-height: 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.7;
+  }
+}

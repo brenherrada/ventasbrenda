@@ -1,0 +1,72 @@
+// Tiempo restante para comprar
+// ────────────────────────────────────────────────────────────────────
+
+/* Compact buying deadline; fixed digit slots avoid layout shifts. */
+.purchase-countdown {
+  max-width: 300px;
+  margin: clamp(16px, 1.8vw, 24px) 0 0;
+  background: var(--color-white);
+  display: grid;
+  gap: 5px;
+  transform: none;
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    font: 700 clamp(13px, 1.1vw, 15px)/1.4 var(--font-display);
+    color: crimson;
+    text-transform: uppercase;
+  }
+
+  &__signal {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--color-cobalt);
+    display: none;
+  }
+
+  &__clock {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(6px, 1vw, 12px);
+  }
+
+  &__unit {
+    display: grid;
+    gap: 2px;
+    text-align: center;
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: ':';
+      position: absolute;
+      right: -12px;
+      top: 2px;
+      font: 400 20px/1.4 var(--font-mono);
+      color: var(--color-text-muted);
+    }
+
+    & strong {
+      font: 700 clamp(22px, 2.2vw, 30px)/1 var(--font-display);
+      font-variant-numeric: tabular-nums;
+    }
+
+    & > span {
+      font: 700 10px/1.4 var(--font-mono);
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+  }
+
+  &[data-expired='true'] .purchase-countdown__clock {
+    display: none;
+  }
+
+  &[data-expired='true'] .purchase-countdown__heading {
+    margin-bottom: 0;
+  }
+}

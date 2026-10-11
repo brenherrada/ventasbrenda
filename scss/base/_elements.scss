@@ -1,0 +1,79 @@
+// Reset, elementos y controles compartidos
+// ────────────────────────────────────────────────────────────────────
+
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--color-lavender) var(--color-butter);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: inherit;
+}
+button,
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button, a, input, textarea):focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 5px;
+}
+/* Shared close control: the approved delivery popup is the visual source. */
+.dismiss-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: var(--line);
+  border-radius: 50%;
+  background: var(--color-white);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  font: 500 16px/1 var(--font-body);
+
+  &__icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+  }
+}
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  background: var(--yellow);
+  padding: 12px;
+  transform: translateY(-160%);
+
+  &:focus {
+    transform: none;
+  }
+}
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.25;
+  margin: 0;
+}

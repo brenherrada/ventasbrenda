@@ -1,0 +1,103 @@
+// Badges y acciones compartidas
+// ────────────────────────────────────────────────────────────────────
+
+.mts-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  background: var(--color-yellow);
+  border: var(--line);
+  box-shadow: var(--shadow-sm);
+  padding: 7px 11px;
+  font: 700 11px var(--font-mono);
+
+  &--pink {
+    background: var(--color-pink);
+    color: var(--color-ink);
+    transform: rotate(-2deg);
+  }
+
+  &--cyan {
+    background: var(--color-cyan);
+  }
+
+  &--tape {
+    padding: 6px 16px;
+    border: 2px solid var(--color-border);
+    font-size: 12px;
+    line-height: 1.4;
+    transform: rotate(2deg);
+  }
+}
+.hero-cta,
+.select-btn,
+.product-status,
+.send,
+.web-promo-contact,
+.bag-browse {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: var(--line);
+  box-shadow: var(--shadow);
+  background: var(--action-support-bg);
+  color: var(--action-support-fg);
+  text-align: center;
+  font-family: var(--font-action);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: normal;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.hero-cta,
+.select-btn,
+.product-status,
+.send,
+.web-promo-contact,
+.web-promo-trigger,
+.bag-browse {
+  border-radius: 12px;
+}
+.hero-cta,
+.select-btn,
+.send,
+.web-promo-contact,
+.bag-browse {
+  transition:
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease);
+}
+:where(.hero-cta, .select-btn, .send, .web-promo-contact, .bag-browse):hover:not(
+    :disabled
+  ),
+:where(
+    .hero-cta,
+    .select-btn,
+    .send,
+    .web-promo-contact,
+    .bag-browse
+  ):focus-visible:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: var(--shadow-hover);
+}
+:where(.hero-cta, .select-btn, .send, .web-promo-contact, .bag-browse):active:not(
+    :disabled
+  ) {
+  transform: translate(5px, 5px);
+  box-shadow: none;
+}
+.hero-cta {
+  background: var(--color-ink);
+  box-shadow: 5px 5px 0 var(--color-pink);
+  color: var(--color-white);
+
+  &:hover,
+  &:focus-visible {
+    box-shadow: 3px 3px 0 var(--color-pink);
+  }
+}

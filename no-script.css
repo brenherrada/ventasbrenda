@@ -1,2 +1,7 @@
+/* Generated from scss/no-script.scss. Edit Sass, then run npm run styles:build. */
 /* Solo se carga cuando JavaScript está desactivado. */
-#catalogStatus, #heroCount, #products[aria-busy="true"] { display: none !important; }
+#catalogStatus,
+#heroCount,
+#products[aria-busy=true] {
+  display: none !important;
+}
