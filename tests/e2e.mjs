@@ -13,7 +13,7 @@ const labels=['id','titulo','descripcion','precio','disponible','imagenes','cate
 const table=(labels,rows)=>({table:{cols:labels.map(label=>({label})),rows:rows.map(r=>({c:r.map(v=>({v}))}))}});
 const rows=Array.from({length:27},(_,i)=>['qa-'+i,`Artículo ${i+1}${i===2?" - RESERVADO":""}`,i===0?'Descripción extensa del artículo para comprobar la lectura completa en un diálogo accesible. '.repeat(5):'Descripción breve.',1000*(i+1),i===2?'Reservado':'Sí',"/images/mts-hero-mobile-horizontal-540.webp | /images/mts-hero-desktop.webp",i%2?'Libros':'Cocina',i===26?'Sí':'No',i<4?'Recién agregado':'']);
 const catalog=table(labels,rows);
-const settings=table(['clave','valor'],[['whatsapp','5492235550101'],['meta_total','100000'],['actualizado','08/10/2026 08:00']]);
+const settings=table(['clave','valor'],[['whatsapp','5492235550101'],['meta_total','100000'],['actualizado','08/10/2026 08:00'],['mp_comision_inmediata','6.60'],['mp_comision_3_cuotas','10.49'],['mp_iva','21']]);
 const sales=table(['Concepto','Monto'],[['TOTAL VENDIDO',29500]]);
 async function fixture(context){await context.route('**/api/catalog?*',route=>{const sheet=new URL(route.request().url()).searchParams.get('sheet');return route.fulfill({json:sheet==='Catalogo'?catalog:sheet==='Config'?settings:sales});});}
 const ready=async page=>{await page.waitForFunction(()=>document.querySelector('#products').getAttribute('aria-busy')==='false' && document.querySelectorAll('#products .card[data-id]').length>0);await page.evaluate(()=>document.fonts.ready);};
@@ -87,8 +87,11 @@ for(const engine of engines){
  await page.locator('.card[data-id="qa-0"] .select-btn').click();await page.locator('.card[data-id="qa-1"] .select-btn').click();
  await bag().click();await page.locator('#drawer.open').waitFor();
  assert.equal(await page.locator('.bag-item').count(),2);assert.match(await page.locator('#bagTotal').innerText(),/3.000/);
+ assert.match(await page.locator('#bagCardTotal').innerText(),/3.782,29/);
+ assert.match(await page.locator('#bagCardInstallment').innerText(),/1.260,76/);
+ assert.equal(await page.locator('#bagCardEstimate img').getAttribute('src'),'icons/credit-card.svg');
  assert.match(await page.locator('.send').innerText(),/^Confirmar por WhatsApp$/i);
- assert.match(await page.locator('#bagFooter .payment-note').innerText(),/Consultame el valor según el medio de pago antes de transferir/);
+ assert.match(await page.locator('#bagFooter .payment-note:not(.payment-estimate)').innerText(),/Transferencia o tarjeta por link de pago, luego de confirmar la compra/);
  assert.match(await page.locator('#bagContributionValue').innerText(),/3%/);
  await page.locator('.send').click();assert.equal(await page.locator('#buyerName').getAttribute('aria-invalid'),'true');
  await page.locator('#buyerName').fill('QA Prueba');await page.locator('.send').click();
@@ -96,7 +99,9 @@ for(const engine of engines){
  await page.screenshot({path:`${output}/${tag}-cart.png`});
  await page.keyboard.press('Escape');assert.equal(await bag().evaluate(e=>document.activeElement===e),true);
  await page.reload();await ready(page);await bag().click();assert.equal(await page.locator('.bag-item').count(),2);assert.equal(await page.locator('#buyerName').inputValue(),'QA Prueba');
- for(let i=0;i<2;i++)await page.locator('.bag-item button').first().click();
+ await page.locator('.bag-item button').first().click();
+ assert.match(await page.locator('#bagCardTotal').innerText(),/2.521,53/);
+ await page.locator('.bag-item button').first().click();
  assert.equal(await page.locator('.bag-item').count(),0);assert.equal(await page.locator('#bagFooter').isVisible(),false);
  await page.keyboard.press('Escape');
  },page);

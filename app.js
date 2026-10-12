@@ -279,6 +279,7 @@
       console.warn("No se pudo cargar Config; se usan textos por defecto.", err);
     }
 
+    renderCardEstimate();
     await loadGoal();
   }
 
@@ -1084,10 +1085,38 @@
     return products.filter((p) => ids.has(p.id));
   }
 
+  function cardPaymentEstimate(total) {
+    const rates = ["mp_comision_inmediata", "mp_comision_3_cuotas", "mp_iva"].map(key => {
+      const raw = String(settings[key] ?? "").trim().replace(",", ".");
+      return /^\d+(?:\.\d+)?$/.test(raw) ? Number(raw) : NaN;
+    });
+    if (!Number.isFinite(total) || total <= 0 || rates.some(rate => !Number.isFinite(rate) || rate < 0 || rate >= 100)) return null;
+    const [collection, financing, vat] = rates;
+    const taxMultiplier = 1 + vat / 100;
+    // The account simulator rounds the VAT-inclusive collection rate to two
+    // decimals, then adds financing + VAT. This remains an estimate, not a charge.
+    const collectionWithVat = Math.round(collection * taxMultiplier * 100) / 100;
+    const deduction = (collectionWithVat + financing * taxMultiplier) / 100;
+    if (deduction >= 1) return null;
+    const cents = Math.ceil(total / (1 - deduction) * 100);
+    if (!Number.isSafeInteger(cents)) return null;
+    return { total: cents / 100, installment: cents / 300 };
+  }
+
+  function renderCardEstimate(total = selectedProducts().reduce((sum, product) => sum + product.price, 0)) {
+    const estimate = cardPaymentEstimate(total);
+    const panel = $("#bagCardEstimate");
+    panel.hidden = !estimate;
+    $("#bagCardTotal").textContent = estimate ? formatPrice(estimate.total, 2) : "";
+    $("#bagCardInstallment").textContent = estimate ? `3 cuotas de ≈ ${formatPrice(estimate.installment, 2)} · Estimado` : "";
+  }
+
   function renderBag() {
     saveSelection();
     renderGoals();
     const items = selectedProducts();
+    const total = items.reduce((sum, product) => sum + (product.price || 0), 0);
+    renderCardEstimate(total);
     bagContentEl.replaceChildren();
     buyerForm.hidden = !items.length;
     $("#bagFooter").hidden = !items.length;
@@ -1175,7 +1204,7 @@
       list.appendChild(item);
     }
 
-    $("#bagTotal").textContent = formatPrice(items.reduce((sum, p) => sum + (p.price || 0), 0));
+    $("#bagTotal").textContent = formatPrice(total);
     bagContentEl.append(list);
   }
 
@@ -1704,11 +1733,12 @@
     }
   }
 
-  function formatPrice(value) {
+  function formatPrice(value, fractionDigits = 0) {
     return new Intl.NumberFormat(CFG.LOCALE || "es-AR", {
       style: "currency",
       currency: CFG.CURRENCY || "ARS",
-      maximumFractionDigits: 0
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits
     }).format(Number(value || 0));
   }
 

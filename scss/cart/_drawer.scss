@@ -1,4 +1,4 @@
-// Drawer, selección, formulario y alias de pago
+// Drawer, selección, formulario y estimación de pago
 // ────────────────────────────────────────────────────────────────────
 
 .overlay {
@@ -79,7 +79,7 @@
     padding: var(--space);
     overflow: auto;
     flex: 1;
-    min-height: 0;
+    min-height: clamp(88px, 18dvh, 128px);
     overscroll-behavior: contain;
 
     &:has(.bag-empty) {
@@ -190,7 +190,10 @@
 }
 .drawer-footer {
   --footer-space: clamp(12px, 1.4vw, 20px);
-  flex: none;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   display: grid;
   gap: clamp(10px, 1vw, 14px);
   padding: var(--footer-space) var(--space)
@@ -223,13 +226,32 @@
 }
 .payment-note {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: clamp(8px, 1vw, 12px);
   text-align: left;
 
+  &:has(> .custom-icon) {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
   & > .custom-icon {
     width: clamp(26px, 2.2vw, 32px);
+  }
+}
+.payment-estimate {
+  border-block: 1px dashed var(--color-border);
+  padding-block: clamp(8px, 1vw, 12px);
+  &__total {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: clamp(4px, 0.7vw, 8px);
+    font: 600 clamp(13px, 1.8vw, 14px)/1.5 var(--font-mono);
+    color: var(--color-ink);
+
+    & strong {
+      white-space: nowrap;
+    }
   }
 }
 #buyerForm {

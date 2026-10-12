@@ -460,7 +460,7 @@ textarea {
   padding: var(--space);
   overflow: auto;
   flex: 1;
-  min-height: 0;
+  min-height: clamp(88px, 18dvh, 128px);
   overscroll-behavior: contain;
 }
 .drawer-body:has(.bag-empty) {
@@ -572,7 +572,10 @@ textarea {
 
 .drawer-footer {
   --footer-space: clamp(12px, 1.4vw, 20px);
-  flex: none;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   display: grid;
   gap: clamp(10px, 1vw, 14px);
   padding: var(--footer-space) var(--space) calc(var(--footer-space) + env(safe-area-inset-bottom));
@@ -606,13 +609,31 @@ textarea {
 
 .payment-note {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: clamp(8px, 1vw, 12px);
   text-align: left;
 }
+.payment-note:has(> .custom-icon) {
+  grid-template-columns: auto minmax(0, 1fr);
+}
 .payment-note > .custom-icon {
   width: clamp(26px, 2.2vw, 32px);
+}
+
+.payment-estimate {
+  border-block: 1px dashed var(--color-border);
+  padding-block: clamp(8px, 1vw, 12px);
+}
+.payment-estimate__total {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: clamp(4px, 0.7vw, 8px);
+  font: 600 clamp(13px, 1.8vw, 14px)/1.5 var(--font-mono);
+  color: var(--color-ink);
+}
+.payment-estimate__total strong {
+  white-space: nowrap;
 }
 
 #buyerForm {

@@ -179,11 +179,17 @@
     </div>
     <div class="drawer-footer" id="bagFooter" hidden>
       <div class="total"><span>Total estimado</span><span id="bagTotal"></span></div>
+      <div class="payment-note payment-estimate" id="bagCardEstimate" hidden>
+        <img class="custom-icon" src="icons/credit-card.svg" width="40" height="40" alt="" aria-hidden="true">
+        <div>
+          <div class="payment-estimate__total"><span>Total con tarjeta</span><strong id="bagCardTotal"></strong></div>
+          <p class="fine" id="bagCardInstallment"></p>
+        </div>
+      </div>
       <p class="bag-contribution" id="bagContribution" hidden><span>Tu compra aportaría</span><strong id="bagContributionValue"></strong></p>
       <button class="send" type="submit" form="buyerForm">Confirmar por WhatsApp</button>
       <div class="payment-note">
-        <img class="custom-icon" src="icons/mercado-pago.svg" width="40" height="40" alt="" aria-hidden="true">
-        <p class="fine bag-notice"><strong>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</strong> Consultame el valor según el medio de pago antes de transferir. La reserva se confirma por WhatsApp.</p>
+        <p class="fine bag-notice">Transferencia o tarjeta por link de pago, luego de confirmar la compra.</p>
       </div>
     </div>
   </aside>
@@ -232,7 +238,7 @@
     </div>
     <div class="info-popup__inner">
       <p>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</p>
-      <p>Consultame el valor según el medio de pago antes de transferir. La reserva se confirma por WhatsApp.</p>
+      <p>Si pagás con tarjeta, te envío el link de pago después de confirmar la compra por WhatsApp.</p>
     </div>
   </aside>
   <footer class="footer-delivery" id="entregas">
@@ -240,7 +246,7 @@
       <a class="footer-logo" href="#" aria-label="Plot Twist — inicio"><img src="images/plot-twist-mobile.webp" width="480" height="160" alt="Plot Twist" loading="lazy"></a>
       <div class="footer-delivery__copy">
         <div><h2>ENTREGAS</h2><p>Entregas únicamente dentro de Mar del Plata.<br>Disponibilidad, pago y entrega se coordinan por WhatsApp.</p></div>
-        <p><strong>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</strong> Consultame el valor según el medio de pago antes de transferir. La reserva se confirma por WhatsApp.</p>
+        <p><strong>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</strong> Si pagás con tarjeta, te envío el link de pago después de confirmar la compra por WhatsApp.</p>
       </div>
     </div>
   </footer>
@@ -274,7 +280,7 @@
       </div>
     </section>
   </template>
-  <script src="app.js?v=20261012-payment-options"></script>
+  <script src="app.js?v=20261012-card-estimate"></script>
   <script src="navigation.js?v=20261008-qa2"></script>
 </body>
 </html>

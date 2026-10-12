@@ -13,10 +13,21 @@ Los productos y sus fotos se mantienen en **Catalogo**.
 | whatsapp | Contacto del vendedor para consultas: país y área, sin + ni espacios. |
 | actualizado | Fecha fija de última edición, escrita por `scripts/catalog-updated.gs`. No usar `NOW()`/`AHORA()`. |
 | meta_total | Fórmula dinámica que suma todo Catalogo, incluidos los artículos vendidos. |
+| mp_comision_inmediata | Porcentaje SIN IVA por cobrar un Link de pago con disponibilidad inmediata. |
+| mp_comision_3_cuotas | Porcentaje adicional SIN IVA por ofrecer 3 cuotas. |
+| mp_iva | Porcentaje de IVA sobre ambas comisiones. |
 
 Los valores se leen al abrir o recargar la web. Si Config no carga, el runtime conserva los valores de respaldo; las consultas necesitan un WhatsApp válido y la meta se oculta si falta su valor. El diseño, imágenes, moneda, formato de números, textos de botones, mensajes y etiquetas accesibles se mantienen en el código, no en Config.
 
-El 10/10/2026 se eliminaron las 95 claves sin consumidores del runtime actual (antes filas 7–101). Permanecen únicamente las seis configuraciones de esta tabla. Respaldo local en `output/backups/config-cleanup-20261010/`. El script de actualización encuentra su fila por clave, por lo que la limpieza no requiere modificarlo.
+El 10/10/2026 se eliminaron las 95 claves sin consumidores del runtime actual (antes filas 7–101). Quedaron seis configuraciones; el 12/10 se sumaron las tres tasas para estimar el pago con tarjeta. Respaldo local en `output/backups/config-cleanup-20261010/`. El script de actualización encuentra su fila por clave, por lo que la limpieza no requiere modificarlo.
+
+## Estimación de tarjeta en 3 cuotas
+
+Config!A8:B10 contiene `mp_comision_inmediata = 6.60`, `mp_comision_3_cuotas = 10.49` y `mp_iva = 21`. Valores comprobados en el simulador de la cuenta el 12/10/2026, para Link de pago con disponibilidad inmediata. Editar B al cambiar las tarifas; 6.60 significa 6,60%, no 0.066. No usar formato porcentual. La web acepta punto o coma decimal y lee Config al cargar o recargar, sin recompilar ni publicar código.
+
+La comisión de cobro con IVA se redondea a dos decimales porcentuales, como en la simulación observada de la cuenta (6.60 × 1.21 → 7.99%). Se suma la financiación con IVA (10.49 × 1.21 → 12.6929%). El total financiado se calcula como `total de artículos / (1 − deducción total / 100)`, redondeando hacia arriba al centavo. No se aplica un recargo fijo ni se suman simplemente las comisiones al precio. Para un total de $100.000 devuelve $126.076,22 y cuotas aproximadas de $42.025,41, coincidiendo con la simulación de referencia.
+
+La estimación se muestra debajo del total del minicart con el SVG custom de tarjeta; selección, eliminación y Config tardía la actualizan. No incluye retenciones fiscales, no crea links ni cobra: el importe final se coordina por WhatsApp. Total de artículos, progreso de la meta y mensaje de consulta conservan el importe base. Si una tasa falta, no es numérica, es negativa o la deducción alcanza el 100%, la estimación se oculta; no hay tarifas de respaldo que puedan quedar desactualizadas.
 
 ## Meta dinámica
 
