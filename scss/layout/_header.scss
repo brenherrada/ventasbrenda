@@ -80,7 +80,7 @@ body::before {
   gap: 10px;
 }
 .nav-link,
-.header-delivery,
+.header-info-button,
 .header-search,
 .bag-fab,
 .header-icon-button {
@@ -106,10 +106,10 @@ body::before {
     box-shadow: var(--shadow-hover);
   }
 }
-.header-delivery[aria-expanded='true'] {
+.header-info-button[aria-expanded='true'] {
   background: var(--color-yellow);
 }
-.header-delivery {
+.header-info-button {
   display: grid;
   place-items: center;
   min-width: 44px;
@@ -124,7 +124,7 @@ body::before {
   object-fit: contain;
 }
 .nav-link .custom-icon,
-.header-delivery .custom-icon {
+.header-info-button .custom-icon {
   width: clamp(22px, 2vw, 27px);
 }
 .header-actions {

@@ -48,6 +48,7 @@
 
       & > span:not(:first-child):not(.bag-count) {
         font: 700 10px/1.1 var(--font-mono);
+        white-space: nowrap;
       }
     }
 

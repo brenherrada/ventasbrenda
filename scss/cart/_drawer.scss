@@ -221,79 +221,16 @@
   font-size: clamp(16px, 2.4vw, 20px);
   font-family: var(--font-mono);
 }
-.payment-alias {
+.payment-note {
   display: grid;
-  gap: clamp(6px, 0.6vw, 8px);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(8px, 1vw, 12px);
+  text-align: left;
 
-  &__button {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: clamp(8px, 1vw, 12px);
-    width: 100%;
-    min-height: 64px;
-    padding: clamp(8px, 1vw, 12px) clamp(10px, 1.2vw, 16px);
-    border: var(--line);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-    background: var(--color-white);
-    text-align: left;
-    transition:
-      background-color var(--motion-fast) var(--ease),
-      box-shadow var(--motion-fast) var(--ease);
+  & > .custom-icon {
+    width: clamp(26px, 2.2vw, 32px);
   }
-
-  &__brand {
-    width: clamp(36px, 3vw, 40px);
-  }
-
-  &__copy {
-    display: grid;
-    gap: 0;
-    min-width: 0;
-    font: 700 clamp(11px, 0.9vw, 12px)/1.4 var(--font-utility-action);
-
-    & strong {
-      font-size: clamp(13px, 1.1vw, 15px);
-      overflow-wrap: anywhere;
-    }
-
-    &-icon {
-      display: block;
-      width: 24px;
-      height: 24px;
-    }
-  }
-
-  &__button:hover,
-  &__button:focus-visible {
-    background: var(--color-sky);
-    box-shadow: var(--shadow-xs);
-  }
-
-  &__button:active {
-    box-shadow: none;
-  }
-
-  &__button[data-copy-state='copied'] {
-    background: var(--color-lime);
-  }
-
-  &__button[aria-busy='true'] {
-    cursor: progress;
-  }
-
-  &__status:not(.is-error) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-#paymentAliasManual {
-  font-family: var(--font-mono);
 }
 #buyerForm {
   padding-top: clamp(16px, 1.5vw, 22px);

@@ -47,7 +47,11 @@
   <nav class="site-nav" aria-label="Navegación principal"><div class="shell nav-inner">
     <a class="header-icon-button header-whatsapp" id="headerWhatsApp" role="link" aria-label="Consultar por WhatsApp" aria-disabled="true" tabindex="-1" target="_blank" rel="noopener noreferrer"><img class="custom-icon" src="icons/whatsapp.svg" width="40" height="40" alt="" aria-hidden="true"></a>
     <a class="site-logo" href="#" aria-label="Plot Twist — inicio"><img src="images/plot-twist-desktop.webp" srcset="images/plot-twist-mobile.webp 480w, images/plot-twist-desktop.webp 960w" sizes="clamp(150px, 17vw, 240px)" width="960" height="320" alt="Plot Twist" decoding="async"></a>
-    <div class="header-links"><button class="nav-link catalog-trigger" type="button" popovertarget="catalogMenu" aria-controls="catalogMenu" aria-expanded="false"><img class="custom-icon" src="icons/catalog.svg" width="40" height="40" alt="" aria-hidden="true">Catálogo</button><button class="header-delivery" type="button" popovertarget="deliveryPopup" aria-controls="deliveryPopup" aria-expanded="false" aria-label="Ver información de entregas"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"></button></div>
+    <div class="header-links">
+      <button class="nav-link catalog-trigger" type="button" popovertarget="catalogMenu" aria-controls="catalogMenu" aria-expanded="false"><img class="custom-icon" src="icons/catalog.svg" width="40" height="40" alt="" aria-hidden="true">Catálogo</button>
+      <button class="header-info-button header-delivery" type="button" popovertarget="deliveryPopup" aria-controls="deliveryPopup" aria-expanded="false" aria-label="Ver información de entregas"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"></button>
+      <button class="header-info-button header-payment" type="button" popovertarget="paymentPopup" aria-controls="paymentPopup" aria-expanded="false" aria-label="Ver información de pagos"><img class="custom-icon" src="icons/credit-card.svg" width="40" height="40" alt="" aria-hidden="true"></button>
+    </div>
     <div class="header-actions"><button class="header-icon-button search-trigger" id="openSiteSearch" type="button" aria-label="Abrir búsqueda" aria-controls="siteSearch" aria-expanded="false"><img class="custom-icon" src="icons/search.svg" width="40" height="40" alt="" aria-hidden="true"></button>      <div class="header-search" id="siteSearch">
         <div class="search-field"><img class="custom-icon" src="icons/search.svg" width="40" height="40" alt="" aria-hidden="true"><input id="catalogSearch" class="catalog-search" type="search" placeholder="Buscar artículo…" autocomplete="off" aria-label="Buscar artículos" />
         <button id="clearSearch" class="clear-search" type="button" aria-label="Limpiar búsqueda" hidden>✕</button></div>
@@ -176,15 +180,10 @@
     <div class="drawer-footer" id="bagFooter" hidden>
       <div class="total"><span>Total estimado</span><span id="bagTotal"></span></div>
       <p class="bag-contribution" id="bagContribution" hidden><span>Tu compra aportaría</span><strong id="bagContributionValue"></strong></p>
-      <button class="send" type="submit" form="buyerForm">Consultar por WhatsApp</button>
-      <div class="payment-alias">
-        <button class="payment-alias__button" id="copyPaymentAlias" type="button" aria-describedby="paymentAliasStatus">
-          <img class="custom-icon payment-alias__brand" src="icons/mercado-pago.svg" width="40" height="40" alt="" aria-hidden="true">
-          <span class="payment-alias__copy"><span id="paymentAliasLabel">Copiar ALIAS:</span><strong id="paymentAliasValue">bren.herrada.mp</strong></span>
-          <img class="payment-alias__copy-icon" src="icons/copy.svg" width="24" height="24" alt="" aria-hidden="true">
-        </button>
-        <p class="payment-alias__status fine" id="paymentAliasStatus" role="status" aria-live="polite" aria-atomic="true"></p>
-        <input id="paymentAliasManual" type="text" aria-label="Alias de Mercado Pago para copiar manualmente" readonly hidden>
+      <button class="send" type="submit" form="buyerForm">Confirmar por WhatsApp</button>
+      <div class="payment-note">
+        <img class="custom-icon" src="icons/mercado-pago.svg" width="40" height="40" alt="" aria-hidden="true">
+        <p class="fine bag-notice"><strong>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</strong> Consultame el valor según el medio de pago antes de transferir. La reserva se confirma por WhatsApp.</p>
       </div>
     </div>
   </aside>
@@ -224,11 +223,31 @@
     <h2 id="descriptionPopupTitle"><span id="descriptionPopupHeading"></span></h2><button class="dismiss-button description-close" type="button" aria-label="Cerrar descripción"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div>
     <div class="description-popup-copy" id="descriptionPopupCopy"></div>
   </dialog>
-  <aside class="delivery-popup anchored-popover" id="deliveryPopup" popover="auto" aria-labelledby="deliveryPopupTitle"><div class="delivery-popup__head"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"><h2 id="deliveryPopupTitle">ENTREGAS EN MAR DEL PLATA</h2><button class="dismiss-button" type="button" popovertarget="deliveryPopup" popovertargetaction="hide" aria-label="Cerrar información de entregas"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div><div class="delivery-popup__inner"><p>Entregas únicamente dentro de Mar del Plata.</p><p>Consultá por WhatsApp para coordinar disponibilidad, pago y entrega.</p></div></aside>
-  <footer class="footer-delivery" id="entregas"><div class="shell"><a class="footer-logo" href="#" aria-label="Plot Twist — inicio"><img src="images/plot-twist-mobile.webp" width="480" height="160" alt="Plot Twist" loading="lazy"></a><div><h2>ENTREGAS</h2><p>Entregas únicamente dentro de Mar del Plata.<br>Disponibilidad, pago y entrega se coordinan por WhatsApp.</p></div></div></footer>
+  <aside class="info-popup delivery-popup anchored-popover" id="deliveryPopup" popover="auto" aria-labelledby="deliveryPopupTitle"><div class="info-popup__head"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"><h2 id="deliveryPopupTitle">ENTREGAS EN MAR DEL PLATA</h2><button class="dismiss-button" type="button" popovertarget="deliveryPopup" popovertargetaction="hide" aria-label="Cerrar información de entregas"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div><div class="info-popup__inner"><p>Entregas únicamente dentro de Mar del Plata.</p><p>Consultá por WhatsApp para coordinar disponibilidad, pago y entrega.</p></div></aside>
+  <aside class="info-popup anchored-popover" id="paymentPopup" popover="auto" aria-labelledby="paymentPopupTitle">
+    <div class="info-popup__head">
+      <img class="custom-icon" src="icons/mercado-pago.svg" width="40" height="40" alt="" aria-hidden="true">
+      <h2 id="paymentPopupTitle">MEDIOS DE PAGO</h2>
+      <button class="dismiss-button" type="button" popovertarget="paymentPopup" popovertargetaction="hide" aria-label="Cerrar información de pagos"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true"></button>
+    </div>
+    <div class="info-popup__inner">
+      <p>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</p>
+      <p>Consultame el valor según el medio de pago antes de transferir. La reserva se confirma por WhatsApp.</p>
+    </div>
+  </aside>
+  <footer class="footer-delivery" id="entregas">
+    <div class="shell">
+      <a class="footer-logo" href="#" aria-label="Plot Twist — inicio"><img src="images/plot-twist-mobile.webp" width="480" height="160" alt="Plot Twist" loading="lazy"></a>
+      <div class="footer-delivery__copy">
+        <div><h2>ENTREGAS</h2><p>Entregas únicamente dentro de Mar del Plata.<br>Disponibilidad, pago y entrega se coordinan por WhatsApp.</p></div>
+        <p><strong>Pago por transferencia o con tarjeta en hasta 3 cuotas con Mercado Pago.</strong> Consultame el valor según el medio de pago antes de transferir. La reserva se confirma por WhatsApp.</p>
+      </div>
+    </div>
+  </footer>
   <nav class="mobile-nav" aria-label="Navegación móvil">
     <button type="button" class="catalog-trigger" popovertarget="catalogMenu" aria-controls="catalogMenu" aria-expanded="false"><img class="custom-icon" src="icons/catalog.svg" width="40" height="40" alt="" aria-hidden="true"><span>Catálogo</span></button>
     <button type="button" popovertarget="deliveryPopup" aria-controls="deliveryPopup" aria-expanded="false"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"><span>Entregas</span></button>
+    <button type="button" popovertarget="paymentPopup" aria-controls="paymentPopup" aria-expanded="false"><img class="custom-icon" src="icons/credit-card.svg" width="40" height="40" alt="" aria-hidden="true"><span>Pago</span></button>
     <button type="button" id="openBagMobile" aria-label="Mi selección"><img class="custom-icon" src="icons/cart-bag.svg" width="40" height="40" alt="" aria-hidden="true"><span>Mi selección</span><span class="bag-count" id="bagCountMobile" aria-hidden="true">0</span></button>
   </nav>
   <noscript><link rel="stylesheet" href="no-script.css"><p class="catalog-status">Para cargar los productos, activá JavaScript en este navegador y recargá la página.</p></noscript>
@@ -255,7 +274,7 @@
       </div>
     </section>
   </template>
-  <script src="app.js?v=20261008-image-cdn"></script>
+  <script src="app.js?v=20261012-payment-options"></script>
   <script src="navigation.js?v=20261008-qa2"></script>
 </body>
 </html>

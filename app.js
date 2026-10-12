@@ -67,46 +67,6 @@
   const bagContentEl = $("#bagContent");
   const buyerForm = $("#buyerForm");
   const buyerName = $("#buyerName");
-  const copyPaymentAlias = $("#copyPaymentAlias");
-  const paymentAliasLabel = $("#paymentAliasLabel");
-  const paymentAliasValue = $("#paymentAliasValue").textContent.trim();
-  const paymentAliasStatus = $("#paymentAliasStatus");
-  const paymentAliasManual = $("#paymentAliasManual");
-  let aliasCopyPending = false;
-  let aliasCopyTimer;
-  copyPaymentAlias.addEventListener("click", async () => {
-    if (aliasCopyPending) return;
-    aliasCopyPending = true;
-    clearTimeout(aliasCopyTimer);
-    copyPaymentAlias.setAttribute("aria-busy", "true");
-    paymentAliasManual.hidden = true;
-    paymentAliasStatus.classList.remove("is-error");
-    paymentAliasStatus.textContent = "";
-    try {
-      await navigator.clipboard.writeText(paymentAliasValue);
-      copyPaymentAlias.dataset.copyState = "copied";
-      paymentAliasLabel.textContent = "¡Alias copiado!";
-      paymentAliasStatus.textContent = `Alias ${paymentAliasValue} copiado.`;
-      aliasCopyTimer = setTimeout(() => {
-        delete copyPaymentAlias.dataset.copyState;
-        paymentAliasLabel.textContent = "Copiar ALIAS:";
-      }, 2600);
-    } catch (_) {
-      delete copyPaymentAlias.dataset.copyState;
-      paymentAliasLabel.textContent = "Copiar ALIAS:";
-      paymentAliasStatus.classList.add("is-error");
-      paymentAliasStatus.textContent = "No se pudo copiar. Seleccioná y copiá el alias de abajo.";
-      paymentAliasManual.value = paymentAliasValue;
-      paymentAliasManual.hidden = false;
-      if (drawer.classList.contains("open")) {
-        paymentAliasManual.focus({ preventScroll: true });
-        paymentAliasManual.select();
-      }
-    } finally {
-      aliasCopyPending = false;
-      copyPaymentAlias.removeAttribute("aria-busy");
-    }
-  });
   const toast = $("#toast");
   const lightbox = $("#lightbox");
   const lightboxImage = $("#lightboxImage");

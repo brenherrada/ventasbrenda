@@ -87,6 +87,8 @@ for(const engine of engines){
  await page.locator('.card[data-id="qa-0"] .select-btn').click();await page.locator('.card[data-id="qa-1"] .select-btn').click();
  await bag().click();await page.locator('#drawer.open').waitFor();
  assert.equal(await page.locator('.bag-item').count(),2);assert.match(await page.locator('#bagTotal').innerText(),/3.000/);
+ assert.match(await page.locator('.send').innerText(),/^Confirmar por WhatsApp$/i);
+ assert.match(await page.locator('#bagFooter .payment-note').innerText(),/Consultame el valor según el medio de pago antes de transferir/);
  assert.match(await page.locator('#bagContributionValue').innerText(),/3%/);
  await page.locator('.send').click();assert.equal(await page.locator('#buyerName').getAttribute('aria-invalid'),'true');
  await page.locator('#buyerName').fill('QA Prueba');await page.locator('.send').click();
@@ -97,6 +99,25 @@ for(const engine of engines){
  for(let i=0;i<2;i++)await page.locator('.bag-item button').first().click();
  assert.equal(await page.locator('.bag-item').count(),0);assert.equal(await page.locator('#bagFooter').isVisible(),false);
  await page.keyboard.press('Escape');
+ },page);
+ await check(`${tag}: payment popover, delivery switch and focus return`,async()=>{
+ const paymentSelector=mobile?'.mobile-nav [popovertarget="paymentPopup"]':'.header-payment';
+ const payment=page.locator(paymentSelector);
+ await payment.click();await page.locator('#paymentPopup').waitFor({state:'visible'});
+ await page.waitForFunction(selector=>document.querySelector(selector).getAttribute('aria-expanded')==='true',paymentSelector);
+ assert.equal(await payment.getAttribute('aria-expanded'),'true');
+ assert.match(await page.locator('#paymentPopup').innerText(),/hasta 3 cuotas con Mercado Pago/);
+ const bounds=await page.locator('#paymentPopup').boundingBox();const size=page.viewportSize();
+ assert.ok(bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=size.width&&bounds.y+bounds.height<=size.height,'Payment popup exceeds viewport');
+ await page.screenshot({path:`${output}/${tag}-payment.png`});
+ await page.locator(mobile?'.mobile-nav [popovertarget="deliveryPopup"]':'.header-delivery').click();
+ await page.locator('#paymentPopup').waitFor({state:'hidden'});
+ await page.locator('#deliveryPopup .dismiss-button').click();
+ await payment.press('Enter');await page.locator('#paymentPopup').waitFor({state:'visible'});
+ await page.keyboard.press('Escape');await page.locator('#paymentPopup').waitFor({state:'hidden'});
+ await page.waitForFunction(selector=>document.querySelector(selector).getAttribute('aria-expanded')==='false',paymentSelector);
+ assert.equal(await payment.evaluate(e=>document.activeElement===e),true);
+ assert.equal(await payment.getAttribute('aria-expanded'),'false');
  },page);
  await check(`${tag}: delivery/promo and consistent close`,async()=>{
  await page.locator(mobile?'.mobile-nav [popovertarget="deliveryPopup"]':'.header-delivery').click();await page.locator('#deliveryPopup').waitFor({state:'visible'});

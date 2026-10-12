@@ -1,4 +1,4 @@
-// Mensajes, toast y popup de entregas
+// Mensajes, toast y popups informativos
 // ────────────────────────────────────────────────────────────────────
 
 .catalog-status,
@@ -94,7 +94,7 @@
   background: var(--action-purchase-bg);
   color: var(--action-purchase-fg);
 }
-.delivery-popup {
+.info-popup {
   flex-direction: column;
   --popover-bg: var(--color-peach);
   width: min(370px, calc(100vw - 36px));

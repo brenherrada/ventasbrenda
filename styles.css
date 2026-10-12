@@ -604,67 +604,15 @@ textarea {
   font-family: var(--font-mono);
 }
 
-.payment-alias {
+.payment-note {
   display: grid;
-  gap: clamp(6px, 0.6vw, 8px);
-}
-.payment-alias__button {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: clamp(8px, 1vw, 12px);
-  width: 100%;
-  min-height: 64px;
-  padding: clamp(8px, 1vw, 12px) clamp(10px, 1.2vw, 16px);
-  border: var(--line);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
-  background: var(--color-white);
   text-align: left;
-  transition: background-color var(--motion-fast) var(--ease), box-shadow var(--motion-fast) var(--ease);
 }
-.payment-alias__brand {
-  width: clamp(36px, 3vw, 40px);
-}
-.payment-alias__copy {
-  display: grid;
-  gap: 0;
-  min-width: 0;
-  font: 700 clamp(11px, 0.9vw, 12px)/1.4 var(--font-utility-action);
-}
-.payment-alias__copy strong {
-  font-size: clamp(13px, 1.1vw, 15px);
-  overflow-wrap: anywhere;
-}
-.payment-alias__copy-icon {
-  display: block;
-  width: 24px;
-  height: 24px;
-}
-.payment-alias__button:hover, .payment-alias__button:focus-visible {
-  background: var(--color-sky);
-  box-shadow: var(--shadow-xs);
-}
-.payment-alias__button:active {
-  box-shadow: none;
-}
-.payment-alias__button[data-copy-state=copied] {
-  background: var(--color-lime);
-}
-.payment-alias__button[aria-busy=true] {
-  cursor: progress;
-}
-.payment-alias__status:not(.is-error) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-#paymentAliasManual {
-  font-family: var(--font-mono);
+.payment-note > .custom-icon {
+  width: clamp(26px, 2.2vw, 32px);
 }
 
 #buyerForm {
@@ -1076,7 +1024,7 @@ body::before {
 }
 
 .nav-link,
-.header-delivery,
+.header-info-button,
 .header-search,
 .bag-fab,
 .header-icon-button {
@@ -1102,11 +1050,11 @@ body::before {
   box-shadow: var(--shadow-hover);
 }
 
-.header-delivery[aria-expanded=true] {
+.header-info-button[aria-expanded=true] {
   background: var(--color-yellow);
 }
 
-.header-delivery {
+.header-info-button {
   display: grid;
   place-items: center;
   min-width: 44px;
@@ -1123,7 +1071,7 @@ body::before {
 }
 
 .nav-link .custom-icon,
-.header-delivery .custom-icon {
+.header-info-button .custom-icon {
   width: clamp(22px, 2vw, 27px);
 }
 
@@ -1749,7 +1697,7 @@ main.shell {
   color: var(--action-purchase-fg);
 }
 
-.delivery-popup {
+.info-popup {
   flex-direction: column;
   --popover-bg: var(--color-peach);
   width: min(370px, 100vw - 36px);
@@ -1761,30 +1709,30 @@ main.shell {
   border-radius: 18px 20px 20px 20px;
   box-shadow: var(--shadow-lg);
 }
-.delivery-popup:popover-open {
+.info-popup:popover-open {
   display: flex;
 }
-.delivery-popup__inner {
+.info-popup__inner {
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
 }
-.delivery-popup__head {
+.info-popup__head {
   flex: none;
   display: flex;
   align-items: center;
   gap: 9px;
   margin-bottom: 10px;
 }
-.delivery-popup__head > .custom-icon {
+.info-popup__head > .custom-icon {
   width: clamp(27px, 2.35vw, 32px);
 }
-.delivery-popup h2 {
+.info-popup h2 {
   flex: 1;
   margin: 0;
   font: 700 15px/1.2 var(--font-mono);
 }
-.delivery-popup p {
+.info-popup p {
   margin: 0 0 7px;
   font: 700 12px/1.5 var(--font-mono);
 }
@@ -1821,6 +1769,11 @@ main.shell {
   gap: 24px;
   justify-content: center;
 }
+.footer-delivery__copy {
+  display: grid;
+  gap: clamp(12px, 1.2vw, 18px);
+  max-width: 580px;
+}
 
 .footer-logo {
   width: clamp(140px, 15vw, 180px);
@@ -1844,7 +1797,7 @@ main.shell {
   font: 400 13px/1.5 var(--font-mono);
 }
 
-/* MTS navigation surfaces, shared by every catalog/delivery trigger. */
+/* Shared navigation surfaces for catalog, delivery and payment triggers. */
 :root {
   --nav-content-height: clamp(76px, 8vw, 100px);
   --popover-gutter: 20px;
@@ -1879,7 +1832,7 @@ main.shell {
 
 :where(.drawer-body,
 .mts-catalog-menu__scroll,
-.delivery-popup__inner,
+.info-popup__inner,
 .description-popup-copy,
 .web-promo-content) {
   scrollbar-color: var(--color-lavender) var(--color-butter);
@@ -2328,6 +2281,7 @@ html:has(#catalogMenu:modal) {
   }
   .mobile-nav > button > span:not(:first-child):not(.bag-count) {
     font: 700 10px/1.1 var(--font-mono);
+    white-space: nowrap;
   }
   .mobile-nav .custom-icon {
     width: clamp(32px, 8.2vw, 35px);

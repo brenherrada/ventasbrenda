@@ -1,7 +1,7 @@
 // Scrollbar, popovers y menú de categorías
 // ────────────────────────────────────────────────────────────────────
 
-/* MTS navigation surfaces, shared by every catalog/delivery trigger. */
+/* Shared navigation surfaces for catalog, delivery and payment triggers. */
 :root {
   --nav-content-height: clamp(76px, 8vw, 100px);
   --popover-gutter: 20px;
@@ -41,7 +41,7 @@
 :where(
   .drawer-body,
   .mts-catalog-menu__scroll,
-  .delivery-popup__inner,
+  .info-popup__inner,
   .description-popup-copy,
   .web-promo-content
 ) {
