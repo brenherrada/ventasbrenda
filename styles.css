@@ -41,7 +41,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--color-lavender) var(--color-butter);
+  scrollbar-color: var(--color-lavender) var(--color-ink);
   scrollbar-width: thin;
   scrollbar-gutter: stable;
 }
@@ -1021,19 +1021,39 @@ body::before {
 .site-logo {
   grid-column: 2;
   grid-row: 1;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(3px, 0.3vw, 4px);
   width: clamp(150px, 17vw, 240px);
-  aspect-ratio: 3/1;
+  text-decoration: none;
   transition: transform 0.3s var(--ease);
 }
 .site-logo img {
+  position: absolute;
+  top: -22.8971962617%;
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
 }
 .site-logo:hover {
   transform: rotate(3deg) scale(1.08);
+}
+
+.site-logo__mark {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 480/107;
+  overflow: hidden;
+}
+
+.site-logo__tagline {
+  font: 600 clamp(10px, 0.85vw, 12px)/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .header-links {
@@ -1919,7 +1939,7 @@ main.shell {
 .anchored-popover::before {
   content: "";
   position: absolute;
-  top: -12px;
+  top: -14px;
   left: var(--anchor-offset, 21px);
   width: 18px;
   height: 18px;
@@ -1933,7 +1953,7 @@ main.shell {
 }
 .anchored-popover.is-above::before {
   top: auto;
-  bottom: -12px;
+  bottom: -14px;
   transform: rotate(225deg);
 }
 

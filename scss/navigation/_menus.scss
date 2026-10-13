@@ -74,7 +74,7 @@
   &::before {
     content: '';
     position: absolute;
-    top: -12px;
+    top: -14px;
     left: var(--anchor-offset, 21px);
     width: 18px;
     height: 18px;
@@ -89,7 +89,7 @@
 
     &::before {
       top: auto;
-      bottom: -12px;
+      bottom: -14px;
       transform: rotate(225deg);
     }
   }
