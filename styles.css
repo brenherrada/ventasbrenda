@@ -254,7 +254,7 @@ textarea {
   gap: 12px;
   border: var(--line);
   border-radius: 10px;
-  background: var(--color-lime);
+  background: var(--color-yellow);
   padding: 10px 14px;
   text-align: left;
   box-shadow: var(--shadow-sm);
