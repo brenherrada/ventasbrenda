@@ -13,6 +13,28 @@ await test('Invalid category and badge are normalized',async p=>{await p.goto(ba
 await test('Corrupt selection and buyer storage recover',async(p,s,ctx)=>{await ctx.addInitScript(()=>{localStorage.setItem('ventaMudanza.selection.v1','{"bad":true}');localStorage.setItem('ventaMudanza.buyer.v1','null');});await p.goto(base);await ready(p);await cart(p);assert.equal(await p.locator('.bag-item').count(),1);assert.equal(await p.locator('#buyerName').inputValue(),'');});
 await test('Storage denied still permits a selection',async(p,s,ctx)=>{await ctx.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('QA storage denied')};Storage.prototype.setItem=()=>{throw Error('QA storage denied')};});await p.goto(base);await ready(p);await cart(p);assert.equal(await p.locator('.bag-item').count(),1);});
 await test('Sold item removed from persisted selection after reload',async(p,s)=>{await p.goto(base);await ready(p);await cart(p);s.catalog=table(cols,[[...item.slice(0,7),'Sí',item[8]],['b','Otro artículo','Descripción',1000,'Sí','','Libros','No','']]);await p.reload();await ready(p);await p.locator('#openBagMobile').click();assert.equal(await p.locator('.bag-item').count(),0);assert.equal(await p.locator('#bagFooter').isVisible(),false);});
+await test('Explicit reservation keeps the clean title, blocks selection and removes stale cart items',async(p,s)=>{
+  await p.goto(base);await ready(p);await cart(p);
+  s.catalog=table([...cols,'reservado'],[[...item,true]]);
+  await p.reload();await ready(p);
+  assert.equal(await p.locator('.card.reserved .title').innerText(),item[1]);
+  assert.equal(await p.locator('.card.reserved .product-status').innerText(),'RESERVADO');
+  assert.equal(await p.locator('.card.reserved .select-btn').count(),0);
+  await p.locator('#openBagMobile').click();assert.equal(await p.locator('.bag-item').count(),0);
+  s.catalog=table([...cols,'reservado'],[[...item,false]]);await p.reload();await ready(p);
+  assert.equal(await p.locator('.card.reserved').count(),0);await cart(p);
+  assert.equal(await p.locator('.bag-item').count(),1);
+});
+await test('Legacy reservations stay blocked and sold or unavailable states win',async(p,s)=>{
+  s.catalog=table(cols,[[item[0],item[1]+' - RESERVADO',...item.slice(2)],['hidden','Oculto','',1000,'no','','Deco','No',''],['sold','Vendido','',1000,'Sí','','Deco','Sí','']]);
+  await p.goto(base);await ready(p);assert.equal(await p.locator('.card').count(),1);
+  assert.equal(await p.locator('.card.reserved .select-btn').count(),0);
+});
+await test('Unchecked reservation overrides an old title marker',async(p,s)=>{
+  s.catalog=table([...cols,'reservado'],[[item[0],item[1]+' - RESERVADO',...item.slice(2),false]]);
+  await p.goto(base);await ready(p);assert.equal(await p.locator('.card.reserved').count(),0);
+  await cart(p);assert.equal(await p.locator('.bag-item').count(),1);
+});
 await test('Payment requires consultation and exposes no transfer alias',async(p)=>{await p.goto(base);await ready(p);await cart(p);assert.equal(await p.locator('#copyPaymentAlias, #paymentAliasManual').count(),0);assert.ok(!(await p.locator('body').innerText()).includes('bren.herrada.mp'));assert.match(await p.locator('#bagFooter .payment-note:not(.payment-estimate)').innerText(),/Transferencia o tarjeta por link de pago, luego de confirmar la compra/);});
 await test('Broken images show gallery placeholder and retain close',async(p,s)=>{s.catalog=table(cols,[[...item.slice(0,5),'/images/mts-hero-mobile-horizontal-540.webp | /images/qa-intentionally-missing.webp',...item.slice(6)]]);await p.goto(base);await ready(p);await p.locator('.media-button').click();await p.locator('#lightboxNext').click();await p.waitForFunction(()=>document.querySelector('#lightboxImageWrap').classList.contains('is-unavailable'));await p.locator('#lightboxClose').click();await p.locator('#lightbox').waitFor({state:'hidden'});});
 await test('Goal failure does not block catalog',async(p,s)=>{s.fail=true;s.failedSheet='Ventas';await p.goto(base);await ready(p);await p.waitForFunction(()=>document.querySelector('#catalogGoal [data-goal-thanks]')?.textContent.includes('No pudimos'));assert.equal(await p.locator('#catalogGoal [data-goal-collected]').innerText(),'—');});

@@ -363,7 +363,7 @@
 
   async function loadCatalog() {
     try {
-      const table = await readTable(CFG.CATALOG_SHEET || "Catalogo", `catalogCallback_${Date.now()}`, "select A,B,C,D,E,F,G,H,I where B is not null");
+      const table = await readTable(CFG.CATALOG_SHEET || "Catalogo", `catalogCallback_${Date.now()}`, "select A,B,C,D,E,F,G,H,I,K where B is not null");
       const parsed = parseCatalog(table);
       products = parsed.filter((p) => !p.vendido && isAvailable(p.disponible));
 
@@ -414,6 +414,7 @@
     const iCategory = idx("categoria", 6);
     const iSold = idx("vendido", 7);
     const iBadge = idx("badge", -1);
+    const iReserved = idx("reservado", -1);
 
     return (table.rows || []).map((row, rowIndex) => {
       const id = slug(cellValue(row, iId) || `producto-${rowIndex + 1}`);
@@ -426,7 +427,9 @@
       const images = parseImages(cellValue(row, iImages));
       const category = cellValue(row, iCategory).trim() || "Otros";
       const badge = categorySlug(cellValue(row, iBadge)) === NEW_BADGE_SLUG ? NEW_BADGE : "";
-      return { id, title, description, price, disponible, vendido, images, category, badge };
+      const rawReserved = rawCellValue(row, iReserved);
+      const reservado = rawReserved === "" ? null : isSold(rawReserved);
+      return { id, title, description, price, disponible, vendido, reservado, images, category, badge };
     }).filter((p) => p.title);
   }
 
@@ -569,7 +572,9 @@
   }
 
   function isReserved(product) {
-    return normalizeHeader(product?.title || "").includes("reservad");
+    // A checked/unchecked box is authoritative. Older feeds without the field
+    // retain title-based reservations until they receive the updated contract.
+    return product?.reservado ?? normalizeHeader(product?.title || "").includes("reservad");
   }
 
   function sellerPhone() {

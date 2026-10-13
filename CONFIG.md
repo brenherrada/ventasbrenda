@@ -3,6 +3,18 @@
 La pestaña **Config** usa A = clave, B = valor. Editá la columna B; no cambies las claves.
 Los productos y sus fotos se mantienen en **Catalogo**.
 
+## Reservas desde la planilla
+
+`Catalogo!K` es la columna **reservado**, con casillas nativas independientes de `disponible` y `vendido`.
+
+- Marcar la casilla mantiene el artículo visible como **Reservado**, sin botón de selección. Al recargar, también se retira de una selección guardada anteriormente.
+- Desmarcarla permite seleccionarlo otra vez, siempre que `disponible = si` y `vendido` esté desmarcado. Vendido o no disponible tiene prioridad y oculta el artículo.
+- El título no determina el estado cuando hay una casilla con valor TRUE/FALSE. Podés quitar la palabra «RESERVADO» del título y dejar solamente el nombre del producto.
+- Los datos se actualizan al recargar; no hay sincronización instantánea con una página que ya esté abierta. Seleccionar en la web no marca una reserva en la Sheet: esa confirmación sigue siendo manual.
+- Para filas nuevas, la validación de casillas cubre K2:K1003. Una celda todavía vacía conserva la compatibilidad con los títulos antiguos; el primer marcado/desmarcado guarda el estado explícito.
+
+Migración del 13/10/2026: se agregó K sin mover A:J, se inicializaron las 92 filas existentes y se trasladaron 16 marcas de reserva de los títulos a las casillas. Títulos, disponibilidad y vendido se conservaron. La API y la lectura alternativa consultan A:I y K; no se sirve `fecha_alta` de J. Fuentes implementadas y probadas localmente; activación en la web pública pendiente de publicar esta versión.
+
 ## Configuraciones activas
 
 | Clave | Uso real |

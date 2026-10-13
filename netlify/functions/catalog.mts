@@ -9,7 +9,7 @@ export default async (request: Request) => {
     url.searchParams.set("headers", "1");
     // Only the aggregate is needed for the goal; never return the sales detail.
     const queries: Record<string, string> = {
-      Catalogo: "select A,B,C,D,E,F,G,H,I where B is not null",
+      Catalogo: "select A,B,C,D,E,F,G,H,I,K where B is not null",
       Config: "select A,B where A is not null",
       Ventas: "select A,B where A = 'TOTAL VENDIDO'",
     };
