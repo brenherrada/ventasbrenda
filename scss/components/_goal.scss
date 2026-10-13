@@ -5,11 +5,11 @@
    Container composition also covers the narrow minicart on desktop. */
 .goal-placement {
   container: goal / inline-size;
-  width: min(100%, 600px);
+  width: min(100%, 700px);
   margin: 0 auto;
 }
 #catalogGoal {
-  margin-top: clamp(18px, 2vw, 24px);
+  margin-top: clamp(18px, 5vw, 50px);
 }
 .mts-goal--compact {
   position: relative;
@@ -70,7 +70,7 @@
   height: clamp(14px, 3.5cqi, 18px);
   background: var(--color-peach);
   border: 3px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: 5px;
   overflow: hidden;
 
   &-current {
@@ -87,7 +87,7 @@
       135deg,
       var(--color-cyan) 0 7px,
       var(--color-ink) 7px 9px,
-      var(--color-cyan) 9px 15px
+      var(--color-lime) 9px 15px
     );
     border-inline: 2px solid var(--color-border);
     transition: width 0.35s var(--ease);
@@ -122,7 +122,7 @@
 .mts-goal__thanks {
   font: 700 clamp(13px, 2.2cqi, 14px)/1.35 var(--font-mono);
 }
-@container goal (min-width:601px) {
+@container goal (min-width:701px) {
   .mts-goal__content {
     grid-template-columns: minmax(180px, auto) minmax(100px, 1fr) minmax(155px, auto);
   }

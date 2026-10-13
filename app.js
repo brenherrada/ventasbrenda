@@ -1002,7 +1002,7 @@
         selectBtn.type = "button";
         selectBtn.className = "select-btn";
         updateSelectionButton(selectBtn, product);
-        selectBtn.addEventListener("click", () => toggleSelection(product.id));
+        selectBtn.addEventListener("click", event => toggleSelection(product.id, event));
         action.appendChild(selectBtn);
       }
 
@@ -1049,7 +1049,7 @@
     button.dataset.selected = String(selected);
   }
 
-  function toggleSelection(id) {
+  function toggleSelection(id, event) {
     const product = products.find((item) => item.id === id);
     if (product && isReserved(product)) {
       showToast("Este artículo está reservado");
@@ -1070,7 +1070,8 @@
       updateSelectionButton(button, item);
     }
     renderBag();
-    showToast(selection.includes(id) ? "Agregado a tu selección" : "Quitado de tu selección", selection.includes(id) ? "🛍️" : "−");
+    if (selection.includes(id) && event) showSelectionThanks(event);
+    else showToast(selection.includes(id) ? "Agregado a tu selección" : "Quitado de tu selección", selection.includes(id) ? "🛍️" : "−");
   }
 
   function saveSelection() {
@@ -1771,7 +1772,43 @@
   toast.addEventListener("keydown", event => {
     if (event.key === "Escape") { event.stopPropagation(); hideToast(); }
   });
+  // An independent acknowledgement: normal toasts retain their original DOM,
+  // coordinates, focus handling, transitions and dismissal timer.
+  const thanksBubble = document.createElement("div");
+  thanksBubble.className = "toast toast--thanks";
+  thanksBubble.setAttribute("role", "status");
+  thanksBubble.setAttribute("aria-live", "polite");
+  thanksBubble.setAttribute("aria-atomic", "true");
+  document.body.appendChild(thanksBubble);
+  let thanksTimer;
+  function hideSelectionThanks() {
+    clearTimeout(thanksTimer);
+    thanksBubble.classList.remove("show");
+    thanksBubble.textContent = "";
+  }
+  thanksBubble.addEventListener("animationend", hideSelectionThanks);
+  function showSelectionThanks(event) {
+    hideSelectionThanks();
+    thanksBubble.textContent = "Gracias ❤️";
+    const anchor = event.currentTarget.getBoundingClientRect();
+    const x = event.detail > 0 ? event.clientX : anchor.left + anchor.width / 2;
+    const y = event.detail > 0 ? event.clientY : anchor.top + anchor.height / 2;
+    // Measurement restarts only this animation on consecutive additions.
+    const bubble = thanksBubble.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const left = viewport?.offsetLeft || 0;
+    const top = viewport?.offsetTop || 0;
+    const width = viewport?.width || document.documentElement.clientWidth;
+    const height = viewport?.height || window.innerHeight;
+    thanksBubble.style.setProperty("--toast-x", `${Math.min(left + width - bubble.width / 2 - 12, Math.max(left + bubble.width / 2 + 12, x))}px`);
+    thanksBubble.style.setProperty("--toast-y", `${Math.min(top + height - 12, Math.max(top + bubble.height + 26, y))}px`);
+    thanksBubble.classList.add("show");
+    // Also dismiss when the global reduced-motion rule disables animation.
+    const duration = parseFloat(getComputedStyle(thanksBubble).getPropertyValue("--thanks-duration"));
+    thanksTimer = setTimeout(hideSelectionThanks, duration);
+  }
   function showToast(message, symbol = "i") {
+    hideSelectionThanks();
     const icon = document.createElement("span");
     icon.setAttribute("aria-hidden", "true");
     icon.className = "toast-icon";

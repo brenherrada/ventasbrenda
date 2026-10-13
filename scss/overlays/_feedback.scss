@@ -47,7 +47,7 @@
   position: fixed;
   z-index: 80;
   right: 16px;
-  bottom: calc(90px + env(safe-area-inset-bottom));
+  bottom: var(--promo-bottom);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -94,6 +94,40 @@
   background: var(--action-purchase-bg);
   color: var(--action-purchase-fg);
 }
+
+// Independent acknowledgement: shares appearance primitives, never the regular
+// toast element or lifecycle. A brief, continuous drift while the copy dissolves.
+.toast.toast--thanks {
+  --thanks-duration: 800ms;
+  left: var(--toast-x);
+  top: var(--toast-y);
+  right: auto;
+  bottom: auto;
+  width: max-content;
+  border: var(--line);
+  border-radius: var(--radius) var(--radius) var(--radius) 0;
+  background: var(--color-ink);
+  color: var(--color-white);
+  box-shadow: 3px 3px var(--color-cyan);
+  font-family: var(--font-body);
+  transform: translate(-50%, -100%);
+  transition: none;
+  pointer-events: none;
+
+  &.show {
+    pointer-events: none;
+    animation: selection-thanks var(--thanks-duration) linear both;
+  }
+}
+
+@keyframes selection-thanks {
+  0% { opacity: 1; transform: translate(-50%, -100%); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, calc(-100% - 14px)); }
+}
+
+// The shared reduced-motion rule disables animation. The same JS timeout
+// dismisses the stationary acknowledgement, keeping its full reading time.
 .info-popup {
   flex-direction: column;
   --popover-bg: var(--color-peach);

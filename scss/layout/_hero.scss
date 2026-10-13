@@ -32,12 +32,16 @@
     position: relative;
     z-index: 2;
     padding: clamp(20px, 2.1vw, 30px) 0 clamp(0px, 2.8vw, 40px);
+
+    > span.mts-badge {
+      background: var(--color-yellow);
+    }
   }
 
   &-title {
     max-width: 100%;
     margin: clamp(14px, 1.7vw, 24px) 0 clamp(8px, 1vw, 14px);
-    font: 600 clamp(28px, calc(20px + 2.5vw), 52px)/1.2 var(--font-display);
+    font: 600 clamp(28px, 5vw, 60px)/1 var(--font-display);
     letter-spacing: -0.025em;
 
     & > span {

@@ -48,7 +48,7 @@ main.shell {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-cobalt);
+  background: var(--color-lime);
 }
 :where(.list, .catalog-status, .card) {
   scroll-margin-top: calc(
@@ -226,12 +226,12 @@ main.shell {
   text-transform: uppercase;
 }
 .card.selected .select-btn {
-  background: var(--color-butter);
+  background: var(--color-peach);
 }
 .card.reserved {
   border-style: double;
   filter: grayscale(1);
 }
 .card.selected {
-  box-shadow: 5px 5px 0 var(--color-cyan);
+  outline: 3px dashed var(--color-cyan);
 }

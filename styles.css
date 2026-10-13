@@ -194,7 +194,7 @@ textarea {
   box-shadow: var(--shadow-sm);
 }
 .filter-chip.active {
-  background: var(--color-lavender);
+  background: var(--color-pink);
   box-shadow: var(--shadow-sm);
 }
 .filter-chip:focus-visible {
@@ -1237,10 +1237,13 @@ body::before {
   z-index: 2;
   padding: clamp(20px, 2.1vw, 30px) 0 clamp(0px, 2.8vw, 40px);
 }
+.hero-copy > span.mts-badge {
+  background: var(--color-yellow);
+}
 .hero-title {
   max-width: 100%;
   margin: clamp(14px, 1.7vw, 24px) 0 clamp(8px, 1vw, 14px);
-  font: 600 clamp(28px, 20px + 2.5vw, 52px)/1.2 var(--font-display);
+  font: 600 clamp(28px, 5vw, 60px)/1 var(--font-display);
   letter-spacing: -0.025em;
 }
 .hero-title > span {
@@ -1424,7 +1427,7 @@ main.shell {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-cobalt);
+  background: var(--color-lime);
 }
 
 :where(.list, .catalog-status, .card) {
@@ -1615,7 +1618,7 @@ main.shell {
 }
 
 .card.selected .select-btn {
-  background: var(--color-butter);
+  background: var(--color-peach);
 }
 
 .card.reserved {
@@ -1624,7 +1627,7 @@ main.shell {
 }
 
 .card.selected {
-  box-shadow: 5px 5px 0 var(--color-cyan);
+  outline: 3px dashed var(--color-cyan);
 }
 
 .catalog-status,
@@ -1675,7 +1678,7 @@ main.shell {
   position: fixed;
   z-index: 80;
   right: 16px;
-  bottom: calc(90px + env(safe-area-inset-bottom));
+  bottom: var(--promo-bottom);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1718,6 +1721,41 @@ main.shell {
   color: var(--action-purchase-fg);
 }
 
+.toast.toast--thanks {
+  --thanks-duration: 800ms;
+  left: var(--toast-x);
+  top: var(--toast-y);
+  right: auto;
+  bottom: auto;
+  width: max-content;
+  border: var(--line);
+  border-radius: var(--radius) var(--radius) var(--radius) 0;
+  background: var(--color-ink);
+  color: var(--color-white);
+  box-shadow: 3px 3px var(--color-cyan);
+  font-family: var(--font-body);
+  transform: translate(-50%, -100%);
+  transition: none;
+  pointer-events: none;
+}
+.toast.toast--thanks.show {
+  pointer-events: none;
+  animation: selection-thanks var(--thanks-duration) linear both;
+}
+
+@keyframes selection-thanks {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 14px));
+  }
+}
 .info-popup {
   flex-direction: column;
   --popover-bg: var(--color-peach);
@@ -2525,12 +2563,12 @@ html:has(#catalogMenu:modal) {
    Container composition also covers the narrow minicart on desktop. */
 .goal-placement {
   container: goal/inline-size;
-  width: min(100%, 600px);
+  width: min(100%, 700px);
   margin: 0 auto;
 }
 
 #catalogGoal {
-  margin-top: clamp(18px, 2vw, 24px);
+  margin-top: clamp(18px, 5vw, 50px);
 }
 
 .mts-goal--compact {
@@ -2592,7 +2630,7 @@ html:has(#catalogMenu:modal) {
   height: clamp(14px, 3.5cqi, 18px);
   background: var(--color-peach);
   border: 3px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: 5px;
   overflow: hidden;
 }
 .mts-goal__track-current {
@@ -2604,7 +2642,7 @@ html:has(#catalogMenu:modal) {
 .mts-goal__track-projected {
   flex: none;
   width: var(--mts-goal-possible, 0%);
-  background: repeating-linear-gradient(135deg, var(--color-cyan) 0 7px, var(--color-ink) 7px 9px, var(--color-cyan) 9px 15px);
+  background: repeating-linear-gradient(135deg, var(--color-cyan) 0 7px, var(--color-ink) 7px 9px, var(--color-lime) 9px 15px);
   border-inline: 2px solid var(--color-border);
   transition: width 0.35s var(--ease);
 }
@@ -2642,7 +2680,7 @@ html:has(#catalogMenu:modal) {
   font: 700 clamp(13px, 2.2cqi, 14px)/1.35 var(--font-mono);
 }
 
-@container goal (min-width:601px) {
+@container goal (min-width:701px) {
   .mts-goal__content {
     grid-template-columns: minmax(180px, auto) minmax(100px, 1fr) minmax(155px, auto);
   }
