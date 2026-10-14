@@ -549,7 +549,7 @@
       // Never download the original Drive file to generate a small thumbnail.
       // Replacing a photo means a new file/link in the Sheet, so the cache key changes.
       const source = `https://lh3.googleusercontent.com/d/${encodeURIComponent(driveId)}=w${width}`;
-      const params = new URLSearchParams({ url: source, w: String(width), fit: "contain", fm: "webp", q: "85" });
+      const params = new URLSearchParams({ url: source, w: String(width), fit: "contain", fm: "webp", q: variant === "gallery" ? "80" : "85" });
       return [
         `/.netlify/images?${params}`,
         source,
