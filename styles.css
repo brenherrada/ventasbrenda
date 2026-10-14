@@ -2903,9 +2903,9 @@ html:has(#catalogMenu:modal) {
   font-weight: 400;
   font-size: clamp(32px, 14cqi, 82px);
   line-height: 1.05;
-  letter-spacing: -0.04em;
   text-transform: uppercase;
   transform: rotate(-4deg);
+  text-shadow: 1px 1px var(--color-white);
 }
 .product-feature__title span {
   display: block;
@@ -2920,7 +2920,7 @@ html:has(#catalogMenu:modal) {
   bottom: -0.16em;
   height: 0.13em;
   border-radius: 50px;
-  background: var(--color-cyan);
+  background: var(--color-lavender);
   transform: rotate(1deg);
 }
 .product-feature__intro {
@@ -3022,6 +3022,7 @@ html:has(#catalogMenu:modal) {
   background-image: url("images/legxercise/cinta-rosa.webp");
   text-transform: uppercase;
   transform: rotate(-4deg);
+  text-shadow: 1px 1px rgba(255, 255, 255, 0.3);
 }
 .product-feature__arrow {
   position: absolute;

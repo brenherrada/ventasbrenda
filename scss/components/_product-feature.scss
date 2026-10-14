@@ -36,14 +36,14 @@
     font-weight: 400;
     font-size: clamp(32px, 14cqi, 82px);
     line-height: 1.05;
-    letter-spacing: -0.04em;
     text-transform: uppercase;
     transform: rotate(-4deg);
+    text-shadow: 1px 1px var(--color-white);
     span {
       display: block; position: relative; width: fit-content;
       &::after {
         content: ''; position: absolute; left: 0; right: 0; bottom: -0.16em; height: 0.13em;
-        border-radius: 50px; background: var(--color-cyan); transform: rotate(1deg);
+        border-radius: 50px; background: var(--color-lavender); transform: rotate(1deg);
       }
     }
   }
@@ -89,6 +89,7 @@
     --feature-label-size: clamp(16px, 1.8vw, 26px);
     left: 12%; bottom: 0; width: 74%; min-height: clamp(48px, 4vw, 60px);
     background-image: url('images/legxercise/cinta-rosa.webp'); text-transform: uppercase; transform: rotate(-4deg);
+    text-shadow: 1px 1px rgba(255, 255, 255, .3);
   }
   &__arrow { position: absolute; width: clamp(40px, 5vw, 72px); top: 0; left: 7%; transform: rotate(25deg); pointer-events: none; }
   &__arrow--movement { top: auto; left: auto; right: -1%; bottom: 22%; transform: rotate(6deg); }
