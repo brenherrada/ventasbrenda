@@ -17,6 +17,7 @@
     "test:visual": "node tests/visual-audit.mjs",
     "test:resilience": "node tests/resilience.mjs",
     "test:interactions": "node tests/interactions.mjs",
+    "waitlist:preflight": "node scripts/check-waitlist-deployment.mjs",
     "clean:qa": "node scripts/clean-qa.mjs"
   }
 }
