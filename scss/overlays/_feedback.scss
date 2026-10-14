@@ -130,15 +130,15 @@
 // dismisses the stationary acknowledgement, keeping its full reading time.
 .info-popup {
   flex-direction: column;
-  --popover-bg: var(--color-peach);
+  --popover-bg: var(--color-butter);
   width: min(370px, calc(100vw - 36px));
   overflow: visible;
   margin: 0;
   padding: 18px 20px 19px;
-  background: var(--color-peach);
+  background: linear-gradient(180deg, var(--popover-bg) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
   border: var(--line-heavy);
   border-radius: 18px 20px 20px 20px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
 
   &:popover-open {
     display: flex;

@@ -1065,7 +1065,7 @@ body::before {
   position: absolute;
   inset: -1px -8px;
   z-index: -1;
-  background: var(--color-cyan);
+  background: var(--color-yellow);
   border: 1.5px solid var(--color-ink);
   border-radius: 3px;
   box-shadow: 1.5px 1.5px 0 var(--color-ink);
@@ -1312,9 +1312,6 @@ body::before {
   position: relative;
   z-index: 2;
   padding: clamp(20px, 2.1vw, 30px) 0 clamp(0px, 2.8vw, 40px);
-}
-.hero-copy > span.mts-badge {
-  background: var(--color-yellow);
 }
 .hero-title {
   max-width: 100%;
@@ -1835,15 +1832,15 @@ main.shell {
 }
 .info-popup {
   flex-direction: column;
-  --popover-bg: var(--color-peach);
+  --popover-bg: var(--color-butter);
   width: min(370px, 100vw - 36px);
   overflow: visible;
   margin: 0;
   padding: 18px 20px 19px;
-  background: var(--color-peach);
+  background: linear-gradient(180deg, var(--popover-bg) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
   border: var(--line-heavy);
   border-radius: 18px 20px 20px 20px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
 }
 .info-popup:popover-open {
   display: flex;
@@ -2012,6 +2009,7 @@ main.shell {
   top: auto;
   bottom: -14px;
   transform: rotate(225deg);
+  background: var(--color-peach);
 }
 
 @starting-style {
@@ -2464,7 +2462,7 @@ html:has(#catalogMenu:modal) {
     background: var(--color-butter);
     border: var(--line-heavy);
     border-radius: 19px;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow);
   }
   .header-search.is-open {
     display: flex;
