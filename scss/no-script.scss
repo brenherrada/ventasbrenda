@@ -7,3 +7,5 @@
 #products[aria-busy='true'] {
   display: none !important;
 }
+// The seller confirmation remains inline when scripting is unavailable.
+.contact-confirmation__close { display: none; }

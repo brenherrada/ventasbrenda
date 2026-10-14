@@ -23,7 +23,8 @@
     intro: "Estoy vendiendo algunos artículos por mudanza. Seleccioná lo que te interese y enviame tu consulta por WhatsApp para coordinar disponibilidad, pago y entrega.",
     nota_reserva: "Elegir un artículo no lo reserva automáticamente.",
     whatsapp: "",
-    actualizado: ""
+    actualizado: "",
+    mostrar_boton_vender: "si"
   };
   let selection = readJSON(STORAGE_SELECTION, []);
   if (!Array.isArray(selection)) selection = [];
@@ -88,6 +89,7 @@
   });
   webPromo.querySelector(".web-promo-close").addEventListener("click", () => webPromoTrigger.focus());
   $("#webPromoContact").addEventListener("click", () => {
+    if (webPromoTrigger.hidden || webPromoTrigger.disabled) return;
     const seller = sellerPhone();
     if (!seller) {
       showToast("El contacto todavía no está disponible. Intentá nuevamente en un momento.");
@@ -121,8 +123,68 @@
   }
 
   const descriptionPopup = $("#descriptionPopup");
-  let descriptionLastFocus = null;
-  let descriptionScroll = "";
+  // Native dialogs share focus return, scroll lock and backdrop dismissal.
+  const nativeDialogState = new WeakMap();
+  function openNativeDialog(dialog, trigger) {
+    if (dialog.open) return;
+    const state = { trigger, overflow: document.body.style.overflow };
+    nativeDialogState.set(dialog, state);
+    document.body.style.overflow = "hidden";
+    try { dialog.showModal(); }
+    catch (error) {
+      document.body.style.overflow = state.overflow;
+      nativeDialogState.delete(dialog);
+      throw error;
+    }
+    const copy = dialog.querySelector(".description-popup-copy");
+    if (copy) copy.scrollTop = 0;
+    dialog.querySelector(".dismiss-button")?.focus();
+  }
+  function restoreNativeDialog(dialog) {
+    // A queued close event must not release a dialog reopened in the meantime.
+    if (dialog.open) return;
+    const state = nativeDialogState.get(dialog);
+    if (!state) return;
+    nativeDialogState.delete(dialog);
+    document.body.style.overflow = state.overflow;
+    if (state.trigger?.isConnected) state.trigger.focus({ preventScroll: true });
+  }
+  function closeNativeDialog(dialog, returnValue = "") {
+    dialog.close(returnValue);
+    restoreNativeDialog(dialog);
+  }
+  function bindNativeDialog(dialog) {
+    dialog.addEventListener("click", event => {
+      if (event.target !== dialog) return;
+      const rect = dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeNativeDialog(dialog);
+    });
+    dialog.addEventListener("close", () => restoreNativeDialog(dialog));
+    dialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeNativeDialog(dialog);
+    });
+  }
+  bindNativeDialog(descriptionPopup);
+  const lauraContactDialog = $("#lauraContactDialog");
+  const lauraContactTrigger = $("#legxerciseContact");
+  if (lauraContactDialog && lauraContactTrigger) {
+    bindNativeDialog(lauraContactDialog);
+    lauraContactTrigger.addEventListener("click", event => {
+      event.preventDefault();
+      openNativeDialog(lauraContactDialog, lauraContactTrigger);
+    });
+    $("#closeLauraContact").addEventListener("click", () => closeNativeDialog(lauraContactDialog));
+    $("#cancelLauraContact").addEventListener("click", event => {
+      event.preventDefault();
+      closeNativeDialog(lauraContactDialog);
+    });
+    // A native link opens WhatsApp in the user's gesture; no message is sent here.
+    $("#confirmLauraContact").addEventListener("click", () => closeNativeDialog(lauraContactDialog, "confirmed"));
+    // Without JS this same confirmation stays inline; there is no direct-contact bypass.
+    lauraContactDialog.removeAttribute("open");
+    if (window.location.hash === "#lauraContactDialog") openNativeDialog(lauraContactDialog, lauraContactTrigger);
+  }
   const descriptionObserver = typeof ResizeObserver === "function" ? new ResizeObserver(entries => {
     for (const {target} of entries) {
       const button = target.parentElement.querySelector(".description-more");
@@ -140,22 +202,18 @@
   function openDescription(product, trigger) {
     $("#descriptionPopupHeading").textContent = product.title;
     $("#descriptionPopupCopy").textContent = product.description;
-    descriptionLastFocus = trigger;
-    descriptionScroll = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    descriptionPopup.showModal();
-    descriptionPopup.querySelector(".description-close").focus();
+    openNativeDialog(descriptionPopup, trigger);
   }
-  descriptionPopup.querySelector(".description-close").addEventListener("click", () => descriptionPopup.close());
-  descriptionPopup.addEventListener("click", event => {
-    if (event.target !== descriptionPopup) return;
-    const rect = descriptionPopup.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) descriptionPopup.close();
-  });
-  descriptionPopup.addEventListener("close", () => {
-    document.body.style.overflow = descriptionScroll;
-    if (descriptionLastFocus?.isConnected) descriptionLastFocus.focus();
-  });
+  const legxerciseDescription = $("#legxerciseDescription");
+  if (legxerciseDescription) {
+    legxerciseDescription.setAttribute("aria-haspopup", "dialog");
+    legxerciseDescription.setAttribute("aria-controls", "descriptionPopup");
+    legxerciseDescription.addEventListener("click", event => {
+      event.preventDefault();
+      openDescription({ title: "LegXercise Pro", description: $("#legxerciseDescriptionText").textContent.trim() }, legxerciseDescription);
+    });
+  }
+  descriptionPopup.querySelector(".description-close").addEventListener("click", () => closeNativeDialog(descriptionPopup));
 
   initializeGoals();
   hydrateBuyer();
@@ -584,6 +642,13 @@
   }
 
   function applySettings() {
+    const showWebPromo = ["si", "true", "1", "yes"].includes(normalizeHeader(settings.mostrar_boton_vender));
+    const supportsPopover = "popover" in HTMLElement.prototype;
+    if (!showWebPromo && supportsPopover && webPromo.matches(":popover-open")) webPromo.hidePopover();
+    webPromoTrigger.hidden = !showWebPromo;
+    webPromoTrigger.disabled = !showWebPromo;
+    webPromo.hidden = !showWebPromo || !supportsPopover;
+
     const seller = sellerPhone();
     if (seller) {
       headerWhatsApp.href = `https://wa.me/${seller}`;
@@ -1646,7 +1711,7 @@
     }, { passive: false });
 
     document.addEventListener("keydown", (e) => {
-      const modal = lightbox.open ? lightbox : drawer.classList.contains("open") ? drawer : null;
+      const modal = lauraContactDialog?.open ? lauraContactDialog : descriptionPopup.open ? descriptionPopup : lightbox.open ? lightbox : drawer.classList.contains("open") ? drawer : null;
       if (modal && e.key === "Tab") {
         const controls = [...modal.querySelectorAll('button, input, textarea, a[href], [tabindex="0"]')]
           .filter(el => !el.disabled && !el.closest('[inert]') && el.getClientRects().length);

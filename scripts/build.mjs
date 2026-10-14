@@ -16,6 +16,9 @@ const images = [
   'plot-twist-desktop.webp', 'plot-twist-mobile.webp', 'mts-hero-desktop.webp',
   'mts-hero-mobile-horizontal-540.webp', 'mts-hero-mobile-horizontal-720.webp', 'mts-hero-mobile-horizontal.webp',
   'mts-hero-tablet.webp', 'perrito-cabeza-67.webp', 'perrito-cabeza-134.webp', 'perrito-cabeza-201.webp', 'venta-por-mudanza-share.jpg',
+  'legxercise/mancha-cyan-puntos.webp', 'legxercise/mancha-amarilla.webp',
+  'legxercise/cinta-rosa.webp',
+  'legxercise/producto-480.webp', 'legxercise/producto-960.webp',
 ];
 
 // Only this generated directory is replaced. Source and QA evidence are preserved.
@@ -32,7 +35,10 @@ for (const dir of ['fonts', 'icons']) {
   }
 }
 await mkdir(path.join(out, 'images'), { recursive: true });
-for (const file of images) await cp(path.join('images', file), path.join(out, 'images', file));
+for (const file of images) {
+  await mkdir(path.dirname(path.join(out, 'images', file)), { recursive: true });
+  await cp(path.join('images', file), path.join(out, 'images', file));
+}
 await cp('images/social', path.join(out, 'images/social'), {
   recursive: true,
   filter: source => !source.endsWith('.DS_Store'),

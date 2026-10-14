@@ -1,6 +1,15 @@
 // Fuentes locales y rangos Unicode
 // ────────────────────────────────────────────────────────────────────
 
+// Brush lettering scoped to the supplied LegXercise campaign.
+@font-face {
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(knewave-latin.woff2) format('woff2');
+}
+
 @font-face {
   font-family: 'Nunito';
   font-style: normal;

@@ -5,3 +5,7 @@
 #products[aria-busy=true] {
   display: none !important;
 }
+
+.contact-confirmation__close {
+  display: none;
+}

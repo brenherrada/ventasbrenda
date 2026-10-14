@@ -1,5 +1,12 @@
 /* Generated from scss/fonts.scss. Edit Sass, then run npm run styles:build. */
 @font-face {
+  font-family: "Knewave";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(knewave-latin.woff2) format("woff2");
+}
+@font-face {
   font-family: "Nunito";
   font-style: normal;
   font-weight: 500;

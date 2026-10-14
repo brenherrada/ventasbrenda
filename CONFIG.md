@@ -28,10 +28,25 @@ Migración del 13/10/2026: se agregó K sin mover A:J, se inicializaron las 92 f
 | mp_comision_inmediata | Porcentaje SIN IVA por cobrar un Link de pago con disponibilidad inmediata. |
 | mp_comision_3_cuotas | Porcentaje adicional SIN IVA por ofrecer 3 cuotas. |
 | mp_iva | Porcentaje de IVA sobre ambas comisiones. |
+| mostrar_boton_vender | Casilla en B11: muestra u oculta «¿Querés vender tus cosas?» y su invitación. |
 
 Los valores se leen al abrir o recargar la web. Si Config no carga, el runtime conserva los valores de respaldo; las consultas necesitan un WhatsApp válido y la meta se oculta si falta su valor. El diseño, imágenes, moneda, formato de números, textos de botones, mensajes y etiquetas accesibles se mantienen en el código, no en Config.
 
 El 10/10/2026 se eliminaron las 95 claves sin consumidores del runtime actual (antes filas 7–101). Quedaron seis configuraciones; el 12/10 se sumaron las tres tasas para estimar el pago con tarjeta. Respaldo local en `output/backups/config-cleanup-20261010/`. El script de actualización encuentra su fila por clave, por lo que la limpieza no requiere modificarlo.
+
+## Mostrar u ocultar la invitación a vender
+
+En **Config!B11**, junto a la clave `mostrar_boton_vender`:
+
+- Casilla marcada: aparece **¿Querés vender tus cosas?**.
+- Casilla desmarcada: el botón y la invitación quedan ocultos y deshabilitados.
+- Abrí o recargá la web después de cambiarla. Una página ya abierta no se sincroniza en vivo.
+
+La casilla se dejó marcada. Guarda internamente `si`/`no`, como texto, para conservar la lectura pública de la columna B de Config sin perder el valor por mezcla de tipos. No cambies la clave ni la validación; usá la casilla.
+
+Mientras carga Config, si falla la lectura o si JavaScript está desactivado, la invitación permanece oculta. Una Config que todavía no tiene esta clave conserva el comportamiento anterior al cargar correctamente; un valor vacío o inválido la desactiva. No cambia el contacto del catálogo ni el de Laura. El control afecta visibilidad y acceso; los estilos y assets siguen incluidos en la versión publicada.
+
+Implementado y verificado localmente el 13/10/2026, incluida la casilla real y su lectura por API. La función requiere publicar esta versión una vez; a partir de esa publicación, marcar o desmarcar la casilla no requiere nuevos deploys.
 
 ## Estimación de tarjeta en 3 cuotas
 

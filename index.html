@@ -133,16 +133,40 @@
       <p class="catalog-progress" id="catalogProgress" role="status" aria-live="polite" aria-atomic="true"></p>
       <button class="bag-browse catalog-more" id="loadMoreProducts" type="button" aria-controls="products" aria-describedby="catalogProgress">Ver 12 más</button>
     </div>
+    <section class="product-feature" id="legxerciseBanner" aria-labelledby="legxerciseTitle">
+      <div class="product-feature__decoration" aria-hidden="true">
+        <img class="product-feature__corner" src="images/legxercise/mancha-cyan-puntos.webp" width="768" height="768" alt="" loading="lazy" decoding="async" />
+        <img class="product-feature__corner product-feature__corner--top" src="images/legxercise/mancha-cyan-puntos.webp" width="768" height="768" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="product-feature__copy">
+        <h2 class="product-feature__title" id="legxerciseTitle">¡Piernas en <span>movimiento!</span></h2>
+        <p class="product-feature__intro">Movete sin levantarte de la silla.</p>
+        <div class="product-feature__meta">
+          <p class="price mts-badge mts-badge--tape product-feature__price">$200.000</p>
+          <details class="product-feature__description" id="legxerciseDetails">
+          <summary class="description-more" id="legxerciseDescription"><img class="custom-icon" src="icons/product-info.svg" width="24" height="24" alt="" aria-hidden="true" />Ver descripción</summary>
+          <p id="legxerciseDescriptionText">El LegXercise Pro es un ejercitador automático para piernas que utiliza un movimiento continuo para aliviar el dolor y promover la circulación saludable de forma natural. Su tecnología patentada simula una caminata natural, moviendo los pies hacia adelante y hacia atrás, lo que ayuda a reducir la hinchazón y prevenir calambres en las piernas y los pies. Es ideal para personas con dolor de piernas, adultos mayores o en rehabilitación, y se adapta a diferentes niveles de intensidad, permitiendo una experiencia de ejercicio cómoda y efectiva en casa.</p>
+          </details>
+        </div>
+      </div>
+      <div class="product-feature__visual">
+        <div class="product-feature__backdrop" aria-hidden="true"><img class="product-feature__shape" src="images/legxercise/mancha-amarilla.webp" width="768" height="768" alt="" loading="lazy" decoding="async" /></div>
+        <img class="product-feature__product" src="images/legxercise/producto-960.webp" srcset="images/legxercise/producto-480.webp 480w, images/legxercise/producto-960.webp 960w" sizes="(max-width: 600px) min(calc(100vw - 64px), max(240px, calc(100vw - 112px))), min(44vw, 510px)" width="960" height="756" alt="LegXercise Pro con sus dos plataformas para los pies y control remoto" loading="lazy" decoding="async" />
+        <p class="product-feature__label product-feature__label--name">LegXercise Pro</p>
+        <svg class="product-feature__arrow product-feature__arrow--movement" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="M13 86C56 68 80 48 80 15M63 37l17-25 9 29M30 75C57 56 67 43 67 26" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </div>
+      <a class="bag-browse product-feature__action" id="legxerciseContact" href="#lauraContactDialog" aria-haspopup="dialog" aria-controls="lauraContactDialog">Contactar por WhatsApp</a>
+    </section>
     <div class="goal-placement" id="catalogGoal" hidden></div>
   </main>
 
 
 
-  <button class="web-promo-trigger" id="webPromoTrigger" type="button" popovertarget="webPromo" aria-controls="webPromo" aria-expanded="false">
+  <button class="web-promo-trigger" id="webPromoTrigger" type="button" popovertarget="webPromo" aria-controls="webPromo" aria-expanded="false" hidden disabled>
     <img src="images/perrito-cabeza-134.webp" srcset="images/perrito-cabeza-67.webp 67w, images/perrito-cabeza-134.webp 134w, images/perrito-cabeza-201.webp 201w" sizes="67px" width="320" height="292" alt="" decoding="async" />
     <span>¿Querés vender tus cosas?</span>
   </button>
-  <aside class="web-promo" id="webPromo" popover="auto" aria-labelledby="webPromoTitle">
+  <aside class="web-promo" id="webPromo" popover="auto" aria-labelledby="webPromoTitle" hidden>
     <button class="dismiss-button web-promo-close" type="button" popovertarget="webPromo" popovertargetaction="hide" aria-label="Cerrar invitación"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button>
     <div class="web-promo-content">
       <img class="web-promo-art" src="images/ilustracion-catalogo.webp" width="560" height="222" alt="" loading="lazy" decoding="async" />
@@ -228,6 +252,20 @@
     <div class="description-popup__head">
     <h2 id="descriptionPopupTitle"><span id="descriptionPopupHeading"></span></h2><button class="dismiss-button description-close" type="button" aria-label="Cerrar descripción"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div>
     <div class="description-popup-copy" id="descriptionPopupCopy"></div>
+  </dialog>
+  <dialog class="description-popup contact-confirmation" id="lauraContactDialog" open aria-labelledby="lauraContactTitle" aria-describedby="lauraContactScope">
+    <div class="description-popup__head">
+      <h2 id="lauraContactTitle">Antes de abrir WhatsApp</h2>
+      <button class="dismiss-button contact-confirmation__close" id="closeLauraContact" type="button" aria-label="Cerrar confirmación de contacto"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button>
+    </div>
+    <div class="description-popup-copy contact-confirmation__copy">
+      <p id="lauraContactScope"><strong>Laura vende solo este LegXercise Pro.</strong></p>
+      <p>Los demás artículos del catálogo se consultan con Brenda.</p>
+      <div class="contact-confirmation__actions">
+        <a class="bag-browse" id="confirmLauraContact" href="https://wa.me/5492235364892?text=Hola%20Laura%2C%20vi%20tu%20LegXercise%20Pro%20en%20Plot%20Twist.%20Quisiera%20consultarte%20por%20este%20producto%3A%20disponibilidad%2C%20precio%20y%20entrega." target="_blank" rel="noopener noreferrer" aria-label="Sí, abrir WhatsApp para consultar por este LegXercise Pro (abre una nueva pestaña)">Sí, abrir WhatsApp <img class="custom-icon" src="icons/whatsapp.svg" width="28" height="28" alt="" aria-hidden="true" /></a>
+        <a class="bag-browse contact-confirmation__cancel" id="cancelLauraContact" href="#legxerciseBanner">Volver al catálogo</a>
+      </div>
+    </div>
   </dialog>
   <aside class="info-popup delivery-popup anchored-popover" id="deliveryPopup" popover="auto" aria-labelledby="deliveryPopupTitle"><div class="info-popup__head"><img class="custom-icon" src="icons/delivery-scooter.svg" width="40" height="40" alt="" aria-hidden="true"><h2 id="deliveryPopupTitle">ENTREGAS EN MAR DEL PLATA</h2><button class="dismiss-button" type="button" popovertarget="deliveryPopup" popovertargetaction="hide" aria-label="Cerrar información de entregas"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button></div><div class="info-popup__inner"><p>Entregas únicamente dentro de Mar del Plata.</p><p>Consultá por WhatsApp para coordinar disponibilidad, pago y entrega.</p></div></aside>
   <aside class="info-popup anchored-popover" id="paymentPopup" popover="auto" aria-labelledby="paymentPopupTitle">
