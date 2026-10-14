@@ -28,6 +28,11 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
         return route.fulfill({ contentType: 'application/javascript', body: `${callback}(${JSON.stringify(config())});` });
       });
       await context.route('https://wa.me/**', route => route.fulfill({ body: 'WhatsApp intercepted for QA.' }));
+      let registrations = 0;
+      await context.route('**/api/waitlist', route => {
+        registrations++;
+        return route.fulfill({ json: { ok: true } });
+      });
       const page = await context.newPage();
       const errors = [];
       page.on('pageerror', e => errors.push(e.message));
@@ -50,13 +55,13 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
       await page.keyboard.press('Escape');
       await promo.waitFor({ state: 'hidden' });
       assert.equal(await trigger.evaluate(el => el === document.activeElement), true);
-      const popupPromise = context.waitForEvent('page');
       await trigger.click();
+      await page.locator('#waitlistName').fill('Persona QA');
+      await page.locator('#waitlistEmail').fill('qa@example.test');
       await page.locator('#webPromoContact').click();
-      const popup = await popupPromise;
-      await popup.waitForLoadState();
-      assert.equal(new URL(popup.url()).pathname, '/5492235550101');
-      await popup.close();
+      await page.locator('#waitlistStatus').waitFor({ state: 'visible' });
+      assert.match(await page.locator('#waitlistStatus').innerText(), /Gracias por tu interés/);
+      assert.equal(registrations, 1);
       for (const flag of ['no', false, '', 'invalid']) {
         state.flag = flag;
         await page.reload();
@@ -65,7 +70,8 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
         assert.equal(await trigger.isDisabled(), true);
         assert.equal(await promo.evaluate(el => el.hidden), true);
         await page.locator('#webPromoContact').evaluate(el => el.click());
-        assert.equal(context.pages().length, 1, 'Disabled promotion opened WhatsApp');
+        assert.equal(registrations, 1, 'Disabled promotion submitted a registration');
+        assert.equal(context.pages().length, 1, 'Registration opened an external page');
       }
       await page.screenshot({ path: `${output}/${engine}-off-${width}.png` });
       for (const flag of [undefined, true, 'Sí']) {

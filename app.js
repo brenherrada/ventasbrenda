@@ -88,20 +88,34 @@
     webPromoTrigger.setAttribute("aria-expanded", String(event.newState === "open"));
   });
   webPromo.querySelector(".web-promo-close").addEventListener("click", () => webPromoTrigger.focus());
-  $("#webPromoContact").addEventListener("click", () => {
-    if (webPromoTrigger.hidden || webPromoTrigger.disabled) return;
-    const seller = sellerPhone();
-    if (!seller) {
-      showToast("El contacto todavía no está disponible. Intentá nuevamente en un momento.");
-      return;
-    }
-    const message = "Hola Brenda, vi tu catálogo de venta por mudanza y me gustaría consultar por una web así para vender mis cosas.";
-    window.open(`https://wa.me/${seller}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
-  });
+  if ("popover" in HTMLElement.prototype) {
+    webPromo.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || !webPromo.matches(":popover-open")) return;
+      event.preventDefault();
+      webPromo.hidePopover();
+      webPromoTrigger.focus({ preventScroll: true });
+    });
+  }
   if (!("popover" in HTMLElement.prototype)) {
-    // Keep legacy browsers usable without showing an uncloseable panel.
+    // Use the same non-modal panel when native popovers are unavailable.
     webPromo.hidden = true;
-    webPromoTrigger.addEventListener("click", () => $("#webPromoContact").click());
+    const closePromo = () => {
+      webPromo.hidden = true;
+      webPromo.classList.remove("is-open");
+      webPromoTrigger.setAttribute("aria-expanded", "false");
+      webPromoTrigger.focus();
+    };
+    webPromoTrigger.addEventListener("click", () => {
+      if (webPromoTrigger.hidden || webPromoTrigger.disabled) return;
+      const opening = !webPromo.classList.contains("is-open");
+      webPromo.hidden = !opening;
+      webPromo.classList.toggle("is-open", opening);
+      webPromoTrigger.setAttribute("aria-expanded", String(opening));
+    });
+    webPromo.querySelector(".web-promo-close").addEventListener("click", closePromo);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && webPromo.classList.contains("is-open")) closePromo();
+    });
   }
 
   // Start product photos near the viewport, rather than the browser's multi-screen
@@ -645,6 +659,7 @@
     const showWebPromo = ["si", "true", "1", "yes"].includes(normalizeHeader(settings.mostrar_boton_vender));
     const supportsPopover = "popover" in HTMLElement.prototype;
     if (!showWebPromo && supportsPopover && webPromo.matches(":popover-open")) webPromo.hidePopover();
+    if (!showWebPromo) webPromo.classList.remove("is-open");
     webPromoTrigger.hidden = !showWebPromo;
     webPromoTrigger.disabled = !showWebPromo;
     webPromo.hidden = !showWebPromo || !supportsPopover;

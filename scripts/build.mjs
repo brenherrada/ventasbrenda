@@ -5,12 +5,13 @@ import * as sass from 'sass';
 const root = process.cwd();
 const out = path.join(root, 'dist');
 const files = [
-  'index.html', 'app.js', 'navigation.js', 'config.js', 'styles.css',
+  'index.html', 'app.js', 'navigation.js', 'waitlist.js', 'config.js', 'styles.css',
   'tokens.css', 'promo.css', 'no-script.css', '_headers', 'robots.txt',
   'favicon-192.png', 'favicon-32.png', 'apple-touch-icon.png',
 ];
 const images = [
-  'badge-recien-agregado.webp', 'ilustracion-catalogo.webp',
+  'badge-recien-agregado.webp',
+  'venta-red-280.webp', 'venta-red-560.webp',
   'mts-hero-mobile-horizontal-540.avif', 'mts-hero-mobile-horizontal-720.avif',
   'mts-hero-mobile-horizontal.avif', 'mts-hero-tablet.avif', 'mts-hero-desktop.avif',
   'plot-twist-desktop.webp', 'plot-twist-mobile.webp', 'mts-hero-desktop.webp',

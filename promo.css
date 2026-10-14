@@ -1,5 +1,5 @@
 /* Generated from scss/promo.scss. Edit Sass, then run npm run styles:build. */
-/* Approved catalog-service invitation. Shared palette remains in styles.css. */
+/* Shared catalog primitives and palette remain in styles.css. */
 :root {
   --promo-gap: clamp(12px, 1.6vw, 22px);
   --promo-bottom: calc(
@@ -71,7 +71,7 @@
   transform-origin: 70px bottom;
   transition: opacity 0.18s ease, transform 0.18s ease, display 0.18s allow-discrete, overlay 0.18s allow-discrete;
 }
-.web-promo:popover-open {
+.web-promo:popover-open, .web-promo.is-open {
   opacity: 1;
   transform: none;
 }
@@ -89,7 +89,7 @@
   box-shadow: 5px 5px 0 var(--ink);
 }
 .web-promo-content {
-  padding: clamp(22px, 2vw, 26px);
+  padding: clamp(18px, 2vw, 22px);
   max-height: calc(100dvh - var(--promo-bottom) - var(--promo-height) - 52px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -103,25 +103,27 @@
 }
 .web-promo-art {
   display: block;
-  width: clamp(180px, 18vw, 230px);
-  height: 132px;
+  width: clamp(160px, 18vw, 230px);
+  height: auto;
   object-fit: contain;
-  margin: 0 auto clamp(12px, 1.4vw, 18px);
+  margin: 0 auto clamp(10px, 1.2vw, 14px);
 }
 .web-promo h2 {
   font-family: var(--font-display);
   margin: 0;
-  font-size: clamp(1.2rem, 2vw, 1.58rem);
+  font-size: clamp(1.2rem, 2vw, 1.4rem);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: 0;
 }
 .web-promo p {
-  margin: clamp(14px, 1.4vw, 18px) 0;
+  margin: clamp(12px, 1.2vw, 14px) 0;
   font-size: clamp(0.95rem, 1.2vw, 1rem);
   line-height: 1.5;
 }
 .web-promo-contact {
+  --action-hover-offset: 0px;
+  --action-press-offset: 0px;
   width: 100%;
   text-transform: uppercase;
   background: var(--color-green);
@@ -130,6 +132,30 @@
 .web-promo-contact span {
   font-size: 25px;
   font-family: var(--font-emoji);
+}
+
+.waitlist-form {
+  display: grid;
+  gap: clamp(12px, 1.2vw, 14px);
+}
+
+.waitlist-trap {
+  display: none;
+}
+
+.waitlist-privacy {
+  font-size: clamp(12px, 0.9vw, 13px);
+  line-height: 1.5;
+}
+
+.web-promo .waitlist-status {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.web-promo-contact:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 @media (prefers-reduced-motion: reduce) {

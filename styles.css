@@ -1436,12 +1436,12 @@ body::before {
 .send,
 .web-promo-contact,
 .bag-browse):focus-visible:not(:disabled) {
-  transform: translate(3px, 3px);
+  transform: translate(var(--action-hover-offset, 3px), var(--action-hover-offset, 3px));
   box-shadow: var(--shadow-hover);
 }
 
 :where(.hero-cta, .select-btn, .send, .web-promo-contact, .bag-browse):active:not(:disabled) {
-  transform: translate(5px, 5px);
+  transform: translate(var(--action-press-offset, 5px), var(--action-press-offset, 5px));
   box-shadow: none;
 }
 

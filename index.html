@@ -36,7 +36,7 @@
   <script src="fonts/font-loading.js?v=20261007-mts-v43"></script>
   <link rel="stylesheet" href="tokens.css?v=20261008-qa" />
   <link rel="stylesheet" href="styles.css?v=20261008-image-cdn" />
-  <link rel="stylesheet" href="promo.css?v=20261007-mts-v41" />
+  <link rel="stylesheet" href="promo.css?v=20261013-comunidad" />
 </head>
 <body>
   <div class="font-splash" role="status" aria-label="Cargando catálogo">
@@ -169,10 +169,17 @@
   <aside class="web-promo" id="webPromo" popover="auto" aria-labelledby="webPromoTitle" hidden>
     <button class="dismiss-button web-promo-close" type="button" popovertarget="webPromo" popovertargetaction="hide" aria-label="Cerrar invitación"><img class="dismiss-button__icon" src="icons/dismiss.svg" width="20" height="20" alt="" aria-hidden="true" /></button>
     <div class="web-promo-content">
-      <img class="web-promo-art" src="images/ilustracion-catalogo.webp" width="560" height="222" alt="" loading="lazy" decoding="async" />
-      <h2 id="webPromoTitle">¿Querés vender tus cosas con una web así?</h2>
-      <p>Soy diseñadora web. Te entrego tu catálogo publicado y una plantilla de ejemplo para que cargues tus productos, fotos y precios. Vos mantenés la información actualizada; las consultas llegan por WhatsApp.</p>
-      <button class="web-promo-contact" id="webPromoContact" type="button">Quiero mi catálogo <span aria-hidden="true">👀</span></button>
+      <img class="web-promo-art" src="images/venta-red-560.webp" srcset="images/venta-red-280.webp 280w, images/venta-red-560.webp 560w" sizes="clamp(160px, 18vw, 230px)" width="560" height="221" alt="" loading="lazy" decoding="async" />
+      <h2 id="webPromoTitle">Venta en comunidad</h2>
+      <p>Estoy desarrollando una web de venta colectiva con el mismo estilo visual de este catálogo. Dejá tus datos y te avisaré por mail cuando esté disponible.</p>
+      <form class="waitlist-form" id="waitlistForm" action="/api/waitlist" method="post" aria-describedby="waitlistPrivacy">
+        <label for="waitlistName">Tu nombre<input id="waitlistName" name="name" autocomplete="name" maxlength="80" required /></label>
+        <label for="waitlistEmail">Tu mail<input id="waitlistEmail" name="email" type="email" autocomplete="email" maxlength="254" required /></label>
+        <label class="waitlist-trap" aria-hidden="true">Sitio web<input name="website" tabindex="-1" autocomplete="off" /></label>
+        <button class="web-promo-contact" id="webPromoContact" type="submit">Quiero participar</button>
+        <small class="waitlist-privacy" id="waitlistPrivacy">Tus datos se guardan en una lista privada y se usarán únicamente para este aviso.</small>
+      </form>
+      <p class="waitlist-status" id="waitlistStatus" role="status" aria-live="polite" tabindex="-1" hidden></p>
     </div>
   </aside>
 
@@ -319,6 +326,7 @@
     </section>
   </template>
   <script src="app.js?v=20261012-card-estimate"></script>
+  <script src="waitlist.js?v=20261013-comunidad"></script>
   <script src="navigation.js?v=20261008-qa2"></script>
 </body>
 </html>
