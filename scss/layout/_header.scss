@@ -54,6 +54,7 @@ body::before {
   gap: clamp(12px, 1.7vw, 24px);
 }
 .site-logo {
+  position: relative;
   grid-column: 2;
   grid-row: 1;
   display: flex;
@@ -62,7 +63,6 @@ body::before {
   gap: clamp(3px, 0.3vw, 4px);
   width: clamp(150px, 17vw, 240px);
   text-decoration: none;
-  transition: transform 0.3s var(--ease);
 
   & img {
     position: absolute;
@@ -74,10 +74,6 @@ body::before {
     height: auto;
     object-fit: contain;
   }
-
-  &:hover {
-    transform: rotate(3deg) scale(1.08);
-  }
 }
 .site-logo__mark {
   display: block;
@@ -87,10 +83,42 @@ body::before {
   overflow: hidden;
 }
 .site-logo__tagline {
+  --sale-cord-height: clamp(20px, 2vw, 24px);
+  position: absolute;
+  bottom: calc(100% + 3px);
+  isolation: isolate;
+  color: var(--color-ink);
+  transform-origin: 50% calc(-1 * var(--sale-cord-height) - 2px);
+  animation: garage-sign-sway 1s ease-in-out infinite alternate;
   font: 600 clamp(10px, 0.85vw, 12px)/1.2 var(--font-mono);
   letter-spacing: 0.04em;
   white-space: nowrap;
   text-transform: uppercase;
+}
+
+.site-logo__tagline::before {
+  content: ''; position: absolute; inset: -1px -8px; z-index: -1;
+  background: var(--color-cyan); border: 1.5px solid var(--color-ink);
+  border-radius: 3px; box-shadow: 1.5px 1.5px 0 var(--color-ink);
+}
+.sale-sign__cord {
+  position: absolute; top: calc(-1 * var(--sale-cord-height) - 2px);
+  width: 2px; height: var(--sale-cord-height); background: var(--color-ink);
+  border-radius: 2px; pointer-events: none;
+  &--left { left: 12px; }
+  &--right { right: 12px; }
+  &::after {
+    content: ''; position: absolute; bottom: -4px; left: -2px;
+    width: 4px; height: 4px; background: var(--color-ink);
+    border: 1px solid var(--color-ink); border-radius: 50%;
+  }
+}
+@keyframes garage-sign-sway {
+  from { transform: rotate(-0.8deg); }
+  to { transform: rotate(0.8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-logo__tagline { animation: none; transform: rotate(0deg); }
 }
 .header-links {
   grid-column: 1;
