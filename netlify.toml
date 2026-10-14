@@ -9,4 +9,4 @@
   publish = "."
 
 [images]
-  remote_images = ['^https://lh3\.googleusercontent\.com/d/[A-Za-z0-9_-]+=w1600$']
+  remote_images = ['^https://lh3\.googleusercontent\.com/d/[A-Za-z0-9_-]+=w(64|128|192|300|450|600|900|1200|1600)$']

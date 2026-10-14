@@ -285,7 +285,7 @@
   async function readTable(sheet, callbackName, query = "") {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), 10000);
       try {
         const response = await fetch(`/api/catalog?sheet=${encodeURIComponent(sheet)}`, { signal: controller.signal, cache: "no-store" });
         if (!response.ok) throw new Error("No se pudo consultar el catálogo.");
@@ -545,13 +545,14 @@
 
     const driveId = extractDriveFileId(raw);
     if (driveId) {
-      // One stable source per Drive ID. Never request the original Drive file.
+      // Request only the source resolution needed for this responsive candidate.
+      // Never download the original Drive file to generate a small thumbnail.
       // Replacing a photo means a new file/link in the Sheet, so the cache key changes.
-      const source = `https://lh3.googleusercontent.com/d/${encodeURIComponent(driveId)}=w1600`;
+      const source = `https://lh3.googleusercontent.com/d/${encodeURIComponent(driveId)}=w${width}`;
       const params = new URLSearchParams({ url: source, w: String(width), fit: "contain", fm: "webp", q: "85" });
       return [
         `/.netlify/images?${params}`,
-        source.replace(/w1600$/, `w${width}`),
+        source,
         `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w${width}`
       ];
     }
