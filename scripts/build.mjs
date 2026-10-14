@@ -1,6 +1,10 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as sass from 'sass';
+import { verifyWaitlistBuildConfig } from './waitlist-build-config.mjs';
+
+// Fail before replacing dist; do not publish an unconfigured waitlist.
+if (verifyWaitlistBuildConfig()) console.log('PASS: waitlist production build configuration.');
 
 const root = process.cwd();
 const out = path.join(root, 'dist');

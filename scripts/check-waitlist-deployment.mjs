@@ -22,8 +22,8 @@ try {
   for (const key of ['WAITLIST_SCRIPT_URL', 'WAITLIST_SCRIPT_SECRET']) {
     const variable = variables.find(item => item.key === key);
     const production = variable?.values?.find(value => value.context === 'production');
-    if (!variable?.scopes?.includes('functions') || !production?.value) {
-      throw new Error(`${key} no está configurada para Functions en producción.`);
+    if (!variable?.scopes?.includes('functions') || !variable.scopes.includes('builds') || !production?.value) {
+      throw new Error(`${key} no está configurada para Builds y Functions en producción.`);
     }
     if (key === 'WAITLIST_SCRIPT_SECRET' && !variable.is_secret) {
       throw new Error('La clave de conexión debe estar marcada como secreta.');

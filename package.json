@@ -18,6 +18,7 @@
     "test:resilience": "node tests/resilience.mjs",
     "test:interactions": "node tests/interactions.mjs",
     "waitlist:preflight": "node scripts/check-waitlist-deployment.mjs",
+    "test:waitlist-build": "node tests/waitlist-build.mjs",
     "clean:qa": "node scripts/clean-qa.mjs"
   }
 }
