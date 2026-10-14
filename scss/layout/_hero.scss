@@ -43,6 +43,7 @@
     margin: clamp(14px, 1.7vw, 24px) 0 clamp(8px, 1vw, 14px);
     font: 600 clamp(28px, 5vw, 60px)/1 var(--font-display);
     letter-spacing: -0.025em;
+    text-shadow: 1px 1px #fff;
 
     & > span {
       display: block;
