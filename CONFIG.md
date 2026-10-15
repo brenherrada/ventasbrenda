@@ -13,7 +13,7 @@ Los productos y sus fotos se mantienen en **Catalogo**.
 - Los datos se actualizan al recargar; no hay sincronización instantánea con una página que ya esté abierta. Seleccionar en la web no marca una reserva en la Sheet: esa confirmación sigue siendo manual.
 - Para filas nuevas, la validación de casillas cubre K2:K1003. Una celda todavía vacía conserva la compatibilidad con los títulos antiguos; el primer marcado/desmarcado guarda el estado explícito.
 
-Migración del 13/10/2026: se agregó K sin mover A:J, se inicializaron las 92 filas existentes y se trasladaron 16 marcas de reserva de los títulos a las casillas. Títulos, disponibilidad y vendido se conservaron. La API y la lectura alternativa consultan A:I y K; no se sirve `fecha_alta` de J. Fuentes implementadas y probadas localmente; activación en la web pública pendiente de publicar esta versión.
+Migración del 13/10/2026: se agregó K sin mover A:J, se inicializaron las 92 filas existentes y se trasladaron 16 marcas de reserva de los títulos a las casillas. Títulos, disponibilidad y vendido se conservaron. La API proyecta las columnas públicas por nombre de cabecera; no se sirve `fecha_alta` ni notas internas. No existe lectura alternativa directa de Google. Fuentes implementadas y probadas localmente; activación en la web pública pendiente de publicar esta versión.
 
 ## Configuraciones activas
 
@@ -42,7 +42,7 @@ En **Config!B11**, junto a la clave `mostrar_boton_vender`:
 - Casilla desmarcada: el botón y la invitación quedan ocultos y deshabilitados.
 - Abrí o recargá la web después de cambiarla. Una página ya abierta no se sincroniza en vivo.
 
-La casilla se dejó marcada. Guarda internamente `si`/`no`, como texto, para conservar la lectura pública de la columna B de Config sin perder el valor por mezcla de tipos. No cambies la clave ni la validación; usá la casilla.
+La casilla se dejó marcada. Guarda internamente `si`/`no`, como texto, para conservar el contrato de configuración. No cambies la clave ni la validación; usá la casilla.
 
 Mientras carga Config, si falla la lectura o si JavaScript está desactivado, la invitación permanece oculta. Una Config que todavía no tiene esta clave conserva el comportamiento anterior al cargar correctamente; un valor vacío o inválido la desactiva. No cambia el contacto del catálogo ni el de Laura. El control afecta visibilidad y acceso; los estilos y assets siguen incluidos en la versión publicada.
 
@@ -64,7 +64,7 @@ La estimación se muestra debajo del total del minicart con el SVG custom de tar
 =TEXT(SUMIF(Catalogo!B2:B,"<>",Catalogo!D2:D),"0")
 ```
 
-Suma todos los artículos con título, incluidos vendidos. No reemplaces la fórmula por un monto fijo. TEXT devuelve dígitos sin separadores para la lectura pública de Config. Los precios deben seguir siendo números en Catalogo!D. El runtime busca la clave `meta_total`; no depende de que esté en una fila determinada.
+Suma todos los artículos con título, incluidos vendidos. No reemplaces la fórmula por un monto fijo. TEXT devuelve dígitos sin separadores para el contrato de Config. Los precios deben seguir siendo números en Catalogo!D. El runtime busca la clave `meta_total`; no depende de que esté en una fila determinada.
 
 Lo recaudado proviene de **TOTAL VENDIDO** en **Ventas**, cuyo cálculo depende de los checkboxes vendido en Catalogo. No cambies ese rótulo. `SALES_SHEET` en config.js define la pestaña. El porcentaje mostrado se calcula con ambos valores; el sitio no registra ventas al seleccionar artículos.
 
@@ -119,9 +119,26 @@ La prueba nativa verificó altas, fechas, pegados, vendidos, reversa y vencimien
 
 ## Resiliencia de lectura — 14/10/2026
 
-La API conserva `no-store` y las consultas permitidas: no sirve stock/configuración antiguos ni detalles de ventas. Ante errores de red, timeout, 429 o 5xx hace como máximo dos intentos (6 s y 2 s, separados por 200 ms). No reintenta permisos denegados ni datos inválidos. El navegador concede 10 s a la API antes del fallback JSONP existente. El presupuesto de lectura de Config más el guardado de 20 s sigue por debajo del timeout de 30 s del formulario. Los logs registran solo evento, pestaña permitida, número de intento y categoría de error; nunca respuestas ni datos personales.
+Registro histórico anterior a la migración privada del 15/10/2026. La API conservaba `no-store` y las consultas permitidas: no sirve stock/configuración antiguos ni detalles de ventas. Ante errores de red, timeout, 429 o 5xx hace como máximo dos intentos (6 s y 2 s, separados por 200 ms). No reintenta permisos denegados ni datos inválidos. El navegador concede 10 s a la API antes del fallback JSONP existente. El presupuesto de lectura de Config más el guardado de 20 s sigue por debajo del timeout de 30 s del formulario. Los logs registran solo evento, pestaña permitida, número de intento y categoría de error; nunca respuestas ni datos personales.
 
 Pruebas dirigidas: `node tests/catalog-api.mjs`, `node tests/waitlist.mjs`, `tests/resilience.mjs` y `tests/image-cdn.mjs`. Esta mitigación reduce fallas transitorias y peso de origen; no garantiza disponibilidad de Google. QA local aprobado: 60 E2E en Chromium/Firefox/WebKit, 26 casos de resiliencia, 32 comprobaciones de waitlist, seis layouts con imágenes reales y tres fallbacks. Lectura real de Sheets en 390 y 1440 px sin errores de página ni overflow. Publicado con autorización de Bren: commit `4183a80`, deploy `6ad0163adc7d30f39ae2c7e4`, 14/10/2026 20:54 ART. El JS público coincide con la fuente. Nueve lecturas reales de Catalogo/Config/Ventas devolvieron 200 en 0,52–1,00 s. Chromium público a 390/1440 px cargó catálogo e imágenes sin errores de página, respuestas 5xx ni overflow durante esos recorridos. El formulario devolvió 200 en ambos tamaños; se verificó una única fila para el correo sintético repetido y se limpiaron exclusivamente sus valores. Observabilidad inicial (20:54:56–20:55:31 ART): 232 respuestas 200, 144 respuestas 304 y seis 499; cero 5xx. Es una muestra breve, no garantía de disponibilidad futura de Google. Dispositivos físicos no probados.
 
 
 Optimización adicional de galería (14/10/2026): las tarjetas medidas en producción promedian 54 KiB (máximo 108 KiB), por lo que conservan su calidad. Las ampliadas mantienen 1600 px y WebP, con calidad 80 en lugar de 85. La comparación de muestras pesadas reduce el peso aproximadamente un 17–21%, conservando textos y detalle visibles. Los originales de Drive y los assets estáticos no se modifican; se conserva el fallback existente. La precarga adyacente usa la misma variante optimizada.
+
+
+## Privacidad del catálogo — migración del 15/10/2026
+
+**Problema confirmado:** el archivo tenía permiso `anyone/reader` y el ID estaba distribuido en `config.js`. La consulta limitada de Netlify no impedía leer directamente en Google otras filas o pestañas. No se puede determinar a partir de esta comprobación si terceros leyeron datos anteriormente.
+
+**Decisión:** reutilizar el proyecto de Apps Script que ya ejecutaba la lista de espera como propietario, con sus permisos y conexión existentes. Alternativas descartadas: una copia pública duplicaría sincronización y estados; una nueva cuenta de servicio añadiría credenciales e infraestructura sin necesidad. La ruta `catalog.read` usa POST y la misma clave privada servidor-servidor, nunca una clave en URL o navegador. No se amplían los scopes del proyecto. La automatización vinculada de fechas/badges se conserva.
+
+Apps Script admite solo `Catalogo`, `Config` y `Ventas`, sin IDs, rangos ni queries aportados por el cliente. Publica diez columnas de productos por cabecera, diez claves explícitas de Config y únicamente `TOTAL VENDIDO`. Netlify vuelve a proyectar esos datos y elimina columnas, metadatos y configuraciones no permitidas. Las notas internas, clientes, pendientes y lista de espera no forman parte del contrato público. No guardar secretos en descripciones, títulos ni otros campos que sí están destinados al catálogo.
+
+El navegador consulta únicamente `/api/catalog`: se retiraron el ID y JSONP, y CSP solo permite scripts propios. El build rechaza conexiones directas a Sheets en los archivos distribuidos. Los clientes que ya tenían una página antigua abierta necesitan recargar; al restringir Google su fallback anterior también deja de tener acceso. Un ID histórico no concede permisos.
+
+Presupuesto de lectura: dos intentos solo ante fallas transitorias, 12 s y 5 s con 200 ms de separación; navegador 20 s. El formulario dispone de 45 s para Config (máximo 17,2 s) y guardado (20 s), dentro de los 60 s de Netlify. No se usa caché de inventario antiguo. Dependencia operativa: disponibilidad y cuotas de Apps Script; ante fallo se muestra error/reintento, nunca datos privados ni éxito simulado.
+
+Puerta de activación: publicar y comprobar el puente; comparar productos, configuración efectiva y recaudado con el runtime vigente; publicar Netlify; quitar permiso general y cualquier publicación web; verificar rechazo anónimo de lectura/exportación y que los tres recursos públicos sigan funcionando. Verificar también formulario real, duplicados y retiro exclusivo del registro sintético. **No revertir a una Sheet pública como rollback**: mantener permisos restringidos y corregir el puente o el código; Google conserva la versión 1 del puente para la lista de espera, que no sirve el catálogo.
+
+Pruebas reproducibles: `tests/catalog-api.mjs`, `tests/catalog-privacy.mjs`, `tests/waitlist.mjs`, `tests/web-promo-config.mjs`, resiliencia, E2E, build y preflight real. La prueba de privacidad cubre credenciales ausentes/incorrectas, pestañas privadas, rangos extras, columnas futuras, claves futuras, detalle de ventas y cambio de cabeceras. El acceso anónimo a Google se verifica de nuevo después de aplicar permisos; los tests simulados por sí solos no lo prueban.

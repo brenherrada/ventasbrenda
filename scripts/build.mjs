@@ -79,6 +79,10 @@ async function auditDirectory(dir) {
     count++;
     bytes += (await stat(file)).size;
     if (/\.(md|zip|pem|log)$/.test(file)) throw new Error('Unexpected public file: ' + file);
+    if (/\.(js|html|css)$/.test(file)) {
+      const content = await readFile(file, 'utf8');
+      if (/SHEET_ID|gviz\/tq|docs\.google\.com\/spreadsheets\/d\//.test(content)) throw new Error('Public build contains a direct spreadsheet connection: ' + path.relative(out, file));
+    }
   }
 }
 await auditDirectory(out);

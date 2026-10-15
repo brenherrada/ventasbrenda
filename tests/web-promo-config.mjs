@@ -14,18 +14,18 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
   try {
     for (const width of [390, 1440]) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width, height: 1000 }, reducedMotion: 'reduce' });
-      const state = { flag: 'si', fail: false, fallback: false, hold: null };
+      const state = { flag: 'si', fail: false, hold: null };
       const config = () => table(['clave', 'valor'], [['whatsapp', '5492235550101'], ...(state.flag === undefined ? [] : [['mostrar_boton_vender', state.flag]])]);
       await context.route('**/api/catalog?*', async route => {
         const sheet = new URL(route.request().url()).searchParams.get('sheet');
         if (sheet !== 'Config') return route.fulfill({ json: catalog });
         if (state.hold) await state.hold;
-        return state.fail || state.fallback ? route.fulfill({ status: 503, json: { error: 'QA failure' } }) : route.fulfill({ json: config() });
+        return state.fail ? route.fulfill({ status: 503, json: { error: 'QA failure' } }) : route.fulfill({ json: config() });
       });
+      let directGoogleRequests = 0;
       await context.route('https://docs.google.com/**', route => {
-        if (!state.fallback) return route.abort();
-        const callback = new URL(route.request().url()).searchParams.get('tqx').split('responseHandler:')[1];
-        return route.fulfill({ contentType: 'application/javascript', body: `${callback}(${JSON.stringify(config())});` });
+        directGoogleRequests++;
+        return route.abort();
       });
       await context.route('https://wa.me/**', route => route.fulfill({ body: 'WhatsApp intercepted for QA.' }));
       let registrations = 0;
@@ -89,20 +89,12 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
       release(); state.hold = null;
       await ready();
       assert.equal(await trigger.isVisible(), false);
-      state.fallback = true;
-      state.flag = 'si';
-      await page.reload();
-      await ready();
-      assert.equal(await trigger.isVisible(), true, 'JSONP cannot enable promotion');
-      state.flag = 'no';
-      await page.reload();
-      await ready();
-      assert.equal(await trigger.isVisible(), false, 'JSONP cannot disable promotion');
-      state.fallback = false; state.fail = true;
+      state.fail = true;
       await page.reload();
       await page.locator('.card[data-id="fixture"]').waitFor();
       await page.waitForFunction(() => !document.querySelector('script[src*="responseHandler"]'));
       assert.equal(await trigger.isVisible(), false, 'Config failure exposed promotion');
+      assert.equal(directGoogleRequests, 0, 'Browser contacted Google Sheets');
       assert.equal(errors.length, 0, errors.join('; '));
       await context.close();
     }
@@ -111,6 +103,6 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
     await noJSPage.goto(base);
     assert.equal(await noJSPage.locator('#webPromoTrigger').isVisible(), false);
     await noJS.close();
-    console.log(`PASS ${engine}: on/off/reload, keyboard/contact, invalid/missing flags, delayed/failed Config, JSONP, no JS, desktop/mobile`);
+    console.log(`PASS ${engine}: on/off/reload, keyboard/contact, invalid/missing flags, delayed/failed Config, no direct Sheets access, no JS, desktop/mobile`);
   } finally { await browser.close(); }
 }

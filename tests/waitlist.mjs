@@ -10,10 +10,10 @@ const valid = { name: 'Persona QA', email: 'qa@example.test', consent: true, web
 const reset = () => { state = { flag: 'si', configFail: false, saved: { ok: true }, secret: 'unit-test-secret', url: 'https://script.google.com/macros/s/fixture/exec', writes: [], failSave: false }; };
 globalThis.Netlify = { env: { get: key => key === 'WAITLIST_SCRIPT_URL' ? state.url : state.secret } };
 globalThis.fetch = async (url, options) => {
-  if (String(url).includes('/gviz/tq')) {
+  if (JSON.parse(options.body).action === 'catalog.read') {
     if (state.configFail) return new Response('', { status: 503 });
     const table = { cols: [{ label: 'clave' }, { label: 'valor' }], rows: state.flag === undefined ? [] : [{ c: [{ v: 'mostrar_boton_vender' }, { v: state.flag }] }] };
-    return new Response(`google.visualization.Query.setResponse(${JSON.stringify({ table })});`);
+    return new Response(JSON.stringify({ ok: true, table }));
   }
   state.writes.push(JSON.parse(options.body));
   if (state.failSave) throw new Error('Upstream error');

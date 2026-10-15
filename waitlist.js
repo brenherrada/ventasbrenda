@@ -26,7 +26,7 @@
           website: String(fields.get("website") || ""),
           consent: true
         }),
-        signal: AbortSignal.timeout(30000)
+        signal: AbortSignal.timeout(45000)
       });
       const result = await response.json();
       if (!response.ok || result.ok !== true) throw new Error("Registration not confirmed");

@@ -2,7 +2,7 @@
 
 Por instrucción explícita de Bren del 7/10/2026, este repo es la única fuente activa del catálogo standalone. Las instrucciones del AGENTS.md padre que describen WordPress, WooCommerce, Docker o theme.css generado no aplican a este runtime. No modificar el theme de WooCommerce para resolver tareas de este proyecto.
 
-- Stack: HTML, CSS y JavaScript sin framework; Google Sheets pública; selección local y consultas por WhatsApp. Netlify sirve estáticos, /api/catalog y las vistas previas sociales de filtros.
+- Stack: HTML, CSS y JavaScript sin framework; Google Sheets privada con puente de Apps Script autenticado desde Netlify; selección local y consultas por WhatsApp. Netlify sirve estáticos, /api/catalog y las vistas previas sociales de filtros.
 - Leer y aplicar ../../standards/UX-UI-STANDARD.md, ENGINEERING-DELIVERY-STANDARD.md, SECURITY-DATA-STANDARD.md y adapters/html-css.md.
 - Fuente visual: rediseño aprobado de este chat (REDISENO.md), tokens.css, componentes reales y assets custom; el theme MTS es referencia de lectura, no runtime ni destino de cambios.
 - Sass es la fuente editable: scss/styles.scss organiza los módulos de catálogo; scss/tokens.scss, promo.scss, fonts.scss, y no-script.scss mantienen sus entradas. styles.css, tokens.css, promo.css, fonts/fonts.css, y no-script.css son generados y NO se editan directamente. Ejecutar npm run styles:build / styles:watch; npm run styles:check verifica sincronización. npm run build compila Sass antes de preparar dist. Mantener orden de cascada, selectores, tokens CSS y contratos existentes de Netlify/Sheets; no hay bundler de JavaScript.

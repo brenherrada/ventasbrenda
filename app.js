@@ -282,69 +282,21 @@
   loadSettings();
   loadCatalog();
 
-  async function readTable(sheet, callbackName, query = "") {
+  async function readTable(sheet) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-      try {
-        const response = await fetch(`/api/catalog?sheet=${encodeURIComponent(sheet)}`, { signal: controller.signal, cache: "no-store" });
-        if (!response.ok) throw new Error("No se pudo consultar el catálogo.");
-        const data = await response.json();
-        if (!data.table) throw new Error("Respuesta de catálogo inválida.");
-        return data.table;
-      } finally { clearTimeout(timeout); }
-    } catch (_) {
-      return jsonp(sheet, callbackName, query);
-    }
-  }
-
-  function gvizUrl(sheet, callbackName, query = "") {
-    const id = encodeURIComponent(CFG.SHEET_ID || "");
-    const name = encodeURIComponent(sheet);
-    const cb = encodeURIComponent(callbackName);
-    return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?sheet=${name}&headers=1&tqx=responseHandler:${cb}&_=${Date.now()}${query ? `&tq=${encodeURIComponent(query)}` : ""}`;
-  }
-
-  function jsonp(sheet, callbackName, query = "") {
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        cleanup();
-        reject(new Error("Tiempo de espera agotado al leer Google Sheets."));
-      }, 12000);
-
-      const script = document.createElement("script");
-      const cleanup = () => {
-        clearTimeout(timeout);
-        script.remove();
-        try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
-      };
-
-      window[callbackName] = (response) => {
-        cleanup();
-        if (!response || response.status === "error" || !response.table) {
-          reject(new Error(response?.errors?.[0]?.detailed_message || "No se pudo leer la planilla."));
-          return;
-        }
-        resolve(response.table);
-      };
-
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("No se pudo conectar con Google Sheets."));
-      };
-      script.src = gvizUrl(sheet, callbackName, query);
-      document.head.appendChild(script);
-    });
+      const response = await fetch(`/api/catalog?sheet=${encodeURIComponent(sheet)}`, { signal: controller.signal, cache: "no-store" });
+      if (!response.ok) throw new Error("No se pudo consultar el catálogo.");
+      const data = await response.json();
+      if (!Array.isArray(data.table?.cols) || !Array.isArray(data.table?.rows)) throw new Error("Respuesta de catálogo inválida.");
+      return data.table;
+    } finally { clearTimeout(timeout); }
   }
 
   async function loadSettings() {
-    if (!CFG.SHEET_ID) {
-      showCatalogError("Falta configurar la Google Sheet.");
-      return;
-    }
-
     try {
-      const table = await readTable(CFG.SETTINGS_SHEET || "Config", `settingsCallback_${Date.now()}`, "select A,B where A is not null");
+      const table = await readTable(CFG.SETTINGS_SHEET || "Config");
       settings = { ...settings, ...parseSettings(table) };
       applySettings();
     } catch (err) {
@@ -380,7 +332,7 @@
     goal.status = "loading";
     renderGoals();
     try {
-      const table = await readTable(CFG.SALES_SHEET || "Ventas", `salesCallback_${Date.now()}`, "select A,B where A = 'TOTAL VENDIDO'");
+      const table = await readTable(CFG.SALES_SHEET || "Ventas");
       const row = (table.rows || []).find(row => normalizeHeader(cellValue(row, 0)) === "total vendido");
       const collected = row?.c?.[1]?.v;
       if (typeof collected !== "number" || !Number.isFinite(collected) || collected < 0) {
@@ -435,7 +387,7 @@
 
   async function loadCatalog() {
     try {
-      const table = await readTable(CFG.CATALOG_SHEET || "Catalogo", `catalogCallback_${Date.now()}`, "select A,B,C,D,E,F,G,H,I,K where B is not null");
+      const table = await readTable(CFG.CATALOG_SHEET || "Catalogo");
       const parsed = parseCatalog(table);
       products = parsed.filter((p) => !p.vendido && isAvailable(p.disponible));
 
