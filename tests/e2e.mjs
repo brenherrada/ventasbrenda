@@ -98,7 +98,7 @@ for(const engine of engines){
  const opened=await page.evaluate(()=>window.__opened);assert.equal(opened.length,1);const url=new URL(opened[0][0]);assert.equal(url.hostname,'wa.me');assert.match(url.searchParams.get('text'),/QA Prueba/);assert.match(url.searchParams.get('text'),/3.000/);
  await page.screenshot({path:`${output}/${tag}-cart.png`});
  await page.keyboard.press('Escape');assert.equal(await bag().evaluate(e=>document.activeElement===e),true);
- await page.reload();await ready(page);await bag().click();assert.equal(await page.locator('.bag-item').count(),2);assert.equal(await page.locator('#buyerName').inputValue(),'QA Prueba');
+ await page.reload();await ready(page);await bag().click();assert.equal(await page.locator('.bag-item').count(),2);assert.equal(await page.locator('#buyerName').inputValue(),'QA Prueba');assert.equal(await page.evaluate(()=>localStorage.getItem('ventaMudanza.buyer.v1')),null);assert.equal(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('ventaMudanza.buyer.v1')).name),'QA Prueba');
  await page.locator('.bag-item button').first().click();
  assert.match(await page.locator('#bagCardTotal').innerText(),/2.521,53/);
  await page.locator('.bag-item button').first().click();

@@ -1754,13 +1754,17 @@
   }
 
   function saveBuyer() {
-    try { localStorage.setItem(STORAGE_BUYER, JSON.stringify({ name: buyerName.value })); }
+    try { sessionStorage.setItem(STORAGE_BUYER, JSON.stringify({ name: buyerName.value })); }
     catch (_) { /* No bloquear consultas con almacenamiento restringido. */ }
   }
 
   function hydrateBuyer() {
-    const data = readJSON(STORAGE_BUYER, {});
-    buyerName.value = data.name || "";
+    // Remove the old persistent value without importing it into this session.
+    try { localStorage.removeItem(STORAGE_BUYER); } catch (_) { /* Storage may be blocked. */ }
+    try {
+      const data = JSON.parse(sessionStorage.getItem(STORAGE_BUYER) || "{}");
+      buyerName.value = typeof data?.name === "string" ? data.name : "";
+    } catch (_) { buyerName.value = ""; }
   }
 
   function readJSON(key, fallback) {

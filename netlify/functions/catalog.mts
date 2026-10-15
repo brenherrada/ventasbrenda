@@ -71,4 +71,7 @@ export default async (request: Request) => {
   }
 };
 
-export const config = { path: "/api/catalog" };
+export const config = {
+  path: "/api/catalog",
+  rateLimit: { windowLimit: 60, windowSize: 60, aggregateBy: ["ip", "domain"] }
+};

@@ -11,6 +11,18 @@ await test('Catalog network failure, visible retry, recovery',async(p,s)=>{s.fai
 await test('Empty catalog, safe status without pagination',async(p,s)=>{s.catalog=table(cols,[]);await p.goto(base);await p.waitForFunction(()=>document.querySelector('#catalogStatus').textContent.includes('No hay artículos disponibles'));assert.equal(await p.locator('#catalogPagination').isVisible(),false);});
 await test('Invalid category and badge are normalized',async p=>{await p.goto(base+'/?categoria=invalid&badge=invalid');await ready(p);assert.equal(new URL(p.url()).search,'');});
 await test('Corrupt selection and buyer storage recover',async(p,s,ctx)=>{await ctx.addInitScript(()=>{localStorage.setItem('ventaMudanza.selection.v1','{"bad":true}');localStorage.setItem('ventaMudanza.buyer.v1','null');});await p.goto(base);await ready(p);await cart(p);assert.equal(await p.locator('.bag-item').count(),1);assert.equal(await p.locator('#buyerName').inputValue(),'');});
+await test('Legacy buyer is erased and a new tab does not inherit the name',async(p,s,ctx)=>{
+ await ctx.addInitScript(()=>localStorage.setItem('ventaMudanza.buyer.v1',JSON.stringify({name:'Old private name'})));
+ await p.goto(base);await ready(p);await cart(p);
+ assert.equal(await p.locator('#buyerName').inputValue(),'');
+ assert.equal(await p.evaluate(()=>localStorage.getItem('ventaMudanza.buyer.v1')),null);
+ await p.locator('#buyerName').fill('Session name');
+ assert.equal(await p.evaluate(()=>JSON.parse(sessionStorage.getItem('ventaMudanza.buyer.v1')).name),'Session name');
+ await p.reload();await ready(p);await p.locator('#openBagMobile').click();
+ assert.equal(await p.locator('#buyerName').inputValue(),'Session name');
+ const fresh=await ctx.newPage();await fresh.goto(base);await ready(fresh);await fresh.locator('#openBagMobile').click();
+ assert.equal(await fresh.locator('#buyerName').inputValue(),'');await fresh.close();
+});
 await test('Storage denied still permits a selection',async(p,s,ctx)=>{await ctx.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('QA storage denied')};Storage.prototype.setItem=()=>{throw Error('QA storage denied')};});await p.goto(base);await ready(p);await cart(p);assert.equal(await p.locator('.bag-item').count(),1);});
 await test('Sold item removed from persisted selection after reload',async(p,s)=>{await p.goto(base);await ready(p);await cart(p);s.catalog=table(cols,[[...item.slice(0,7),'Sí',item[8]],['b','Otro artículo','Descripción',1000,'Sí','','Libros','No','']]);await p.reload();await ready(p);await p.locator('#openBagMobile').click();assert.equal(await p.locator('.bag-item').count(),0);assert.equal(await p.locator('#bagFooter').isVisible(),false);});
 await test('Explicit reservation keeps the clean title, blocks selection and removes stale cart items',async(p,s)=>{

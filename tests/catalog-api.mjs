@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import handler from '../netlify/functions/catalog.mts';
+import handler, { config } from '../netlify/functions/catalog.mts';
 const originalFetch = globalThis.fetch, originalWarn = console.warn;
 const fields = {
   Catalogo: ['id', 'titulo', 'descripcion', 'precio', 'disponible', 'imagenes', 'categoria', 'vendido', 'badge', 'reservado'],
@@ -69,5 +69,6 @@ try {
   assert.equal((await handler(request('private'))).status, 404);
   assert.equal((await handler(new Request(request('Catalogo'), { method: 'POST' }))).status, 405);
   assert.equal(calls.length, 0);
+  assert.deepEqual(config.rateLimit, { windowLimit: 60, windowSize: 60, aggregateBy: ['ip', 'domain'] });
   console.log('PASS: catalog retry recovery, bounded failure, private errors, validation and sales aggregate.');
 } finally { globalThis.fetch = originalFetch; console.warn = originalWarn; globalThis.Netlify = originalNetlify; }
