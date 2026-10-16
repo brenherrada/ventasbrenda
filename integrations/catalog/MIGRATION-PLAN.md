@@ -1,6 +1,6 @@
 # Migración del lector del catálogo a Google Sheets directo
 
-Fecha: 16/10/2026, Buenos Aires. Estado: **migración productiva autorizada; aislamiento privado completado; validación final y publicación en curso**. Evidencia sintética en [PREVIEW-VERIFICATION.md](PREVIEW-VERIFICATION.md), ejecución actual en [PRODUCTION-VERIFICATION.md](PRODUCTION-VERIFICATION.md) y operación en [README.md](README.md). Las puertas siguientes describen el plan original; las autorizaciones posteriores y los resultados actuales quedan registrados en el informe productivo.
+Fecha: 16/10/2026, Buenos Aires. Estado: **lector directo publicado; aislamiento y recorridos productivos verificados**. Evidencia sintética en [PREVIEW-VERIFICATION.md](PREVIEW-VERIFICATION.md), ejecución actual en [PRODUCTION-VERIFICATION.md](PRODUCTION-VERIFICATION.md) y operación en [README.md](README.md). Las puertas siguientes describen el plan original; las autorizaciones posteriores y los resultados actuales quedan registrados en el informe productivo.
 
 ## Resultado y alcance
 
@@ -10,7 +10,9 @@ Bren autorizó avanzar con la implementación y conservar todos los cambios actu
 
 No migrar la escritura de la lista de espera, cambiar fórmulas/columnas, publicar la Sheet, introducir caché de productos, rediseñar UI, cambiar DNS ni incorporar una base de datos como parte de esta migración. Reutilizar endpoint, proyección y componentes actuales. Las mejoras de UX y minicart se conservan en la rama compartida por instrucción de Bren; revisar el conjunto exacto antes de cualquier publicación.
 
-## Evidencia y límites de lo conocido
+## Evidencia y límites de lo conocido durante la planificación
+
+Esta sección registra el punto de partida. Los pendientes de custodia, aislamiento y publicación se resolvieron posteriormente con autorización expresa; el estado actual y sus límites están en el informe productivo.
 
 - Código activo: `netlify/functions/catalog.mts`, contrato GET `/api/catalog?sheet=Catalogo|Config|Ventas`. Respuesta `{table:{cols,rows}}`, `no-store`, lista fija de recursos y campos. El navegador nunca elige spreadsheet ID, rango ni credenciales.
 - Catálogo y Config se solicitan en paralelo. Ventas se consulta después de Config para la meta. No sumar sus tiempos como si bloquearan secuencialmente la aparición de productos.
@@ -47,9 +49,9 @@ Recomendación concretada tras la consulta de Bren: usar ambos entornos de prueb
 
 Antes del preview, verificar variables efectivamente heredadas, protección de acceso disponible y consumo del plan. Una URL de preview no es privada automáticamente y puede compartir cuotas de Netlify/Google: limitar las mediciones y no hacer pruebas de carga contra recursos productivos. Si no se puede aislar el contexto con las capacidades disponibles, preparar un sitio de pruebas separado con su costo y mantenimiento explícitos antes de crearlo.
 
-La lista de espera necesita aislamiento propio: la versión publicada no bloquea escrituras por ser un preview. El código nuevo ya lo bloquea usando metadata de contexto entregada por Netlify; se comprobó que un POST directo, incluso con header de contexto falsificado, no llega al escritor. Ocultar el formulario no es suficiente. Las pruebas de persistencia de esta etapa son sintéticas; cualquier escritura real posterior exige escritor/archivo de prueba separado y autorización. No cambiar el flag de la Sheet productiva para desactivar el preview. El ensayo del puente de recuperación conserva su puerta específica de acceso controlado y ausencia de escrituras.
+La lista de espera necesitaba aislamiento propio: la versión publicada antes de esta migración no bloqueaba escrituras por ser un preview. El código nuevo ya lo bloquea usando metadata de contexto entregada por Netlify; se comprobó que un POST directo, incluso con header de contexto falsificado, no llega al escritor. Ocultar el formulario no es suficiente. Las pruebas de persistencia de esta etapa son sintéticas; cualquier escritura real posterior exige escritor/archivo de prueba separado y autorización. No cambiar el flag de la Sheet productiva para desactivar el preview. El ensayo del puente de recuperación conserva su puerta específica de acceso controlado y ausencia de escrituras.
 
-Estado: bloqueo de escritura en servidor y lector directo implementados y probados. Bren autorizó el primer preview con cuenta y planilla de prueba dedicadas, incluyendo clave en Builds/Functions/Runtime del contexto `deploy-preview`. Recursos creados y variables leídas de vuelta; permisos y lecturas reales locales verificados, incluidos 403 para los dos archivos reales. El primer preview usa exclusivamente esos datos sintéticos. El archivo real contiene Pendientes con datos de clientas/pagos/entregas; el acceso directo a ese archivo requiere resolver antes el aislamiento final. El benchmark sintético no reemplaza la comparación equivalente del catálogo real.
+Estado del primer preview, anterior a la separación y publicación: bloqueo de escritura en servidor y lector directo implementados y probados. Bren autorizó el primer preview con cuenta y planilla de prueba dedicadas, incluyendo clave en Builds/Functions/Runtime del contexto `deploy-preview`. Recursos creados y variables leídas de vuelta; permisos y lecturas reales locales verificados, incluidos 403 para los dos archivos reales. El primer preview usa exclusivamente esos datos sintéticos. El archivo real contiene Pendientes con datos de clientas/pagos/entregas; el acceso directo a ese archivo requiere resolver antes el aislamiento final. El benchmark sintético no reemplaza la comparación equivalente del catálogo real.
 
 ## Secuencia de ejecución y puertas
 
@@ -164,13 +166,15 @@ No hay garantía transaccional de reserva/pago en este catálogo de consultas. M
 | Recursos/build/SEO | APLICA: auth solo en Functions, Node 24, lockfile, dist sin secretos/fuentes privadas y metadata social conservada. |
 | Repositorio/operación | APLICA: checkout compartido, alcance aislado, deploy atómico, configuración por deploy, permisos reales y recuperación ensayada. |
 
-## Pendientes explícitos antes de implementar/publicar
+## Resolución de las puertas de publicación
 
-1. Acceso operativo de Google/Netlify y despliegue del candidato sintético verificados. Falta ensayar recuperación por el puente en un candidato autorizado y registrar su tiempo real.
-2. Custodia de prueba aprobada y configurada solo en deploy-preview, con scopes estándar del plan y cuenta nueva sin acceso real. Custodia de producción y aislamiento del archivo real siguen pendientes.
-3. Inventario seguro de datos privados dentro del workbook; aceptar conscientemente el alcance reader por archivo. Si se exige mantener credenciales lectoras fuera de Netlify, la variante directa propuesta no está aprobada y se requiere otra decisión.
-4. Autenticación y benchmark desde Netlify verificados con la Sheet sintética. Falta comparación equivalente con datos reales una vez resuelto su aislamiento. No prometer latencia productiva ni fecha de cambio antes de medirlos.
-5. Alcance exacto de commit/release y autorizaciones para datos reales, publicación y prueba sintética de inscripción. El candidato sintético ya estaba autorizado y fue desplegado sin publicar producción.
+1. Acceso operativo y recuperación comprobados: fallo controlado en preview y nuevo deploy con bridge, verificado en 58 s.
+2. Custodia productiva aprobada expresamente. Cuenta nueva reader, clave secreta con los scopes autorizados, sin claves copiadas del puente.
+3. Pendientes separado en archivo privado con copia nativa y comparación exacta antes de retirar sus registros del original. La nueva cuenta recibió 403 para Pendientes, lista de espera y escritura.
+4. Comparación equivalente con los mismos datos reales completada: 20 ciclos, 60 lecturas directas sin fallas, mediana de Catalogo 640 ms y p95 1.188 ms.
+5. Main y producción publicadas después del preview; recorridos comerciales, lista de espera, persistencia, deduplicación y limpieza del registro técnico comprobados. La observación y el SHA publicado se registran en el informe productivo.
+
+Se mantiene el puente durante la ventana de recuperación. La revisión posterior con tráfico representativo y renovación real de token no se confunde con la observación inicial ni se agenda automáticamente.
 
 ## Fuentes verificadas
 

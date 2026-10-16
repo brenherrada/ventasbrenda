@@ -1,6 +1,6 @@
 # Lector privado del catálogo
 
-Estado 16/10/2026: migración productiva autorizada y en ejecución. [Registro actual de aislamiento, custodia, pruebas y publicación](PRODUCTION-VERIFICATION.md). [Pruebas del preview sintético](PREVIEW-VERIFICATION.md) y [plan operativo](MIGRATION-PLAN.md).
+Estado 16/10/2026: lector directo publicado y verificado en producción. [Registro actual de aislamiento, custodia, pruebas y publicación](PRODUCTION-VERIFICATION.md). [Pruebas del preview sintético](PREVIEW-VERIFICATION.md) y [plan operativo](MIGRATION-PLAN.md).
 
 ## Contrato y ejecución
 
@@ -9,7 +9,7 @@ Estado 16/10/2026: migración productiva autorizada y en ejecución. [Registro a
 - `bridge` conserva el transporte Apps Script, las variables `WAITLIST_SCRIPT_URL/SECRET` y su presupuesto anterior. `direct` llama a Sheets desde la función. Ambos pasan por `netlify/lib/catalog-contract.mjs`.
 - Se conservan campos públicos, Config filtrada y exclusivamente `TOTAL VENDIDO` de Ventas. Se eliminan columnas privadas y metadata de celdas. El cliente mantiene el mismo formato y `no-store`.
 - Rangos fijos: Catalogo A1:K, Config A1:B, Ventas A1:B. Lectura de valores no formateados, fechas seriales y filas, igual que el puente. No se publica una Sheet ni se añade acceso a Google desde el navegador.
-- `direct` tiene un presupuesto inicial de 6 segundos para autenticación, lectura, cuerpo y reintento; máximo dos intentos. 401 de Sheets invalida el token rechazado; 403 y respuestas inválidas no se reintentan. El presupuesto requiere validación real antes de activarse en producción.
+- `direct` tiene un presupuesto inicial de 6 segundos para autenticación, lectura, cuerpo y reintento; máximo dos intentos. 401 de Sheets invalida el token rechazado; 403 y respuestas inválidas no se reintentan. El presupuesto pasó la comparación equivalente y las pruebas públicas registradas en el informe productivo; revisar sus márgenes si cambia el volumen o proveedor.
 - `google-auth-library` 11.3.1 firma y obtiene el token. Solo se reutiliza el token en memoria, con renovación 60 segundos antes de vencer y una renovación concurrente por identidad. Los cambios de credencial invalidan ese estado. Productos, stock, precios y configuración se leen cada vez.
 - Logs del directo: recurso permitido, ID aleatorio de lectura, intento, motivo acotado y tiempos de autenticación/Sheets/proyección/total. No se registran claves, tokens, URLs, IDs de archivos, filas ni errores crudos del proveedor.
 - Límite de respuesta de Sheets y del JSON público: 4 MiB; un exceso falla de forma cerrada. El límite y la ausencia de paginado deben revisarse si crece el catálogo.
@@ -20,7 +20,7 @@ El modo directo usa `CATALOG_SPREADSHEET_ID` y `CATALOG_GOOGLE_CREDENTIALS` en s
 
 Bren autorizó el 16/10/2026 separar los datos personales y completar la migración hasta producción. Se creó `catalog-netlify-reader@plot-twist-catalog.iam.gserviceaccount.com` sin roles de proyecto, con permiso reader exclusivamente sobre el archivo del catálogo. Pendientes se copió de forma nativa a un archivo privado accesible solo por la propietaria; se comprobaron valores, formatos, validaciones y tabla antes de retirar los registros del archivo original, donde permanece un enlace. La nueva cuenta no tiene acceso a Pendientes ni a la lista de espera. Google denegó ambas lecturas y la escritura, incluso solicitando un token con scope de escritura para comprobar el permiso reader del archivo.
 
-La clave nueva está marcada secreta en Netlify para producción, con los scopes Builds/Functions/Runtime del plan actual, autorizados expresamente. No se trasladaron las claves de las identidades del puente. El contexto genérico `deploy-preview` conserva una identidad y planilla sintéticas independientes. La validación final usa temporalmente el contexto específico `catalog-migration-validation`; se retira su configuración al cerrar las pruebas. No conceder esta clave productiva a PRs arbitrarios ni a dev.
+La clave nueva está marcada secreta en Netlify para producción, con los scopes Builds/Functions/Runtime del plan actual, autorizados expresamente. No se trasladaron las claves de las identidades del puente. El contexto genérico `deploy-preview` conserva una identidad y planilla sintéticas independientes. La validación final usó el contexto específico `catalog-migration-validation`; sus cinco variables temporales ya fueron retiradas. No conceder esta clave productiva a PRs arbitrarios ni a dev.
 
 La custodia incluye a los colaboradores y procesos con acceso al build de producción. Mantener acceso de escritura al repositorio/Netlify limitado a personas de confianza. No imprimir valores secretos, exportarlos al cliente ni copiar archivos de credenciales a Git/dist. Las copias locales de transferencia se eliminan después de comprobar la configuración remota y el runtime.
 
@@ -30,7 +30,7 @@ Rotación: crear una clave de reemplazo para esta misma identidad, actualizar ex
 
 `waitlist.mts` permite intentar una escritura únicamente cuando el `context.deploy.context` entregado por Netlify es `production`. Local, deploy-preview, branch-deploy y contextos ausentes/desconocidos devuelven 403 antes de consultar Config o Apps Script. Un header enviado por el visitante no modifica esta decisión. La UI puede mostrar la invitación según Config; eso no habilita la escritura del servidor.
 
-En producción se conservan validación de datos, consentimiento, bandera `mostrar_boton_vender`, límites y escritor actual. No eliminar sus variables aunque el catálogo use `direct`. Las pruebas de persistencia de este turno son sintéticas; falta la verificación real autorizada después de cualquier publicación.
+En producción se conservan validación de datos, consentimiento, bandera `mostrar_boton_vender`, límites y escritor actual. No eliminar sus variables aunque el catálogo use `direct`. La prueba pública del 16/10/2026 confirmó persistencia y deduplicación en la Sheet real; se eliminaron solo los valores de la inscripción técnica. Repetir ese gate en publicaciones que afecten este flujo.
 
 ## Build y distribución
 
@@ -59,6 +59,14 @@ Resultados locales: 43 comprobaciones del directo, 39 de waitlist, pruebas del p
 
 Build de funciones local: catalog aproximadamente 677 kB comprimidos, waitlist 678 kB; dos funciones y sin archivos de secretos. `npm audit` no reportó vulnerabilidades en la revisión actual. El tamaño comprimido no demuestra el tiempo de arranque.
 
-Preview real: 60 consultas sin fallas en el candidato verificado; Catalogo mediana 538,5 ms y p95 muestral 983 ms. Matriz de navegador real aprobada, cambios de precio visibles en la siguiente lectura y permiso de escritura denegado. La copia temporal de la clave fue eliminada. Ver el informe para los fallos de preparación corregidos y los límites de esas métricas.
+Preview de la planilla sintética en Google real: 60 consultas sin fallas en el candidato verificado; Catalogo mediana 538,5 ms y p95 muestral 983 ms. Matriz de navegador real aprobada, cambios de precio visibles en la siguiente lectura y permiso de escritura denegado. La copia temporal de la clave fue eliminada. Ver el informe para los fallos de preparación corregidos y los límites de esas métricas.
 
 La comparación con datos reales, el ensayo de recuperación y la publicación se registran en [PRODUCTION-VERIFICATION.md](PRODUCTION-VERIFICATION.md). El puente se conserva al menos 48 horas y hasta comprobar una ventana representativa, renovación de token y una instancia nueva. La lista de espera sigue necesitándolo después de retirar el lector antiguo.
+
+## Recuperación operativa
+
+1. Confirmar el proyecto `ventasbrenda`, la revisión actualmente publicada y el motivo concreto del fallo. Aplicar los criterios del informe productivo; una cancelación de navegación 499 aislada no equivale a una caída del lector.
+2. Cambiar exclusivamente `CATALOG_SOURCE` del contexto **production** a `bridge`. Conservar `WAITLIST_SCRIPT_URL`, `WAITLIST_SCRIPT_SECRET` y las identidades existentes. No cambiar el archivo comercial ni publicar permisos de Google.
+3. Disparar un nuevo build de `main` en Netlify. La versión actual continúa publicada mientras se prepara la corrección; la nueva variable no modifica instantáneamente el deploy existente. No restaurar un deploy histórico.
+4. Esperar `ready` y publicación de la revisión esperada. Comprobar los tres recursos, contenido comercial, selección persistida y Config consumida por waitlist; revisar logs para confirmar `source: bridge` y ejecutar el preflight remoto. Si el incidente afectó inscripciones, repetir el gate de persistencia/deduplicación con un registro técnico y su limpieza exacta.
+5. Mantener el lector directo desactivado hasta corregir y validar la causa en un contexto de prueba autorizado. Rehabilitarlo mediante otro deploy verificado. Los 58 s del ensayo son una medición, no un tiempo de recuperación garantizado.
