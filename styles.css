@@ -306,6 +306,10 @@ textarea {
   height: 24px;
 }
 
+.list[aria-busy=true]:empty {
+  min-block-size: clamp(20rem, 100svh, 135rem);
+}
+
 .skeleton-media {
   aspect-ratio: 1;
   display: grid;

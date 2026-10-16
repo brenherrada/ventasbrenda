@@ -6,7 +6,7 @@ Documento de referencia del diseño implementado. Relevado contra las fuentes lo
 
 La identidad pública es **Plot Twist · Venta de garage**. El producto permite explorar artículos, armar una selección y consultar por WhatsApp para coordinar disponibilidad, pago y entrega. La selección no constituye una reserva, un pedido confirmado ni un pago.
 
-Este runtime usa HTML, Sass/CSS y JavaScript sin framework. Los datos llegan por `/api/catalog`, con el puente privado de Google Sheets descrito en [AGENTS.md](AGENTS.md). WordPress y WooCommerce no gobiernan esta interfaz.
+Este runtime usa HTML, Sass/CSS y JavaScript sin framework. Los datos llegan por `/api/catalog`, con el lector privado directo de Google Sheets descrito en [AGENTS.md](AGENTS.md). WordPress y WooCommerce no gobiernan esta interfaz.
 
 Orden de referencia para trabajar:
 
@@ -115,7 +115,7 @@ Preservar estados de carga/skeleton, error con recuperación, búsqueda vacía, 
 
 ## Interacción, accesibilidad y movimiento
 
-La carga inicial muestra la página sin esperar las fuentes. El bootstrap diferido comprueba sus familias en segundo plano, manteniendo el fallback por visita si fallan. El listado anuncia «Cargando catálogo…», muestra seis skeletons con la misma composición de las cards y avisa si la espera supera seis segundos. No se presentan productos ni disponibilidad de una caché local; éxito, vacío y error sustituyen ese estado con los datos recién consultados o el reintento correspondiente.
+La carga inicial muestra la página sin esperar las fuentes. El bootstrap diferido comprueba sus familias en segundo plano, manteniendo el fallback por visita si fallan. Antes de ejecutar `app.js`, el listado vacío y ocupado reserva espacio para evitar que el banner inferior aparezca y se desplace al insertar las cards de carga. Esa reserva solo aplica a `aria-busy=true` y `:empty`; éxito, error y catálogo vacío recuperan su altura natural. El listado anuncia «Cargando catálogo…», muestra seis skeletons con la misma composición de las cards y avisa si la espera supera seis segundos. No se presentan productos ni disponibilidad de una caché local; éxito, vacío y error sustituyen ese estado con los datos recién consultados o el reintento correspondiente.
 
 Mantener semántica nativa, labels, foco visible, Escape y retorno al disparador en los flujos que correspondan. Los paneles modales deben bloquear el fondo y permitir llegar al último contenido y todas las acciones. Mantener scroll interior y cierres fuera de él; no aplicar `overflow:hidden` al panel exterior para ocultar defectos. El recorte de fotos y decoraciones es otra responsabilidad.
 

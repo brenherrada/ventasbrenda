@@ -16,12 +16,14 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
   const browser = await pw[engine].launch();
   const context = await browser.newContext({ignoreHTTPSErrors:true, viewport:{width:390,height:844}, hasTouch:engine !== 'firefox', reducedMotion:'reduce'});
   try {
-    let releaseCatalog, releaseFonts;
+    let releaseCatalog, releaseFonts, releaseApp;
     const catalogGate = new Promise(resolve => { releaseCatalog = resolve; });
     const fontGate = new Promise(resolve => { releaseFonts = resolve; });
+    const appGate = new Promise(resolve => { releaseApp = resolve; });
     let fail = false;
     let empty = false;
     const catalogRequests = [];
+    await context.route('**/app.js*', async route => { await appGate; await route.continue(); });
     await context.route('**/*.woff2', async route => { await fontGate; await route.continue(); });
     await context.route('**/api/catalog?*', async route => {
       const sheet = new URL(route.request().url()).searchParams.get('sheet');
@@ -37,7 +39,17 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
     const errors = [];
     page.on('pageerror',error=>errors.push(error.message));
     await page.clock.install();
-    await page.goto(base, {waitUntil:'domcontentloaded'});
+    await page.goto(base, {waitUntil:'commit'});
+    await page.locator('#legxerciseBanner').waitFor({state:'attached'});
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#products')).display === 'grid');
+    for (const width of [320,390,766,767,768,1024,1440]) {
+      await page.setViewportSize({width,height:844});
+      assert.ok(await page.locator('#legxerciseBanner').evaluate(element => element.getBoundingClientRect().top >= innerHeight),
+        `${engine}/${width}: the lower banner must not flash before loading cards are inserted`);
+    }
+    await page.setViewportSize({width:390,height:844});
+    releaseApp();
+    await page.waitForLoadState('domcontentloaded');
     assert.equal(await page.locator('main').isVisible(),true,'Fonts must not hide the storefront');
     assert.equal(await page.locator('#catalogStatus').isVisible(),true);
     assert.match(await page.locator('#catalogStatus').innerText(),/Cargando catálogo/);
@@ -69,6 +81,8 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
     await page.reload({waitUntil:'domcontentloaded'});
     await page.locator('.catalog-retry').waitFor();
     assert.equal(await page.locator('.skeleton-card').count(),0);
+    assert.equal(await page.locator('#products').evaluate(element => element.getBoundingClientRect().height),0,
+      'A failed load must release the reserved space');
     fail = false;
     await page.locator('.catalog-retry').click();
     await page.locator('.card[data-id]').waitFor();
@@ -78,6 +92,8 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
     await page.waitForFunction(()=>document.querySelector('#products').getAttribute('aria-busy')==='false');
     assert.match(await page.locator('#catalogStatus').innerText(),/No hay artículos disponibles/);
     assert.equal(await page.locator('.skeleton-card').count(),0);
+    assert.equal(await page.locator('#products').evaluate(element => element.getBoundingClientRect().height),0,
+      'An empty catalog must release the reserved space');
     assert.deepEqual(errors,[]);
     console.log(`PASS ${engine}: visible before fonts/data, slow response, responsive, recovery, empty, no product cache`);
   } finally { await context.close(); await browser.close(); }
