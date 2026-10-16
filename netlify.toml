@@ -2,6 +2,11 @@
   command = "npm run build"
   publish = "dist"
 
+# This migration is verified through the separately authorized deploy-preview.
+# A plain push must not create an unconfigured second preview or expand secrets.
+[context.branch-deploy]
+  ignore = 'test "$BRANCH" = "codex/catalogo-mejoras-y-migracion"'
+
 [functions]
   directory = "netlify/functions"
 

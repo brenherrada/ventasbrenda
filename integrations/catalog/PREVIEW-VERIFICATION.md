@@ -50,12 +50,16 @@ Evidencia local ignorada por Git en `output/qa/catalog-migration/`: `google-live
 
 ## Gate de commit y push de la rama — 16/10/2026
 
-Bren autorizó guardar y subir el conjunto de cambios en `codex/catalogo-mejoras-y-migracion`. La configuración real de Netlify conserva `main` como rama productiva y `allowed_branches: []`; este push no publica el catálogo. El otro chat confirmó que no tenía ediciones en curso.
+Bren autorizó guardar y subir el conjunto de cambios en `codex/catalogo-mejoras-y-migracion`. La configuración real de Netlify conserva `main` como rama productiva. El otro chat confirmó que no tenía ediciones en curso.
 
 - Los hashes de todas las fuentes del catálogo y funciones coinciden con el candidato verificado; las diferencias anteriores al gate eran documentación. Se volvieron a ejecutar build, sincronización Sass, tests de estilos, catálogo, privacidad, identidades, waitlist y configuración de build. La matriz del handler directo con Google simulado pasó en Node 24, Chromium/Firefox/WebKit a 390 y 1440 px.
 - Se preservaron en `output/backups/commit-tooling-20261016/` tres archivos auxiliares no versionados (`deno.lock`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`) y se excluyeron de Git. El lock de pnpm no incluía la nueva dependencia y su workspace tenía un valor pendiente; publicarlo habría cambiado la instalación npm existente por [la autodetección de pnpm de Netlify](https://docs.netlify.com/build/configure-builds/manage-dependencies/). `package-lock.json` conserva la fuente única de dependencias.
 - La comprobación local del sistema visual aún esperaba la demostración dentro de `dist`, aunque el build ya la excluye. Se corrigió para contrastar las fuentes locales y exigir su exclusión del artefacto público. La copia HTML de demostración se sincronizó con `index.html`, conservando el adaptador sintético. Chromium a 390/1440 px verificó productos, selección, drawer, ausencia de errores/overflow y cero peticiones a `/api/`. Esto no cambia el catálogo distribuido.
 - El análisis de archivos no encontró material de claves privadas ni tokens; `.env`, credenciales, evidencia y respaldos quedan fuera de Git. Sass watch y Netlify Dev continúan activos. La migración productiva mantiene las puertas indicadas abajo.
+
+El primer commit `24be682` quedó subido y sincronizado. La interpretación inicial de `allowed_branches: []` fue incorrecta: Netlify permite todas las ramas con ese valor. Se activó el branch-deploy `6ad23a73c5772af35267a462`; instaló npm correctamente, pero el preflight detuvo el build por falta de configuración privada en ese contexto. No se publicó ni cambió producción. La credencial de prueba permanece exclusivamente en `deploy-preview`.
+
+Se añadió una regla `ignore` solo para `branch-deploy` de esta rama: el push guarda el trabajo y Netlify omite su build. `production`, `deploy-preview` y otras ramas conservan su configuración; no se amplían permisos ni secretos. La regla se contrasta con el resolutor real de Netlify y los códigos de salida documentados en [Ignore builds](https://docs.netlify.com/build/configure-builds/ignore-builds/); el seguimiento remoto debe confirmar la cancelación antes de cerrar.
 
 ## Próxima puerta
 
