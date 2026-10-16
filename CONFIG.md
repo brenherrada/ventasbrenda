@@ -159,3 +159,11 @@ La comparación previa confirmó productos y recaudado iguales; Config mantiene 
 - Revisión de los 60 deploys históricos listos: 540 solicitudes, sin claves privadas ni la clave de conexión actual en los recursos revisados. Cuatro deploys antiguos exponen `package.json` (metadatos del proyecto, sin secretos); no se eliminaron releases históricos. Esta revisión acotada no demuestra ausencia de accesos anteriores ni de cualquier vulnerabilidad.
 
 Operación y rotación: `integrations/waitlist/README.md`. Pruebas de firma/contratos sin secretos reales: `tests/google-identities.mjs`, `tests/catalog-privacy.mjs`, `tests/waitlist.mjs` y `tests/catalog-api.mjs`. El rollback mantiene privadas las planillas y las identidades limitadas; no volver al permiso personal amplio ni a versiones antiguas que dependían de él.
+
+## Compatibilidad de CSP con métricas de Netlify — 15/10/2026
+
+Netlify inyecta `/.netlify/scripts/rum` en producción. El script publicado envía sus métricas a `https://ingesteer.services-prod.nsvcs.net/rum_collection`; `connect-src 'self'` bloqueaba ese envío y generaba tres errores de consola. La corrección permite únicamente esa URL HTTPS y las conexiones propias, tanto en `_headers` como en las respuestas de `category-preview.ts`. Se mantienen las restricciones de scripts, estilos, formularios, objetos y frames; no se permiten comodines ni conexiones directas a Google Sheets. No se desactiva la captura de errores para ocultar el problema.
+
+`tests/catalog-privacy.mjs` comprueba que ambas políticas coincidan y que las demás restricciones permanezcan. La verificación de publicación debe comprobar el encabezado real en `/`, `/index.html` y enlaces de categoría/badge, y el envío de RUM desde Chrome después de recargar o navegar. Un test de texto o un build por sí solos no prueban el envío del navegador. Referencias: [Netlify RUM](https://docs.netlify.com/manage/monitoring/real-user-monitoring/), [CSP connect-src](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src).
+
+Bren completó la activación del doble factor de Netlify el 15/10/2026; la API de la cuenta confirmó `mfa_enabled: true`. Ese pendiente quedó resuelto.
