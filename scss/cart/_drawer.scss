@@ -24,7 +24,7 @@
   top: 0;
   height: 100dvh;
   width: min(480px, 100%);
-  background: var(--paper);
+  background: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
   border-left: 3px solid var(--color-border);
   transform: translateX(105%);
   visibility: hidden;

@@ -110,7 +110,7 @@
   max-width: 100%;
   padding: var(--catalog-padding) var(--catalog-padding)
     calc(var(--catalog-padding) + env(safe-area-inset-bottom));
-  background: var(--color-butter);
+  background: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
   color: var(--color-ink);
   border: var(--line-heavy);
 
@@ -178,7 +178,7 @@
   border-radius: clamp(12px, 1.04vw, 15px);
   box-shadow: var(--shadow-sm);
   text-decoration: none;
-  transition: background-color var(--motion-fast) var(--ease);
+  transition: all var(--motion-fast) var(--ease);
 
   &:focus-visible {
     outline: 3px solid var(--color-ink);
@@ -186,7 +186,15 @@
   }
 
   &[aria-current='page'] {
-    background: var(--color-yellow);
+    background: var(--color-pink);
+  }
+  &:not([aria-current='page']){
+    &:hover,
+    &:focus-visible {
+      background: var(--color-toolbar);
+      transform: translate(2px, 2px);
+      box-shadow: var(--shadow-hover);
+    }
   }
 }
 .mts-catalog-menu:not(:modal) .mts-catalog-menu__icon {

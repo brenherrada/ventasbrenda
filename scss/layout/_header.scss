@@ -146,6 +146,7 @@ body::before {
   font: 700 13px var(--font-display);
   text-transform: uppercase;
   text-decoration: none;
+  transition: all var(--motion-fast) var(--ease);
 
   &:hover,
   &:focus-visible {
@@ -163,6 +164,13 @@ body::before {
   min-width: 44px;
   height: 44px;
   padding: 5px;
+  &[aria-expanded='false']{
+    transition: all var(--motion-fast) var(--ease);
+    &:hover,
+    &:focus-visible {
+      background: var(--color-yellow);
+    }
+  }
 }
 .custom-icon {
   display: block;

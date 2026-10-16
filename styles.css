@@ -414,7 +414,7 @@ textarea {
   top: 0;
   height: 100dvh;
   width: min(480px, 100%);
-  background: var(--paper);
+  background: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
   border-left: 3px solid var(--color-border);
   transform: translateX(105%);
   visibility: hidden;
@@ -1140,6 +1140,7 @@ body::before {
   font: 700 13px var(--font-display);
   text-transform: uppercase;
   text-decoration: none;
+  transition: all var(--motion-fast) var(--ease);
 }
 .nav-link:hover, .nav-link:focus-visible {
   background: var(--color-yellow);
@@ -1157,6 +1158,12 @@ body::before {
   min-width: 44px;
   height: 44px;
   padding: 5px;
+}
+.header-info-button[aria-expanded=false] {
+  transition: all var(--motion-fast) var(--ease);
+}
+.header-info-button[aria-expanded=false]:hover, .header-info-button[aria-expanded=false]:focus-visible {
+  background: var(--color-yellow);
 }
 
 .custom-icon {
@@ -2026,7 +2033,7 @@ main.shell {
   --catalog-padding: clamp(17px, 1.8vw, 26px);
   max-width: 100%;
   padding: var(--catalog-padding) var(--catalog-padding) calc(var(--catalog-padding) + env(safe-area-inset-bottom));
-  background: var(--color-butter);
+  background: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
   color: var(--color-ink);
   border: var(--line-heavy);
 }
@@ -2092,14 +2099,19 @@ main.shell {
   border-radius: clamp(12px, 1.04vw, 15px);
   box-shadow: var(--shadow-sm);
   text-decoration: none;
-  transition: background-color var(--motion-fast) var(--ease);
+  transition: all var(--motion-fast) var(--ease);
 }
 .mts-catalog-menu:not(:modal) .mts-catalog-menu__item:focus-visible {
   outline: 3px solid var(--color-ink);
   outline-offset: 5px;
 }
 .mts-catalog-menu:not(:modal) .mts-catalog-menu__item[aria-current=page] {
-  background: var(--color-yellow);
+  background: var(--color-pink);
+}
+.mts-catalog-menu:not(:modal) .mts-catalog-menu__item:not([aria-current=page]):hover, .mts-catalog-menu:not(:modal) .mts-catalog-menu__item:not([aria-current=page]):focus-visible {
+  background: var(--color-toolbar);
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-hover);
 }
 
 .mts-catalog-menu:not(:modal) .mts-catalog-menu__icon {
