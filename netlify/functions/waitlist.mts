@@ -1,11 +1,15 @@
 import catalog from './catalog.mts';
+import type { Context } from '@netlify/functions';
 
 const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 const reply = (status: number, body: object) => new Response(JSON.stringify(body), { status, headers });
 const normalize = (value: unknown) => String(value ?? '').normalize('NFKD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase();
 
-export default async (request: Request) => {
+export default async (request: Request, context?: Pick<Context, 'deploy'>) => {
   if (request.method !== 'POST') return reply(405, { error: 'method_not_allowed' });
+  // Trust platform metadata, never a request header or the visible form state.
+  // Local, previews and missing/unknown contexts cannot reach the writer.
+  if (context?.deploy?.context !== 'production') return reply(403, { error: 'registration_disabled' });
   if (request.headers.get('origin') !== new URL(request.url).origin) return reply(403, { error: 'origin_not_allowed' });
   if (request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') return reply(415, { error: 'json_required' });
   try {

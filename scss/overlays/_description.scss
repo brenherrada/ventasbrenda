@@ -2,7 +2,8 @@
 // ────────────────────────────────────────────────────────────────────
 
 .web-promo:popover-open,
-.description-popup[open] {
+.description-popup[open],
+.drawer.open {
   animation: popup-pop 0.36s cubic-bezier(0.2, 0.8, 0.25, 1);
 }
 @keyframes popup-pop {
@@ -25,7 +26,7 @@
   padding: clamp(24px, 3vw, 36px);
   border: 3px solid var(--color-border);
   border-radius: var(--radius);
-  background: var(--paper);
+  background: var(--baloon-gradient);
   box-shadow: 6px 6px 0 var(--pink);
   overflow: visible;
 
@@ -59,6 +60,9 @@
     overflow: auto;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    line-height: 1.7;
+  }
+
+  .bag-browse:not(.contact-confirmation__cancel) {
+    background: var(--color-green);
   }
 }

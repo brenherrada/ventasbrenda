@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Plot Twist — Sistema visual calmo</title>
+  <meta name="description" content="Una segunda dirección para Plot Twist: neutra, clara y serena. Paleta, tipografía y muestras de interfaz.">
+  <link rel="icon" href="favicon-32.png" type="image/png">
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="sistema-visual.css">
+  <!-- Local design study, explicitly outside the production build.
+       EXTEND: original tokens and component styles; new values live ONLY here.
+       HTML/CSS/UX and local interactions apply. No API, storage, commercial
+       data, permissions or external requests. Publishing would require a CSP
+       hash for inline styles/scripts; do not weaken the production policy.
+       Direction: Catálogo esencial, selected after the three territories in chat.
+       Distinctive rule: quiet surfaces and a fixed object / state / price rhythm.
+       Existing brand artwork is preserved, shown here in a local grayscale study.
+       This demonstrates tokens, not a completed alternative storefront. -->
+  <style id="calm-tokens">
+    :root {
+      --color-ink: #292d30;
+      --color-border: #c9cdcd;
+      --color-cream: #f8f9f7;
+      --color-butter: #f0f2ef;
+      --color-toolbar: #e7eae7;
+      --color-white: #ffffff;
+      --color-yellow: #ebece5;
+      --color-cobalt: #456475;
+      --color-pink: #e8e1df;
+      --color-cyan: #e0e8eb;
+      --color-lavender: #e4e5e9;
+      --color-orange: #e7dbd1;
+      --color-peach: #f0e8df;
+      --color-sky: #e7edf0;
+      --color-lime: #e7eadd;
+      --color-green: #dce8df;
+      --color-on-accent: var(--color-white);
+      --color-field-focus: #edf2f4;
+      --color-field-selected: #e6eee8;
+      --color-placeholder: #656e72;
+      --color-text-muted: #596267;
+      --color-price-note: #596267;
+      --color-discount-value: #78463f;
+      --color-cart-discount-bg: #78463f;
+      --color-cart-discount-fg: var(--color-white);
+      --color-cart-discount-value: var(--color-white);
+      --color-tape-highlight: #ffffff00;
+      --color-overlay: #292d3099;
+      --color-art-shadow: #292d3000;
+      --color-tape-shadow: #292d3000;
+      --color-step-bg: var(--color-butter);
+      --color-upsell-bg: var(--color-sky);
+      --action-primary-bg: var(--color-ink);
+      --action-primary-fg: var(--color-white);
+      --action-purchase-bg: var(--color-ink);
+      --action-purchase-fg: var(--color-white);
+      --action-secondary-bg: var(--color-white);
+      --action-secondary-fg: var(--color-ink);
+      --action-support-bg: var(--color-butter);
+      --action-support-fg: var(--color-ink);
+      --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "Space Mono", monospace;
+      --font-action: var(--font-body);
+      --font-utility-action: var(--font-body);
+      --line: 1px solid var(--color-border);
+      --line-heavy: 1px solid var(--color-ink);
+      --shadow-xs: none;
+      --shadow-sm: none;
+      --shadow: none;
+      --shadow-lg: none;
+      --shadow-hover: none;
+      --shadow-cobalt: none;
+      --shadow-orange: none;
+      --radius-sm: 4px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --ease: cubic-bezier(.2, 0, 0, 1);
+      --ease-pop: var(--ease);
+      --motion-fast: 160ms;
+      --motion-modal: 220ms;
+      --motion-category: 220ms;
+    }
+  </style>
+  <style>
+    /* Presentation-only extensions. Existing fluid dimensions stay in their source. */
+    .calm-system .vs-brand h1 {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 6.3vw, 88px);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -.065em;
+    }
+    .calm-system .vs-brand p { font-weight: 400; letter-spacing: -.025em; }
+    .calm-system .vs-art { background: var(--color-butter); }
+    .calm-system .vs-art img { filter: grayscale(1); }
+    .calm-system .vs-top a { display: inline-flex; align-items: center; min-height: 44px; text-underline-offset: 4px; }
+    .calm-system .vs-swatch { box-shadow: inset -1px -1px 0 var(--color-border); }
+    .calm-system .vs-display { font-weight: 500; letter-spacing: -.035em; }
+    .calm-system .vs-body-sample { font-weight: 400; }
+    .calm-system .vs-icon-grid img { filter: grayscale(1); }
+    .calm-system .vs-description { color: var(--color-text-muted); }
+    .calm-samples {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--vs-space);
+      padding: var(--vs-space);
+      border-block: var(--line);
+    }
+    .calm-sample { min-width: 0; display: flex; flex-direction: column; gap: var(--vs-gap); }
+    .calm-sample h3 { margin: 0; font-size: clamp(16px, 1.3vw, 19px); font-weight: 600; }
+    .calm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--vs-gap); }
+    /* Production primitives contain literal radii, shadows, transforms and input
+       colors. These local bridges expose the calm tokens without altering Sass.
+       No fluid font-size, padding, gap or width is overridden. */
+    .calm-system :is(.send, .bag-browse, .mts-badge, input) { border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .calm-system :is(.send, .bag-browse) { text-transform: none; transform: none; }
+    .calm-system .send { background: var(--action-primary-bg); color: var(--action-primary-fg); border-color: var(--action-primary-bg); }
+    .calm-system .bag-browse { background: var(--action-secondary-bg); color: var(--action-secondary-fg); }
+    .calm-system :is(.send, .bag-browse):hover:not(:disabled) { background: var(--color-cobalt); border-color: var(--color-cobalt); color: var(--color-white); }
+    .calm-system :is(.send, .bag-browse):active:not(:disabled) { background: var(--color-ink); color: var(--color-white); }
+    .calm-system :is(.send, .bag-browse):disabled { background: var(--color-toolbar); color: var(--color-text-muted); cursor: not-allowed; }
+    .calm-system .mts-badge { transform: none; }
+    .calm-system input { background: var(--color-white); border-color: var(--color-placeholder); }
+    .calm-system input:focus { background: var(--color-field-focus); }
+    .calm-system input::placeholder { color: var(--color-placeholder); }
+    .calm-system input[aria-invalid="true"] { border-color: var(--color-discount-value); }
+    .calm-field { display: grid; gap: clamp(8px, 1vw, 12px); }
+    .calm-field label { font-weight: 600; }
+    .calm-field p { margin: 0; color: var(--color-text-muted); font-size: clamp(13px, 1.1vw, 15px); line-height: 1.5; }
+    .calm-field .calm-field-error { color: var(--color-discount-value); }
+    .calm-token-notes { margin: 0; padding: 0; list-style: none; }
+    .calm-token-notes li { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--vs-gap); padding-block: clamp(12px, 1.2vw, 18px); border-bottom: var(--line); }
+    .calm-token-notes code { font-family: var(--font-mono); font-size: clamp(12px, 1vw, 14px); }
+    .calm-state { min-height: 48px; margin: 0; color: var(--color-text-muted); font-size: clamp(14px, 1.1vw, 16px); line-height: 1.5; }
+    .calm-system .vs-motion-content dd { color: var(--color-text-muted); }
+    @media (max-width: 760px) {
+      .calm-samples { grid-template-columns: 1fr; }
+      .calm-system .vs-swatch:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .calm-system { --motion-fast: 0ms; --motion-modal: 0ms; --motion-category: 0ms; }
+    }
+  </style>
+</head>
+<body class="visual-system calm-system">
+  <a class="skip-link" href="#sistema">Ir al sistema visual</a>
+  <main class="vs-board" id="sistema">
+    <header class="vs-top"><span>PLOT TWIST / SISTEMA VISUAL / 02</span><a href="sistema-visual.html">Ver sistema original</a></header>
+    <section class="vs-hero" aria-labelledby="vs-title">
+      <div class="vs-brand">
+        <span class="vs-label">DIRECCIÓN CALMA · CATÁLOGO ESENCIAL</span>
+        <h1 id="vs-title">Plot Twist</h1>
+        <p>Otra historia.<br>Con más calma.</p>
+        <span class="vs-description">Una base neutra, detalles precisos y espacio para que cada objeto se destaque.</span>
+      </div>
+      <div class="vs-art"><img src="images/ilustracion-catalogo.webp" width="560" height="222" alt="Objetos del universo de Plot Twist en una exploración monocromática"><span class="vs-art-note">LA MISMA HISTORIA. OTRO TONO.</span></div>
+    </section>
+    <section class="vs-palette" aria-labelledby="palette-title">
+      <div class="vs-section-heading"><h2 id="palette-title">01 / Una base serena</h2><p>Blancos suaves, piedra y grafito. El contraste ordena.</p></div>
+      <div class="vs-swatches">
+        <div class="vs-swatch vs-swatch--ink"><strong>Grafito</strong><span data-token="--color-ink">#292D30</span></div>
+        <div class="vs-swatch vs-swatch--cream"><strong>Blanco suave</strong><span data-token="--color-cream">#F8F9F7</span></div>
+        <div class="vs-swatch vs-swatch--butter"><strong>Niebla</strong><span data-token="--color-butter">#F0F2EF</span></div>
+        <div class="vs-swatch vs-swatch--toolbar"><strong>Piedra</strong><span data-token="--color-toolbar">#E7EAE7</span></div>
+        <div class="vs-swatch vs-swatch--white"><strong>Blanco</strong><span data-token="--color-white">#FFFFFF</span></div>
+      </div>
+      <div class="vs-section-heading"><h3>Acentos en voz baja</h3><p>Superficies de apoyo; el color nunca es la única señal.</p></div>
+      <div class="vs-swatches">
+        <div class="vs-swatch vs-swatch--cyan"><strong>Bruma azul</strong><span data-token="--color-cyan">#E0E8EB</span></div>
+        <div class="vs-swatch vs-swatch--pink"><strong>Arcilla</strong><span data-token="--color-pink">#E8E1DF</span></div>
+        <div class="vs-swatch vs-swatch--lavender"><strong>Gris violeta</strong><span data-token="--color-lavender">#E4E5E9</span></div>
+        <div class="vs-swatch vs-swatch--peach"><strong>Lino</strong><span data-token="--color-peach">#F0E8DF</span></div>
+        <div class="vs-swatch vs-swatch--green"><strong>Hoja gris</strong><span data-token="--color-green">#DCE8DF</span></div>
+      </div>
+    </section>
+    <div class="vs-foundations">
+      <section class="vs-type" aria-labelledby="type-title">
+        <h2 id="type-title">02 / Tipografía que deja respirar</h2>
+        <div class="vs-type-row"><span class="vs-label">SANS DEL SISTEMA · TITULARES</span><p class="vs-display">Cosas lindas.<br>Historias nuevas.</p></div>
+        <div class="vs-type-row"><span class="vs-label">SANS DEL SISTEMA · TEXTO</span><p class="vs-body-sample">Encontrá algo que te encante.<br>Dale un lugar en tu próxima historia.</p></div>
+        <div class="vs-type-row"><span class="vs-label">SPACE MONO · DATOS</span><p class="vs-mono-sample">CATÁLOGO / MAR DEL PLATA<br>ABCDEFGHIJKLMN · 0123456789</p></div>
+      </section>
+      <section class="vs-language" aria-labelledby="language-title">
+        <h2 id="language-title">03 / Detalles que ordenan</h2>
+        <p class="vs-description">Contornos finos, superficies planas y curvas discretas. La jerarquía aparece en la composición y en el peso del texto.</p>
+        <ul class="calm-token-notes">
+          <li><span>Borde de superficie</span><code>1 px · #C9CDCD</code></li>
+          <li><span>Radios</span><code>4 / 8 / 12 px</code></li>
+          <li><span>Sombras</span><code>Ninguna</code></li>
+          <li><span>Foco y acción activa</span><code>#456475</code></li>
+          <li><span>Feedback</span><code>160 ms · sin rebote</code></li>
+        </ul>
+      </section>
+    </div>
+    <section aria-labelledby="components-title">
+      <div class="vs-section-heading"><h2 id="components-title">04 / El tono de la interfaz</h2><p>Muestras interactivas · sin datos ni envíos reales.</p></div>
+      <div class="calm-samples">
+        <div class="calm-sample">
+          <h3>Acciones & estados</h3>
+          <div class="calm-actions"><button class="send" type="button" id="sample-select" aria-pressed="false">Seleccionar objeto</button><button class="bag-browse" type="button" id="sample-reset">Restablecer</button><button class="bag-browse" type="button" disabled>No disponible</button></div>
+          <p class="calm-state" id="sample-status" role="status">Probá seleccionar y quitar. Esta muestra no guarda tu selección.</p>
+          <div class="calm-actions"><span class="mts-badge mts-badge--cyan">Disponible</span><span class="mts-badge mts-badge--pink">Reservado</span><span class="mts-badge">Recién agregado</span></div>
+        </div>
+        <div class="calm-sample">
+          <h3>Campos & feedback</h3>
+          <div class="calm-field"><label for="sample-name">Tu nombre</label><input id="sample-name" type="text" placeholder="Escribí tu nombre" autocomplete="off" aria-describedby="sample-name-help"><p id="sample-name-help">Campo de muestra. No se envía ni se guarda.</p></div>
+          <div class="calm-field"><label for="sample-invalid">Nombre · ejemplo de error</label><input id="sample-invalid" type="text" placeholder="Escribí tu nombre" autocomplete="off" aria-invalid="true" aria-describedby="sample-error"><p class="calm-field-error" id="sample-error">Falta tu nombre. Completalo para continuar.</p></div>
+        </div>
+      </div>
+    </section>
+    <section class="vs-icons" aria-labelledby="icons-title">
+      <div class="vs-section-heading"><h2 id="icons-title">05 / Iconos en un mismo tono</h2><p>La familia original, en una exploración monocromática.</p></div>
+      <div class="vs-icon-grid">
+        <figure><img src="icons/catalog.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Catálogo</figcaption></figure>
+        <figure><img src="icons/search.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Buscar</figcaption></figure>
+        <figure><img src="icons/cart-bag.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Selección</figcaption></figure>
+        <figure><img src="icons/photo-gallery.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Galería</figcaption></figure>
+        <figure><img src="icons/product-info.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Información</figcaption></figure>
+        <figure><img src="icons/delivery-scooter.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Entrega</figcaption></figure>
+        <figure><img src="icons/whatsapp.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Consulta</figcaption></figure>
+        <figure><img src="icons/dismiss.svg" width="44" height="44" alt="" loading="lazy"><figcaption>Cerrar</figcaption></figure>
+      </div>
+    </section>
+    <section class="vs-motion" aria-labelledby="motion-title">
+      <div class="vs-section-heading"><h2 id="motion-title">06 / Respuesta sin ruido</h2><p>Movimiento bajo. Feedback claro.</p></div>
+      <div class="vs-motion-content"><dl><div><dt>Acciones</dt><dd>El color confirma hover y presión. El botón permanece en su lugar.</dd></div><div><dt>Teclado</dt><dd>Un contorno azul grisáceo hace visible el foco.</dd></div><div><dt>Selección reversible</dt><dd>El texto y el estado cambian juntos. Siempre se puede volver.</dd></div><div><dt>Movimiento reducido</dt><dd>Se elimina la transición y se conserva la respuesta de cada control.</dd></div></dl></div>
+    </section>
+    <footer class="vs-footer"><span>PLOT TWIST / CALMO</span><span>Estudio visual local. Tokens dentro de este HTML; el catálogo conserva su estilo actual.</span><a href="sistema-visual.html">Comparar con el original</a></footer>
+  </main>
+  <script>
+    // Local specimen interactions only: no commerce, persistence or networking.
+    const select = document.getElementById('sample-select');
+    const status = document.getElementById('sample-status');
+    function setSelected(selected) {
+      select.setAttribute('aria-pressed', String(selected));
+      select.textContent = selected ? 'Quitar de la selección' : 'Seleccionar objeto';
+      status.textContent = selected ? 'Objeto seleccionado en esta muestra. Podés quitarlo con el mismo botón.' : 'Sin objetos seleccionados en esta muestra.';
+    }
+    select.addEventListener('click', () => setSelected(select.getAttribute('aria-pressed') !== 'true'));
+    document.getElementById('sample-reset').addEventListener('click', () => {
+      setSelected(false);
+      document.querySelectorAll('.calm-field input').forEach(input => { input.value = ''; });
+      document.getElementById('sample-invalid').setAttribute('aria-invalid', 'true');
+      document.getElementById('sample-error').textContent = 'Falta tu nombre. Completalo para continuar.';
+      document.getElementById('sample-error').classList.add('calm-field-error');
+    });
+    document.getElementById('sample-invalid').addEventListener('input', event => {
+      const valid = Boolean(event.target.value.trim());
+      event.target.setAttribute('aria-invalid', String(!valid));
+      const message = document.getElementById('sample-error');
+      message.textContent = valid ? 'Nombre completo en esta muestra.' : 'Falta tu nombre. Completalo para continuar.';
+      message.classList.toggle('calm-field-error', !valid);
+    });
+    const tokens = getComputedStyle(document.documentElement);
+    document.querySelectorAll('[data-token]').forEach(label => {
+      label.textContent = tokens.getPropertyValue(label.dataset.token).trim().toUpperCase();
+    });
+  </script>
+</body>
+</html>

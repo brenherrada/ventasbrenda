@@ -1,33 +1,9 @@
 /* Generated from scss/styles.scss. Edit Sass, then run npm run styles:build. */
-/* Reveal the catalog once its critical local fonts have settled. */
+/* Fonts may settle in the background; never hide or block the storefront. */
 :root[data-fonts=fallback] {
   --font-display: system-ui, sans-serif;
   --font-body: system-ui, sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-}
-
-.font-splash {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: var(--color-cream);
-  place-items: center;
-}
-.font-splash img {
-  display: block;
-  width: clamp(180px, 22vw, 260px);
-  height: auto;
-}
-
-:root[data-fonts=loading] {
-  overflow: clip;
-}
-:root[data-fonts=loading] .font-splash {
-  display: grid;
-}
-:root[data-fonts=loading] body > :not(.font-splash) {
-  visibility: hidden;
 }
 
 * {
@@ -332,7 +308,14 @@ textarea {
 
 .skeleton-media {
   aspect-ratio: 1;
-  border-bottom: 3px solid var(--color-border);
+  display: grid;
+  place-items: center;
+  background: var(--color-toolbar);
+  border-bottom: var(--line);
+}
+.skeleton-media img {
+  width: clamp(40px, 5vw, 64px);
+  height: auto;
 }
 
 .skeleton-body {
@@ -354,7 +337,7 @@ textarea {
 .skeleton-line,
 .skeleton-price,
 .skeleton-button {
-  background: #e9e4dc;
+  background: var(--color-toolbar);
   border-radius: 6px;
   display: block;
 }
@@ -397,7 +380,7 @@ textarea {
   background: var(--modal-overlay);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--motion-modal) var(--ease);
   z-index: 39;
 }
 .overlay.open {
@@ -408,23 +391,27 @@ textarea {
 
 /* Minicart: the footer stays visible while products and buyer details scroll. */
 .drawer {
+  --drawer-gutter: clamp(8px, 1vw, 12px);
+  --surface-visibility-delay: var(--motion-modal);
   position: fixed;
   z-index: 40;
-  right: 0;
-  top: 0;
-  height: 100dvh;
-  width: min(480px, 100%);
-  background: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
-  border-left: 3px solid var(--color-border);
-  transform: translateX(105%);
+  right: max(var(--drawer-gutter), env(safe-area-inset-right));
+  top: max(var(--drawer-gutter), env(safe-area-inset-top));
+  bottom: max(var(--drawer-gutter), env(safe-area-inset-bottom));
+  width: min(480px, 100% - max(var(--drawer-gutter), env(safe-area-inset-left)) - max(var(--drawer-gutter), env(safe-area-inset-right)));
+  background: var(--baloon-gradient);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  opacity: 0;
   visibility: hidden;
-  transition: transform 0.24s ease, visibility 0.24s;
+  transition: opacity var(--motion-modal) var(--ease), visibility 0s linear var(--surface-visibility-delay);
   display: flex;
   flex-direction: column;
-  padding-top: env(safe-area-inset-top);
 }
 .drawer.open {
-  transform: none;
+  --surface-visibility-delay: 0s;
+  opacity: 1;
   visibility: visible;
 }
 .drawer-head {
@@ -580,6 +567,7 @@ textarea {
   gap: clamp(10px, 1vw, 14px);
   padding: var(--footer-space) var(--space) calc(var(--footer-space) + env(safe-area-inset-bottom));
   border-top: var(--line);
+  border-radius: 0 0 calc(var(--radius) - 3px) calc(var(--radius) - 3px);
   background: var(--paper);
 }
 
@@ -907,7 +895,8 @@ label {
 }
 
 .web-promo:popover-open,
-.description-popup[open] {
+.description-popup[open],
+.drawer.open {
   animation: popup-pop 0.36s cubic-bezier(0.2, 0.8, 0.25, 1);
 }
 
@@ -931,7 +920,7 @@ label {
   padding: clamp(24px, 3vw, 36px);
   border: 3px solid var(--color-border);
   border-radius: var(--radius);
-  background: var(--paper);
+  background: var(--baloon-gradient);
   box-shadow: 6px 6px 0 var(--pink);
   overflow: visible;
 }
@@ -961,7 +950,9 @@ label {
   overflow: auto;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  line-height: 1.7;
+}
+.description-popup .bag-browse:not(.contact-confirmation__cancel) {
+  background: var(--color-green);
 }
 
 /* Actual MTS composition and primitives, adapted to the catalog's existing IDs and data contract. */
@@ -1305,7 +1296,7 @@ body::before {
 
 .hero-wrap {
   overflow: hidden;
-  background: radial-gradient(ellipse at 5% 20%, color-mix(in srgb, var(--color-peach) 85%, transparent), transparent 65%), radial-gradient(ellipse at 95% 80%, color-mix(in srgb, var(--color-lavender) 48%, transparent), transparent 65%), radial-gradient(ellipse at 80% 5%, color-mix(in srgb, var(--color-lime) 16%, transparent), transparent 55%), var(--color-sky);
+  background: radial-gradient(ellipse at 5% 20%, color-mix(in srgb, var(--color-peach) 85%, transparent), transparent 65%), radial-gradient(ellipse at 95% 80%, color-mix(in srgb, var(--color-lavender) 48%, transparent), transparent 65%), radial-gradient(ellipse at 80% 5%, color-mix(in srgb, var(--color-lime) 16%, transparent), transparent 55%), var(--color-white);
 }
 
 .hero {
@@ -1728,16 +1719,17 @@ main.shell {
 }
 
 .catalog-status {
+  margin-bottom: clamp(12px, 1.3vw, 16px);
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   align-items: center;
   gap: clamp(8px, 1vw, 12px);
-  border: 1px dashed color-mix(in srgb, var(--color-border) 24%, var(--color-butter));
+  border: var(--line);
   border-radius: var(--radius-sm);
-  background: var(--color-butter);
-  color: var(--color-text-muted);
+  background: var(--color-orange);
   font: 600 clamp(16px, 1.1vw, 20px)/1.5 var(--font-body);
   overflow-wrap: anywhere;
+  box-shadow: var(--shadow);
 }
 .catalog-status::before {
   content: "";
@@ -2546,7 +2538,8 @@ html:has(#catalogMenu:modal) {
     flex-direction: column;
     align-items: flex-start;
   }
-  .media {
+  .media,
+  .skeleton-media {
     aspect-ratio: var(--product-image-listing-ratio);
   }
 }
@@ -3025,14 +3018,15 @@ html:has(#catalogMenu:modal) {
 }
 .product-feature__label--name {
   --feature-label-size: clamp(16px, 1.8vw, 26px);
-  left: 12%;
-  bottom: 0;
-  width: 74%;
+  left: 17%;
+  bottom: 5%;
+  width: 55%;
   min-height: clamp(48px, 4vw, 60px);
   background-image: url("images/legxercise/cinta-rosa.webp");
   text-transform: uppercase;
   transform: rotate(-4deg);
-  text-shadow: 1px 1px rgba(255, 255, 255, 0.3);
+  text-shadow: 1px 1px var(--color-ink);
+  color: var(--color-white);
 }
 .product-feature__arrow {
   position: absolute;

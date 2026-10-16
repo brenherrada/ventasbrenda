@@ -16,16 +16,17 @@
   font: 700 clamp(12px, 1vw, 14px)/1.4 var(--font-mono);
 }
 .catalog-status {
+  margin-bottom: clamp(12px, 1.3vw, 16px);
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   align-items: center;
   gap: clamp(8px, 1vw, 12px);
-  border: 1px dashed color-mix(in srgb, var(--color-border) 24%, var(--color-butter));
+  border: var(--line);
   border-radius: var(--radius-sm);
-  background: var(--color-butter);
-  color: var(--color-text-muted);
+  background: var(--color-orange);
   font: 600 clamp(16px, 1.1vw, 20px)/1.5 var(--font-body);
   overflow-wrap: anywhere;
+  box-shadow: var(--shadow);
 
   &::before {
     content: '';

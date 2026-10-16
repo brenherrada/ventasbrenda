@@ -13,6 +13,8 @@
     "styles:check": "node scripts/styles.mjs --check",
     "test:styles": "node tests/styles.mjs",
     "test:catalog-automation": "node tests/catalog-automation.mjs",
+    "test:catalog-api": "node tests/catalog-api.mjs && node tests/catalog-direct.mjs && node tests/catalog-privacy.mjs && node tests/google-identities.mjs",
+    "test:catalog-browser": "node tests/catalog-direct-browser.mjs",
     "test:e2e": "node tests/e2e.mjs",
     "test:visual": "node tests/visual-audit.mjs",
     "test:resilience": "node tests/resilience.mjs",
@@ -20,5 +22,8 @@
     "waitlist:preflight": "node scripts/check-waitlist-deployment.mjs",
     "test:waitlist-build": "node tests/waitlist-build.mjs",
     "clean:qa": "node scripts/clean-qa.mjs"
+  },
+  "dependencies": {
+    "google-auth-library": "11.3.1"
   }
 }

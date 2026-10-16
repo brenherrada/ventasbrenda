@@ -2,6 +2,11 @@
 node_modules/
 .netlify/
 
+# npm/package-lock.json is the dependency source; local tool-generated files stay out.
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
+/deno.lock
+
 # Secrets and local environment configuration
 .env
 .env.*

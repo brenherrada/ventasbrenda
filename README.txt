@@ -164,7 +164,7 @@ Con Netlify CLI ya instalado: netlify dev --offline --dir . --port 8765 --no-ope
 Esto compila y sirve las funciones localmente; no publica el sitio.
 QA y respaldos están en output/ y no forman parte de dist.
 
-Fuentes locales: el head precarga los WOFF2 críticos y fonts/font-loading.js espera hasta 2 segundos. Durante la espera muestra el logo. Si falla la carga, usa tipografía del sistema durante esa visita para evitar cambios tardíos. No quitar el bootstrap ni sus reglas de styles.css al preparar la publicación.
+Fuentes locales: el head precarga los WOFF2 críticos. fonts/font-loading.js se ejecuta con defer y comprueba su carga hasta 2 segundos sin ocultar ni bloquear la página. Si falla la carga, usa tipografía del sistema durante esa visita para evitar cambios tardíos. El catálogo muestra su estado de carga y placeholders mientras consulta datos frescos; no guarda precios ni disponibilidad en el navegador.
 
 Fotos de Drive: optimización automática mediante Netlify Image CDN.
 Al reemplazar una foto, subí un archivo nuevo y actualizá su enlace en la Sheet.

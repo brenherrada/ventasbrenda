@@ -3,7 +3,15 @@
 
 .skeleton-media {
   aspect-ratio: 1;
-  border-bottom: 3px solid var(--color-border);
+  display: grid;
+  place-items: center;
+  background: var(--color-toolbar);
+  border-bottom: var(--line);
+
+  & img {
+    width: clamp(40px, 5vw, 64px);
+    height: auto;
+  }
 }
 .skeleton-body {
   padding: var(--card-space);
@@ -21,7 +29,7 @@
 .skeleton-line,
 .skeleton-price,
 .skeleton-button {
-  background: #e9e4dc;
+  background: var(--color-toolbar);
   border-radius: 6px;
   display: block;
 }

@@ -8,7 +8,7 @@ const realNetlify = globalThis.Netlify;
 let state;
 const valid = { name: 'Persona QA', email: 'qa@example.test', consent: true, website: '' };
 const reset = () => { state = { flag: 'si', configFail: false, saved: { ok: true }, secret: 'unit-test-secret', url: 'https://script.google.com/macros/s/fixture/exec', writes: [], failSave: false }; };
-globalThis.Netlify = { env: { get: key => key === 'WAITLIST_SCRIPT_URL' ? state.url : state.secret } };
+globalThis.Netlify = { env: { get: key => ({ WAITLIST_SCRIPT_URL: state.url, WAITLIST_SCRIPT_SECRET: state.secret })[key] } };
 globalThis.fetch = async (url, options) => {
   if (JSON.parse(options.body).action === 'catalog.read') {
     if (state.configFail) return new Response('', { status: 503 });
@@ -23,9 +23,13 @@ const send = (body = valid, options = {}) => handler(new Request('https://fixtur
   method: options.method || 'POST',
   headers: { origin: options.origin || 'https://fixture.test', 'content-type': options.type || 'application/json' },
   ...(options.method === 'GET' ? {} : { body: typeof body === 'string' ? body : JSON.stringify(body) })
-}));
+}), { deploy: { context: options.context ?? 'production' } });
 let checks = 0;
 try {
+  for (const context of ['dev', 'deploy-preview', 'branch-deploy', 'preview-server', 'unknown', '']) {
+    reset(); assert.equal((await send(valid, { context })).status, 403); assert.equal(state.writes.length, 0); checks++;
+  }
+  reset(); assert.equal((await handler(new Request('https://fixture.test/api/waitlist', { method: 'POST' }))).status, 403); assert.equal(state.writes.length, 0); checks++;
   for (const [body, status] of [[{ ...valid, consent: false }, 400], [{ ...valid, email: 'invalid' }, 400], [{ ...valid, name: '' }, 400], [{ ...valid, name: 'a'.repeat(81) }, 400], [{ ...valid, name: 'a\nb' }, 400], [{ ...valid, website: 'bot' }, 400], [{ ...valid, admin: true }, 400], [[], 400], ['bad json', 400], ['x'.repeat(4097), 413]]) {
     reset(); assert.equal((await send(body)).status, status); assert.equal(state.writes.length, 0); checks++;
   }

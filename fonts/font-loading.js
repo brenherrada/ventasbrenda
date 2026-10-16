@@ -15,9 +15,8 @@
     '700 16px "Space Mono"',
   ];
 
-  // This head script runs before the body exists; no fallback layout is exposed.
+  // Track fonts without blocking content, scrolling or catalog requests.
   root.dataset.fonts = "loading";
-  root.setAttribute("aria-busy", "true");
   let settled = false;
   let timeout;
 
@@ -27,7 +26,6 @@
     window.clearTimeout(timeout);
     // Fallback tokens stay selected even if a timed-out font arrives later.
     root.dataset.fonts = state;
-    root.removeAttribute("aria-busy");
   }
 
   timeout = window.setTimeout(() => reveal("fallback"), waitLimit);

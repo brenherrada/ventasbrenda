@@ -1,34 +1,9 @@
 // Carga inicial y fallback de fuentes
 // ────────────────────────────────────────────────────────────────────
 
-/* Reveal the catalog once its critical local fonts have settled. */
+/* Fonts may settle in the background; never hide or block the storefront. */
 :root[data-fonts='fallback'] {
   --font-display: system-ui, sans-serif;
   --font-body: system-ui, sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-}
-.font-splash {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: var(--color-cream);
-  place-items: center;
-
-  & img {
-    display: block;
-    width: clamp(180px, 22vw, 260px);
-    height: auto;
-  }
-}
-:root[data-fonts='loading'] {
-  overflow: clip;
-
-  & .font-splash {
-    display: grid;
-  }
-
-  & body > :not(.font-splash) {
-    visibility: hidden;
-  }
 }

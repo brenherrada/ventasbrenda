@@ -10,6 +10,7 @@
   let restoringCatalog = false;
   let restorationVersion = 0;
   let catalogScrollTimer;
+  let catalogLoadingTimer;
   const CATEGORY_PARAM = "categoria";
   const BADGE_PARAM = "badge";
   const NEW_BADGE = "Recién agregado";
@@ -408,6 +409,8 @@
     } catch (err) {
       console.error(err);
       showCatalogError("No pudimos cargar los productos. Volvé a intentar en unos segundos.");
+    } finally {
+      clearTimeout(catalogLoadingTimer);
     }
   }
 
@@ -1264,7 +1267,9 @@
     overlay.classList.add("open");
     drawer.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
-    requestAnimationFrame(() => $("#closeBag").focus());
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (drawer.classList.contains("open")) $("#closeBag").focus({ preventScroll: true });
+    }));
   }
 
   function closeDrawer() {
@@ -1896,13 +1901,21 @@
     photoObserver?.disconnect();
     productsEl.replaceChildren();
     productsEl.setAttribute("aria-busy", "true");
-    catalogStatusEl.hidden = true;
-    for (let index = 0; index < 4; index += 1) {
+    catalogCountEl.textContent = "Catálogo";
+    if (mobileCategoryCount) mobileCategoryCount.textContent = "…";
+    catalogStatusEl.classList.remove("is-error");
+    catalogStatusEl.textContent = "Cargando catálogo…";
+    catalogStatusEl.hidden = false;
+    clearTimeout(catalogLoadingTimer);
+    catalogLoadingTimer = setTimeout(() => {
+      catalogStatusEl.textContent = "La carga está tardando más de lo habitual. Seguimos intentando…";
+    }, 6000);
+    for (let index = 0; index < 6; index += 1) {
       const skeleton = document.createElement("article");
       skeleton.className = "card skeleton-card";
       skeleton.setAttribute("aria-hidden", "true");
       skeleton.innerHTML = `
-        <div class="skeleton-media skeleton-shimmer"></div>
+        <div class="skeleton-media"><img class="skeleton-shimmer" src="icons/photo-gallery.svg" width="64" height="64" alt=""></div>
         <div class="skeleton-body">
           <span class="skeleton-line skeleton-title skeleton-shimmer"></span>
           <div class="skeleton-summary">

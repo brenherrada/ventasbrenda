@@ -7,7 +7,7 @@
   background: var(--modal-overlay);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--motion-modal) var(--ease);
   z-index: 39;
 
   &.open {
@@ -18,25 +18,29 @@
 }
 /* Minicart: the footer stays visible while products and buyer details scroll. */
 .drawer {
+  --drawer-gutter: clamp(8px, 1vw, 12px);
+  --surface-visibility-delay: var(--motion-modal);
   position: fixed;
   z-index: 40;
-  right: 0;
-  top: 0;
-  height: 100dvh;
-  width: min(480px, 100%);
-  background: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
-  border-left: 3px solid var(--color-border);
-  transform: translateX(105%);
+  right: max(var(--drawer-gutter), env(safe-area-inset-right));
+  top: max(var(--drawer-gutter), env(safe-area-inset-top));
+  bottom: max(var(--drawer-gutter), env(safe-area-inset-bottom));
+  width: min(480px, calc(100% - max(var(--drawer-gutter), env(safe-area-inset-left)) - max(var(--drawer-gutter), env(safe-area-inset-right))));
+  background: var(--baloon-gradient);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  opacity: 0;
   visibility: hidden;
   transition:
-    transform 0.24s ease,
-    visibility 0.24s;
+    opacity var(--motion-modal) var(--ease),
+    visibility 0s linear var(--surface-visibility-delay);
   display: flex;
   flex-direction: column;
-  padding-top: env(safe-area-inset-top);
 
   &.open {
-    transform: none;
+    --surface-visibility-delay: 0s;
+    opacity: 1;
     visibility: visible;
   }
 
@@ -199,6 +203,7 @@
   padding: var(--footer-space) var(--space)
     calc(var(--footer-space) + env(safe-area-inset-bottom));
   border-top: var(--line);
+  border-radius: 0 0 calc(var(--radius) - 3px) calc(var(--radius) - 3px);
   background: var(--paper);
 }
 .bag-contribution {

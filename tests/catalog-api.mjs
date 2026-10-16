@@ -9,7 +9,7 @@ let activeSheet = 'Catalogo';
 const tableFor = sheet => ({ cols: fields[sheet].map(label => ({ label })), rows: sheet === 'Ventas' ? [{ c: [{ v: 'TOTAL VENDIDO' }, { v: 123 }] }] : [] });
 let table = tableFor(activeSheet);
 const originalNetlify = globalThis.Netlify;
-globalThis.Netlify = { env: { get: key => key === 'WAITLIST_SCRIPT_URL' ? 'https://script.google.com/macros/s/fixture/exec' : 'unit-test-secret' } };
+globalThis.Netlify = { env: { get: key => ({ WAITLIST_SCRIPT_URL: 'https://script.google.com/macros/s/fixture/exec', WAITLIST_SCRIPT_SECRET: 'unit-test-secret' })[key] } };
 const good = () => new Response(JSON.stringify({ ok: true, table }));
 let calls = [], logs = [];
 console.warn = value => logs.push(JSON.parse(value));
@@ -67,6 +67,9 @@ try {
   assert.equal((await handler(request('Catalogo'))).status, 200);
   calls = [];
   assert.equal((await handler(request('private'))).status, 404);
+  for (const query of ['sheet=Catalogo&range=A:Z', 'sheet=Catalogo&source=direct', 'sheet=Config&sheet=Catalogo']) {
+    assert.equal((await handler(new Request(`https://fixture.test/api/catalog?${query}`))).status, 400);
+  }
   assert.equal((await handler(new Request(request('Catalogo'), { method: 'POST' }))).status, 405);
   assert.equal(calls.length, 0);
   assert.deepEqual(config.rateLimit, { windowLimit: 60, windowSize: 60, aggregateBy: ['ip', 'domain'] });

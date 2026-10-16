@@ -33,15 +33,12 @@
   <link rel="preload" href="fonts/latin-7.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/latin-9.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="fonts/fonts.css?v=20261008-qa3" />
-  <script src="fonts/font-loading.js?v=20261007-mts-v43"></script>
+  <script src="fonts/font-loading.js?v=20261016-nonblocking" defer></script>
   <link rel="stylesheet" href="tokens.css?v=20261008-qa" />
   <link rel="stylesheet" href="styles.css?v=20261008-image-cdn" />
   <link rel="stylesheet" href="promo.css?v=20261013-comunidad" />
 </head>
 <body>
-  <div class="font-splash" role="status" aria-label="Cargando catálogo">
-    <img src="images/plot-twist-desktop.webp" srcset="images/plot-twist-mobile.webp 480w, images/plot-twist-desktop.webp 960w" sizes="clamp(180px, 22vw, 260px)" width="960" height="320" alt="" fetchpriority="high" />
-  </div>
   <a class="skip-link" href="#catalogo">Ir al listado</a>
   <div class="site-alert">✳ ARTÍCULOS USADOS EN BUEN ESTADO · ALGUNOS NUEVOS ✳</div>
   <nav class="site-nav" aria-label="Navegación principal"><div class="shell nav-inner">
@@ -106,7 +103,7 @@
         </div>
       </div>
       <div>
-        <h2 id="catalogCount"></h2>
+        <h2 id="catalogCount">Catálogo</h2>
       </div>
     </div>
 
@@ -122,7 +119,7 @@
           <span class="mobile-category-eyebrow">Categoría</span>
           <span class="mobile-category-value" id="mobileCategoryValue">Todos</span>
         </span>
-        <span class="mobile-category-count" id="mobileCategoryCount">0</span>
+        <span class="mobile-category-count" id="mobileCategoryCount">…</span>
         <img class="mobile-category-icon" src="icons/category-filter.svg" width="28" height="28" alt="" aria-hidden="true" />
       </button>
     </section>

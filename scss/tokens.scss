@@ -59,6 +59,7 @@
   --motion-fast: 400ms;
   --motion-modal: 500ms;
   --motion-category: 500ms;
+  --baloon-gradient: linear-gradient(180deg, var(--color-butter) 0%, var(--color-cream) 55%, var(--color-peach) 100%);
 }
 /* Button type roles: journey and purchase actions use display; compact utilities use mono. */
 :root {

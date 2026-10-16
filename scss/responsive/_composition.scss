@@ -174,7 +174,8 @@
     flex-direction: column;
     align-items: flex-start;
   }
-  .media {
+  .media,
+  .skeleton-media {
     aspect-ratio: var(--product-image-listing-ratio);
   }
 }

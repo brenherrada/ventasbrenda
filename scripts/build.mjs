@@ -2,9 +2,11 @@ import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promi
 import path from 'node:path';
 import * as sass from 'sass';
 import { verifyWaitlistBuildConfig } from './waitlist-build-config.mjs';
+import { verifyCatalogBuildConfig } from './catalog-build-config.mjs';
 
 // Fail before replacing dist; do not publish an unconfigured waitlist.
 if (verifyWaitlistBuildConfig()) console.log('PASS: waitlist production build configuration.');
+if (verifyCatalogBuildConfig()) console.log('PASS: catalog build configuration; runtime credentials still require deployed verification.');
 
 const root = process.cwd();
 const out = path.join(root, 'dist');
