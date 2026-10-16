@@ -13,11 +13,7 @@ const data = {
 const context = vm.createContext({
   PropertiesService: { getScriptProperties: () => ({ getProperty: key => key === 'WAITLIST_SECRET' ? 'fixture-secret' : 'private-waitlist' }) },
   ContentService: { MimeType: { JSON: 'json' }, createTextOutput: body => ({ body, setMimeType() { return this; } }) },
-  SpreadsheetApp: { openById: () => { reads++; return { getSheetByName: name => {
-    const rows = data[name]; if (!rows) return null;
-    return { getLastRow: () => rows.length, getLastColumn: () => rows[0].length,
-      getRange: (r, c, nr, nc) => ({ getValues: () => rows.slice(r - 1, r - 1 + nr).map(row => row.slice(c - 1, c - 1 + nc)) }) };
-  } }; } }
+  readSheetValues_: (purpose, range) => { reads++; assert.equal(purpose, 'catalog'); return data[range.split('!')[0]]; }
 });
 vm.runInContext(source, context);
 const post = input => JSON.parse(context.doPost({ postData: { contents: JSON.stringify(input) } }).body);

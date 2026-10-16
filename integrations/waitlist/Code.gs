@@ -1,4 +1,4 @@
-// Runs as the owner. Private Sheets are never shared with website visitors.
+// Web app uses technical identities; the owner grants no personal Sheets OAuth scope.
 // Configure WAITLIST_SHEET_ID and WAITLIST_SECRET in Script Properties.
 const WAITLIST_HEADERS = ['Fecha de inscripción', 'Nombre', 'Mail', 'Estado', 'Fecha de contacto', 'Consentimiento'];
 
@@ -34,16 +34,11 @@ function doPost(event) {
     lock = LockService.getScriptLock();
     acquired = lock.tryLock(5000);
     if (!acquired) return result_({ ok: false });
-    const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName('Lista de espera');
-    if (!sheet || JSON.stringify(sheet.getRange(1, 1, 1, 6).getValues()[0]) !== JSON.stringify(WAITLIST_HEADERS)) return result_({ ok: false });
-    const lastRow = sheet.getLastRow();
-    if (lastRow > 1 && sheet.getRange(2, 3, lastRow - 1, 1).createTextFinder(email).matchEntireCell(true).matchCase(false).findNext()) return result_({ ok: true });
-    // Prefix spreadsheet formula characters so user-entered names remain literal text.
-    const text = value => /^[=+\-@]/.test(value) ? "'" + value : value;
-    const row = lastRow + 1;
-    sheet.getRange(row, 1, 1, 6).setValues([[new Date(), text(name), text(email), 'En espera', '', 'waitlist-v1 · contacto por mail']]);
-    sheet.getRange(row, 1).setNumberFormat('dd/mm/yyyy hh:mm');
-    SpreadsheetApp.flush();
+    const headers = readSheetValues_('waitlist', "'Lista de espera'!A1:F1");
+    if (JSON.stringify(headers[0]) !== JSON.stringify(WAITLIST_HEADERS)) return result_({ ok: false });
+    const existing = readSheetValues_('waitlist', "'Lista de espera'!C2:C");
+    if (existing.some(row => String(row[0] || '').trim().toLowerCase() === email)) return result_({ ok: true });
+    appendWaitlist_(name, email);
     return result_({ ok: true });
   } catch (_) {
     return result_({ ok: false });
@@ -60,25 +55,21 @@ function readPublicCatalog_(name) {
     Ventas: ['concepto', 'importe']
   };
   if (!Object.prototype.hasOwnProperty.call(fields, name)) throw new Error('Invalid public resource');
-  const book = SpreadsheetApp.openById('18tOI0_8yoLwXR4za7XVvsOUjVrktexYldoMAlRJ1BMA');
-  const sheet = book.getSheetByName(name);
-  if (!sheet) throw new Error('Missing public resource');
+  const values = readSheetValues_('catalog', name + (name === 'Catalogo' ? '!A1:K' : '!A1:B'));
+  if (!values.length) throw new Error('Missing public resource');
   const keys = ['titulo', 'intro', 'nota_reserva', 'whatsapp', 'actualizado', 'meta_total', 'mp_comision_inmediata', 'mp_comision_3_cuotas', 'mp_iva', 'mostrar_boton_vender'];
   let rows;
   if (name === 'Catalogo') {
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const headers = values[0];
     const indices = fields.Catalogo.map(field => {
       const matches = headers.map((value, index) => String(value).trim() === field ? index : -1).filter(index => index >= 0);
       if (matches.length !== 1) throw new Error('Invalid catalog columns');
       return matches[0];
     });
-    const count = Math.max(0, sheet.getLastRow() - 1);
-    rows = count ? sheet.getRange(2, 1, count, Math.max.apply(null, indices) + 1).getValues()
-      .filter(row => String(row[indices[1]] || '').trim())
-      .map(row => indices.map(index => row[index])) : [];
+    rows = values.slice(1).filter(row => String(row[indices[1]] || '').trim())
+      .map(row => indices.map(index => row[index] === undefined ? '' : row[index]));
   } else {
-    const count = Math.max(0, sheet.getLastRow() - 1);
-    rows = count ? sheet.getRange(2, 1, count, 2).getValues() : [];
+    rows = values.slice(1).map(row => [row[0], row[1] === undefined ? '' : row[1]]);
     rows = rows.filter(row => name === 'Config' ? keys.indexOf(String(row[0]).trim()) !== -1 : row[0] === 'TOTAL VENDIDO');
     if (name === 'Ventas' && (rows.length !== 1 || typeof rows[0][1] !== 'number' || !isFinite(rows[0][1]))) throw new Error('Invalid sales total');
   }

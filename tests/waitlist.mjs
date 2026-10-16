@@ -49,15 +49,12 @@ const script = vm.createContext({
   PropertiesService: { getScriptProperties: () => ({ getProperty: key => key === 'WAITLIST_SECRET' ? 'unit-test-secret' : 'private-fixture' }) },
   ContentService: { MimeType: { JSON: 'json' }, createTextOutput: body => ({ body, setMimeType() { return this; } }) },
   LockService: { getScriptLock: () => ({ tryLock: () => !locked, releaseLock: () => {} }) },
-  SpreadsheetApp: { openById: () => ({ getSheetByName: () => ({
-    getLastRow: () => rows.length,
-    getRange: (row, column) => ({
-      getValues: () => [rows[row - 1]],
-      setValues: values => { rows[row - 1] = values[0]; },
-      setNumberFormat: () => {},
-      createTextFinder: email => ({ matchEntireCell() { return this; }, matchCase() { return this; }, findNext: () => rows.slice(1).find(r => r[2] === email) || null })
-    })
-  }) }), flush: () => { if (failFlush) throw new Error('Write failure'); } }
+  readSheetValues_: (purpose, range) => range.endsWith('A1:F1') ? [rows[0]] : rows.slice(1).map(row => [row[2]]),
+  appendWaitlist_: (name, email) => {
+    const text = value => /^[=+\-@]/.test(value) ? "'" + value : value;
+    rows.push([new Date(), text(name), text(email), 'En espera', '', 'waitlist-v1 · contacto por mail']);
+    if (failFlush) throw new Error('Write response lost');
+  }
 });
 vm.runInContext(source, script);
 const post = body => JSON.parse(script.doPost({ postData: { contents: JSON.stringify(body) } }).body);
