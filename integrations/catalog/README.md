@@ -1,6 +1,6 @@
 # Lector privado del catálogo
 
-Estado 16/10/2026: implementación en `codex/catalogo-mejoras-y-migracion`; preview con Google real y planilla sintética verificado. [Resultados, seguridad, evidencia y límites](PREVIEW-VERIFICATION.md). Modo productivo y credenciales existentes sin cambios. El plan operativo sigue en [MIGRATION-PLAN.md](MIGRATION-PLAN.md).
+Estado 16/10/2026: migración productiva autorizada y en ejecución. [Registro actual de aislamiento, custodia, pruebas y publicación](PRODUCTION-VERIFICATION.md). [Pruebas del preview sintético](PREVIEW-VERIFICATION.md) y [plan operativo](MIGRATION-PLAN.md).
 
 ## Contrato y ejecución
 
@@ -14,19 +14,17 @@ Estado 16/10/2026: implementación en `codex/catalogo-mejoras-y-migracion`; prev
 - Logs del directo: recurso permitido, ID aleatorio de lectura, intento, motivo acotado y tiempos de autenticación/Sheets/proyección/total. No se registran claves, tokens, URLs, IDs de archivos, filas ni errores crudos del proveedor.
 - Límite de respuesta de Sheets y del JSON público: 4 MiB; un exceso falla de forma cerrada. El límite y la ausencia de paginado deben revisarse si crece el catálogo.
 
-## Configuración privada pendiente
+## Configuración privada y custodia autorizada
 
-El modo directo espera `CATALOG_SPREADSHEET_ID` y `CATALOG_GOOGLE_CREDENTIALS` en el entorno de servidor. La credencial debe ser de tipo `service_account`, RSA de al menos 2048 bits y cuenta técnica; no se acepta OAuth personal, impersonación, endpoints alternativos ni carga automática de archivos/URLs. Solo se solicitan scopes de lectura de Sheets. Los permisos reales del archivo y de IAM deben comprobarse en Google: la validación del JSON no los prueba.
+El modo directo usa `CATALOG_SPREADSHEET_ID` y `CATALOG_GOOGLE_CREDENTIALS` en servidor. La credencial debe ser `service_account`, RSA de al menos 2048 bits, sin OAuth personal, impersonación ni endpoints alternativos. El código solicita `spreadsheets.readonly`; los permisos del archivo e IAM se verifican además de validar el JSON.
 
-**Autorización recibida el 16/10/2026:** Bren aprobó la cuenta y planilla privadas de prueba, incluyendo custodia de la clave en el contexto de preview y disponibilidad para Builds. Se creó `catalog-preview-reader@plot-twist-catalog.iam.gserviceaccount.com` sin roles de proyecto, reader exclusivamente de la planilla sintética `1l9o08tGSlAVuG2BSGa9fU5PS00wTDaE17UvSynz1bJQ`. El README del puente conserva fuera de Netlify las dos credenciales existentes; la excepción documentada no les afecta. No se autorizó acceso a archivos reales ni custodia productiva.
+Bren autorizó el 16/10/2026 separar los datos personales y completar la migración hasta producción. Se creó `catalog-netlify-reader@plot-twist-catalog.iam.gserviceaccount.com` sin roles de proyecto, con permiso reader exclusivamente sobre el archivo del catálogo. Pendientes se copió de forma nativa a un archivo privado accesible solo por la propietaria; se comprobaron valores, formatos, validaciones y tabla antes de retirar los registros del archivo original, donde permanece un enlace. La nueva cuenta no tiene acceso a Pendientes ni a la lista de espera. Google denegó ambas lecturas y la escritura, incluso solicitando un token con scope de escritura para comprobar el permiso reader del archivo.
 
-Las tres variables `CATALOG_*` tienen valor únicamente en `deploy-preview`. La credencial está marcada secreta y disponible para Builds/Functions/Runtime; no hay valor en producción, dev ni branch-deploy. Se verificó metadata después de guardarlas. La primera solicitud de scopes reducidos fue rechazada por el plan y no creó variables; se usaron los scopes estándar ya autorizados, excluyendo postprocesado de la credencial.
+La clave nueva está marcada secreta en Netlify para producción, con los scopes Builds/Functions/Runtime del plan actual, autorizados expresamente. No se trasladaron las claves de las identidades del puente. El contexto genérico `deploy-preview` conserva una identidad y planilla sintéticas independientes. La validación final usa temporalmente el contexto específico `catalog-migration-validation`; se retira su configuración al cerrar las pruebas. No conceder esta clave productiva a PRs arbitrarios ni a dev.
 
-Integración real local, Node 24: Catalogo 94 filas en 984 ms, Config 10 filas en 397 ms, Ventas un agregado en 292 ms, con igualdad exacta contra el fixture sintético. Google devolvió 403 para lectura de los dos archivos reales, lectura anónima de la planilla de prueba y escritura con el lector. Una primera medición local no prueba p95, arranques fríos de Netlify ni rendimiento del catálogo real.
+La custodia incluye a los colaboradores y procesos con acceso al build de producción. Mantener acceso de escritura al repositorio/Netlify limitado a personas de confianza. No imprimir valores secretos, exportarlos al cliente ni copiar archivos de credenciales a Git/dist. Las copias locales de transferencia se eliminan después de comprobar la configuración remota y el runtime.
 
-Verificado mediante conectores: las dos variables actuales tienen valores solo en producción; el secreto está marcado como tal y sus scopes incluyen Builds/Functions/Runtime. El plan no ofrece el aislamiento de scopes propuesto como preferencia en el plan. La custodia final de credenciales de producción sigue pendiente.
-
-El archivo real contiene Catalogo, LEEME, Config, Ventas y Pendientes. Se inspeccionaron solo metadata y encabezados: Pendientes incluye Clienta, Productos/cantidades, Pago, Saldo por cobrar, Entrega, Próximo paso, Fecha/horario y Notas. No se copiaron registros. Como Google concede lectura por archivo, una cuenta con acceso al catálogo real tendría capacidad técnica de leer también esos datos. La proyección del endpoint no elimina esa capacidad de la credencial; resolver aislamiento antes de concederla a Netlify.
+Rotación: crear una clave de reemplazo para esta misma identidad, actualizar exclusivamente el valor secreto productivo, construir un nuevo deploy y verificar lecturas/logs antes de revocar la anterior. Retirar una variable de contexto no revoca claves ya capturadas por deploys previos. Ante exposición, revocar la clave afectada y ejecutar la recuperación ensayada con el puente; no reutilizar sus JSON ni modificar al escritor de waitlist.
 
 ## Preview y lista de espera
 
@@ -63,4 +61,4 @@ Build de funciones local: catalog aproximadamente 677 kB comprimidos, waitlist 6
 
 Preview real: 60 consultas sin fallas en el candidato verificado; Catalogo mediana 538,5 ms y p95 muestral 983 ms. Matriz de navegador real aprobada, cambios de precio visibles en la siguiente lectura y permiso de escritura denegado. La copia temporal de la clave fue eliminada. Ver el informe para los fallos de preparación corregidos y los límites de esas métricas.
 
-Próximo paso: resolver aislamiento de datos reales/custodia productiva, comparar fuentes equivalentes y ensayar recuperación. Producción permanece con el puente hasta completar esas puertas y recibir aprobación de publicación.
+La comparación con datos reales, el ensayo de recuperación y la publicación se registran en [PRODUCTION-VERIFICATION.md](PRODUCTION-VERIFICATION.md). El puente se conserva al menos 48 horas y hasta comprobar una ventana representativa, renovación de token y una instancia nueva. La lista de espera sigue necesitándolo después de retirar el lector antiguo.

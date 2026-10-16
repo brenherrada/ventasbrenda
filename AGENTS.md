@@ -2,7 +2,7 @@
 
 Por instrucción explícita de Bren del 7/10/2026, este repo es la única fuente activa del catálogo standalone. Las instrucciones del AGENTS.md padre que describen WordPress, WooCommerce, Docker o theme.css generado no aplican a este runtime. No modificar el theme de WooCommerce para resolver tareas de este proyecto.
 
-- Stack: HTML, CSS y JavaScript sin framework; Google Sheets privada con puente de Apps Script autenticado desde Netlify; selección local y consultas por WhatsApp. Netlify sirve estáticos, /api/catalog y las vistas previas sociales de filtros.
+- Stack: HTML, CSS y JavaScript sin framework; Google Sheets privada con lector directo desde Netlify y puente de Apps Script conservado para recuperación y escritura de la lista de espera; selección local y consultas por WhatsApp. Netlify sirve estáticos, /api/catalog y las vistas previas sociales de filtros.
 - Leer y aplicar ../../standards/UX-UI-STANDARD.md, ENGINEERING-DELIVERY-STANDARD.md, SECURITY-DATA-STANDARD.md y adapters/html-css.md.
 - Fuente visual: rediseño aprobado de este chat (REDISENO.md), tokens.css, componentes reales y assets custom; el theme MTS es referencia de lectura, no runtime ni destino de cambios.
 - Leer [DESIGN.md](DESIGN.md) antes de trabajar en UI: documenta el diseño standalone vigente y sus fuentes. Contrastar el historial de REDISENO.md con los componentes y Sass actuales; la propuesta calma separada no es el diseño activo del catálogo.

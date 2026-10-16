@@ -1,6 +1,6 @@
 # Migración del lector del catálogo a Google Sheets directo
 
-Fecha: 16/10/2026, Buenos Aires. Estado: **lector dual probado localmente y preview con Google real/planilla sintética verificado; datos reales, recuperación y producción pendientes**. Evidencia en [PREVIEW-VERIFICATION.md](PREVIEW-VERIFICATION.md) y operación en [README.md](README.md). Este documento no autoriza publicar en producción.
+Fecha: 16/10/2026, Buenos Aires. Estado: **migración productiva autorizada; aislamiento privado completado; validación final y publicación en curso**. Evidencia sintética en [PREVIEW-VERIFICATION.md](PREVIEW-VERIFICATION.md), ejecución actual en [PRODUCTION-VERIFICATION.md](PRODUCTION-VERIFICATION.md) y operación en [README.md](README.md). Las puertas siguientes describen el plan original; las autorizaciones posteriores y los resultados actuales quedan registrados en el informe productivo.
 
 ## Resultado y alcance
 
@@ -119,7 +119,7 @@ Estado: bloqueo de escritura en servidor y lector directo implementados y probad
 
 ### 5. Cambio controlado en producción
 
-1. Pedir aprobación sobre una revisión concreta ya probada: SHA, pruebas, cambio de custodia/costos, mediciones, pendientes y recuperación. No pedirle a Bren que opere Google/Netlify ni que detecte requisitos faltantes.
+1. Contrastar la revisión concreta con la autorización vigente: SHA, pruebas, custodia/costos, mediciones, pendientes y recuperación. Bren autorizó hacerse cargo de punta a punta hasta producción y aprobó expresamente separar Pendientes y completar la migración con la cuenta nueva. No pedir nuevamente una autorización ya recibida; consultar solo un cambio material no cubierto.
 2. Reconfirmar deploy publicado y ausencia de cambios concurrentes en el destino. Leer de vuelta metadata de configuración productiva; no confundir valores locales o de preview con producción.
 3. Incorporar solo el alcance revisado y publicar por el workflow identificado. La configuración `direct` debe existir antes del build/deploy que la usa; el deploy anterior sigue sirviendo con su configuración propia.
 4. Netlify construye una versión nueva mientras la anterior sigue publicada. Si el build falla, conservar la anterior e investigar; no desmontar el sitio ni revocar nada. Verificar el cambio atómico de versión y el SHA/contexto esperados, no asumirlos por un push exitoso.
@@ -127,7 +127,7 @@ Estado: bloqueo de escritura en servidor y lector directo implementados y probad
 6. Cuando esté autorizada la prueba de escritura, verificar una inscripción sintética identificable y consentida, leerla en su Sheet, repetir y comprobar una única fila; eliminar solo ese registro de prueba. No contactar personas ni usar datos de clientes. Si no está autorizada/disponible, registrar la puerta pendiente y no declarar el flujo de inscripciones verificado.
 7. Quien publica permanece durante la verificación; no dejar a Bren monitoreando. Ante criterios de recuperación, ejecutar la revisión preparada como **nuevo deploy correctivo**. No depender de restaurar un deploy viejo como procedimiento del agente.
 
-**Puerta 5:** publicación y recorridos reales verificados. La aprobación del plan no equivale a la aprobación de esta publicación.
+**Puerta 5:** publicación y recorridos reales verificados. La publicación cuenta con autorización explícita posterior al plan; conservar todos los gates técnicos.
 
 ### 6. Observación y cierre
 

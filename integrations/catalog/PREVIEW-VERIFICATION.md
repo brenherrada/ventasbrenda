@@ -1,5 +1,7 @@
 # Preview de lectura directa — 16/10/2026
 
+Registro histórico de la etapa sintética. Bren autorizó posteriormente separar Pendientes y completar la migración hasta producción; los gates con datos reales y el estado actual están en [PRODUCTION-VERIFICATION.md](PRODUCTION-VERIFICATION.md).
+
 Resultado: integración real Netlify → Google Sheets verificada con datos sintéticos. Esta etapa está completada; no autoriza migrar datos reales ni publicar en producción.
 
 - [Preview verificado](https://6ad230b987955831f386cee3--ventasbrenda.netlify.app).
@@ -59,7 +61,58 @@ Bren autorizó guardar y subir el conjunto de cambios en `codex/catalogo-mejoras
 
 El primer commit `24be682` quedó subido y sincronizado. La interpretación inicial de `allowed_branches: []` fue incorrecta: Netlify permite todas las ramas con ese valor. Se activó el branch-deploy `6ad23a73c5772af35267a462`; instaló npm correctamente, pero el preflight detuvo el build por falta de configuración privada en ese contexto. No se publicó ni cambió producción. La credencial de prueba permanece exclusivamente en `deploy-preview`.
 
-Se añadió una regla `ignore` solo para `branch-deploy` de esta rama: el push guarda el trabajo y Netlify omite su build. `production`, `deploy-preview` y otras ramas conservan su configuración; no se amplían permisos ni secretos. La regla se contrasta con el resolutor real de Netlify y los códigos de salida documentados en [Ignore builds](https://docs.netlify.com/build/configure-builds/ignore-builds/); el seguimiento remoto debe confirmar la cancelación antes de cerrar.
+Se añadió una regla `ignore` solo para `branch-deploy` de esta rama: el push guarda el trabajo y Netlify omite su build. `production`, `deploy-preview` y otras ramas conservan su configuración; no se amplían permisos ni secretos. La regla se contrasta con el resolutor real de Netlify y los códigos de salida documentados en [Ignore builds](https://docs.netlify.com/build/configure-builds/ignore-builds/). Seguimiento remoto confirmado: el deploy `6ad23b1253362833c6e6d76b`, correspondiente a `c84c604`, se canceló en `checking build content for changes` con `Canceled build due to no content change`, antes de compilar.
+
+## QA del preview antes de main — 16/10/2026
+
+Resultado de esta ronda: **pasaron las pruebas del preview sintético; main y producción permanecen sin cambios**. Rama local y remota verificadas en `c84c6048ec8d7fa893b9d483536111fb1637b1cc`; main local/remota y producción siguen en `d29fb5986526bbe263283a2ffc82bca5a87374fa`. No se modificó código de aplicación ni se hizo otro deploy durante esta ronda.
+
+### Correspondencia del preview con la rama
+
+`npm run build` pasó: cinco salidas Sass sincronizadas, 84 archivos, 3,35 MiB. Se contrastaron los hashes de fuentes de runtime y funciones con el manifiesto del candidato desplegado: coinciden. Las diferencias son documentación, tooling local, exclusiones de Git y la regla para omitir el branch-deploy; no cambian la aplicación distribuida.
+
+De los 84 archivos del artefacto, 82 coinciden byte por byte con las respuestas del preview. `_headers` devuelve 404 porque Netlify consume ese archivo de configuración. `index.html` coincide exactamente al retirar únicamente el script RUM que inyecta Netlify. No se equipara la etiqueta `branch: main` del deploy manual con un commit: la evidencia es la comparación de fuentes y contenido servido.
+
+### Navegación con la integración real
+
+Sin simular `/api/catalog`: primera matriz de siete combinaciones (Chromium 390/768/1440 px; Firefox y WebKit 390/1440 px), seguida de seis recorridos ampliados en los tres motores a 390×900 y 1440×900. Los recorridos ampliados verificaron:
+
+- Los 86 artículos disponibles mediante paginación, exclusión de vendidos y bloqueo de reservados.
+- Categoría, badge, historial, recarga filtrada, búsqueda vacía y restablecimiento.
+- Descripción larga con scroll hasta el final, galería con dos imágenes servidas, navegación, zoom y foco contenido.
+- Selección, totales, cuotas, validación del nombre, privacidad del almacenamiento, persistencia al recargar, eliminación y devolución del foco.
+- Pago, entrega y confirmación exclusiva de Laura. Se inspeccionó el destino y texto de WhatsApp interceptando la salida; no se enviaron mensajes.
+
+Los seis recorridos ampliados tuvieron 54 respuestas reales de catálogo/configuración/ventas, todas 200, sin excepciones JS ni respuestas HTTP de error. El tiempo hasta tener catálogo, meta y fuentes listos fue de 1,84–2,75 s en sus primeras navegaciones. Esta medida incluye más que la consulta y no es un p95 productivo ni una comparación equivalente contra la planilla real.
+
+La descripción larga, dos rutas de imágenes existentes y un badge reconocido se cargaron temporalmente en `Catalogo!C2/F2/I2` de la planilla sintética. Al terminar, las tres celdas se restauraron a sus valores originales; el conector y la siguiente lectura del preview confirmaron la restauración, 94 filas y `Cache-Control: no-store`, sin redeploy. Las imágenes usadas en este recorrido son assets del sitio: no validan las fotos comerciales de Drive ni su Image CDN.
+
+### Estados adversos y revisión visual
+
+Las siguientes suites se ejecutaron contra los recursos públicos del preview, con respuestas de API controladas para reproducir estados concretos. No representan fallas inducidas en Google real:
+
+| Prueba | Cobertura | Resultado |
+| --- | --- | --- |
+| `tests/e2e.mjs` | Chromium, Firefox y WebKit; mobile y desktop | 60 pasadas, 0 fallidas |
+| `tests/resilience.mjs` | Chromium; red/reintento/vacío, storage denegado/corrupto, privacidad, reservas, imágenes/fuentes fallidas, XSS y configuración de pagos | 27 pasadas, 0 fallidas |
+| `tests/catalog-loading.mjs` | Tres motores; contenido visible antes de datos/fuentes, seis skeletons, aviso de demora, error, reintento y vacío; 320–1440 px | Pasada |
+| `tests/product-feature.mjs` | Tres motores; 11 tamaños, descripciones largas, confirmación/cancelación de Laura, foco, teclado/touch, ausencia de JS y fallo de catálogo | Pasada |
+
+Además, se usó la API real con diez productos seleccionados en Chromium con touch emulado: 320, 390, 539/540/541, 599/600/601, 639/640/641, 679/680/681, 766/767/768/769, 1024 y 1440 px. Sin overflow horizontal; último artículo, nombre y CTA alcanzables. También pasaron 844×390, 390×430 y 320×568; la altura reducida no sustituye un teclado físico real. Animación normal, apertura/cierre interrumpidos, movimiento reducido, foco y liberación del scroll comprobados.
+
+Se inspeccionaron capturas reales del drawer en mobile/desktop y pantallas bajas, descripción larga, galería y confirmación de Laura. No se encontró un defecto visual bloqueante en los estados revisados. Firefox informa correcciones de métricas de la fuente Knewave y protección antifingerprinting en RUM; la fuente renderiza y los recorridos pasan. WebKit registra un bloqueo CSP de estilos al tomar capturas con Playwright: se reprodujo ligado a cada captura, con cero violaciones al navegar sin capturar. Se conservó la CSP estricta; no se añadió `unsafe-inline` para silenciar la herramienta.
+
+### Seguridad, operación y límites
+
+- Se volvió a comprobar la proyección pública de Catalogo, las diez claves permitidas de Config y únicamente `TOTAL VENDIDO` de Ventas. Parámetros arbitrarios/duplicados: 400; pestañas privadas/desconocidas: 404.
+- La lectura anónima de la planilla devolvió 403. Waitlist en preview devolvió 403 incluso con un header que intentaba fingir producción. Archivos privados, documentación, demostración y módulos de servidor devuelven 404. CSP, `nosniff`, `noindex` y `no-store` conservados.
+- Una muestra actual de logs (100 entradas, 49 eventos de lectura) confirma `source: direct`, `reason: ok` y reutilización de token. Es una muestra, no un análisis completo del histórico ni una prueba de carga.
+- Producción se verificó nuevamente a las 15:12 UTC en `6ad174c760716e72a684808b`; el preview sigue `ready`, `deploy-preview`, sin publicación productiva. Sass watch continúa activo.
+- No se repitieron con una clave local las comprobaciones previas de escritura denegada y falta de acceso a archivos reales: la copia temporal fue eliminada. La evidencia de esa etapa permanece en el informe anterior. No se ampliaron permisos para esta ronda.
+
+Evidencia local: `output/qa/catalog-migration/current-artifact-parity.json`, `preview-current-safety.json`, `preview-browser.json`, `preview-extended.json`, `preview-stress.json`, `webkit-csp-trace.json`, `preview-current-logs.json`, `current-final-state.json` y capturas `extended-*.png`/`stress-*.png`. Regresión funcional en `output/qa/catalog-migration/regression/`; carga en `output/qa/catalog-loading/`; resiliencia en `output/qa/release-2026-10-08/`; producto especial en `output/qa/legxercise/` (son los destinos configurados por esas suites).
+
+Esta ronda no habilita todavía la migración productiva: siguen pendientes aislamiento y custodia de datos reales, comparación equivalente y ensayo de recuperación por el puente. Tampoco prueba dispositivos físicos, zoom del navegador, concurrencia productiva, fotos comerciales de Drive ni el envío efectivo de WhatsApp/lista de espera.
 
 ## Próxima puerta
 
