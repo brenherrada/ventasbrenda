@@ -66,13 +66,16 @@ body::before {
 
   & img {
     position: absolute;
-    // Original 960 × 320 asset: artwork spans y=51..260. Remove only
-    // transparent padding, with two source pixels of breathing room.
-    top: calc(-49 / 214 * 100%);
+    // Preserve the full artwork, including its lower stroke and suitcase.
+    top: -8px;
     display: block;
     width: 100%;
     height: auto;
     object-fit: contain;
+
+    @media screen and (max-width: 767px) {
+      top: -2px;
+    }
   }
 }
 .site-logo__mark {
@@ -80,7 +83,7 @@ body::before {
   position: relative;
   width: 100%;
   aspect-ratio: 480 / 107;
-  overflow: hidden;
+  overflow: visible;
 }
 .site-logo__tagline {
   --sale-cord-height: clamp(20px, 2vw, 24px);

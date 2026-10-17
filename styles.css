@@ -558,7 +558,7 @@ textarea {
   inset: -4px;
 }
 .remove:hover, .remove:focus-visible {
-  background: var(--color-pink);
+  background: var(--color-orange);
 }
 
 .drawer-footer {
@@ -1026,11 +1026,16 @@ body::before {
 }
 .site-logo img {
   position: absolute;
-  top: -22.8971962617%;
+  top: -8px;
   display: block;
   width: 100%;
   height: auto;
   object-fit: contain;
+}
+@media screen and (max-width: 767px) {
+  .site-logo img {
+    top: -2px;
+  }
 }
 
 .site-logo__mark {
@@ -1038,7 +1043,7 @@ body::before {
   position: relative;
   width: 100%;
   aspect-ratio: 480/107;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .site-logo__tagline {
