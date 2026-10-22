@@ -43,3 +43,40 @@ for (const sheet of ['Catalogo', 'Ventas']) assert.equal(post({ action: 'catalog
 assert.equal(reads, 0);
 assert.equal(post({ action: 'catalog.read', sheet: 'Config', secret: 'preview-secret' }).environment, 'preview'); assert.equal(reads, 1);
 console.log('PASS: trusted preview context, separate connection/build configuration, no credential fallback, scoped Google destinations and production catalog rejection.');
+
+// Exercise real HTTP handlers with synthetic upstreams: no Google calls.
+const { default: waitlist } = await import('../netlify/functions/waitlist.mts');
+const { default: productIntake } = await import('../netlify/functions/product-intake.mts');
+const { readIntakeToken, issueIntakeToken } = await import('../netlify/lib/product-intake.mjs');
+const { randomUUID } = await import('node:crypto');
+const { categories, conditions } = await import('../product-options.mjs');
+const originalFetch = globalThis.fetch, originalNetlify = globalThis.Netlify;
+const requests = []; let receiptEnvironment = 'preview';
+globalThis.Netlify = { env: { get: key => ({ ...values, PRODUCT_INTAKE_ENABLED: 'true' })[key] } };
+globalThis.fetch = async (url, options) => {
+  assert.equal(url, values.PREVIEW_WAITLIST_SCRIPT_URL);
+  const body = JSON.parse(options.body); requests.push(body);
+  assert.equal(body.secret, values.PREVIEW_WAITLIST_SCRIPT_SECRET);
+  if (body.action === 'catalog.read') return Response.json({ ok: true, environment: 'preview', table: { cols: [{ label: 'clave' }, { label: 'valor' }], rows: [{ c: [{ v: 'mostrar_boton_vender' }, { v: 'si' }] }] } });
+  assert.equal(body.environment, 'preview');
+  return Response.json({ ok: true, productsReady: true, environment: receiptEnvironment });
+};
+const trustedPreview = { deploy: { context: 'deploy-preview' } };
+const register = () => waitlist(new Request('https://preview.test/api/waitlist', { method: 'POST', headers: { origin: 'https://preview.test', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Persona QA', email: 'qa@example.test', consent: true }) }), trustedPreview);
+try {
+  const contact = await register(); assert.equal(contact.status, 200);
+  const sessionToken = (await contact.json()).intakeToken;
+  assert.equal(readIntakeToken(sessionToken, values.PREVIEW_WAITLIST_SCRIPT_SECRET).email, 'qa@example.test');
+  assert.throws(() => readIntakeToken(sessionToken, values.WAITLIST_SCRIPT_SECRET));
+  const submit = token => {
+    const form = new FormData(); form.append('product', JSON.stringify({ id: randomUUID(), title: 'Producto QA', category: categories[0], condition: conditions[0], city: 'Ciudad de prueba', description: '', price: null, currency: 'ARS', consent: true }));
+    return productIntake(new Request('https://preview.test/api/product-intake', { method: 'POST', headers: { origin: 'https://preview.test', Authorization: 'Bearer ' + token }, body: form }), trustedPreview);
+  };
+  assert.equal((await submit(sessionToken)).status, 200);
+  assert.equal(requests.filter(request => request.action === 'product.submit').length, 1);
+  assert.equal((await submit(issueIntakeToken('Persona QA', 'qa@example.test', values.WAITLIST_SCRIPT_SECRET))).status, 401);
+  receiptEnvironment = 'production';
+  assert.equal((await register()).status, 503, 'Never confirm a production receipt in preview');
+  assert.equal((await submit(sessionToken)).status, 503);
+} finally { globalThis.fetch = originalFetch; globalThis.Netlify = originalNetlify; }
+console.log('PASS: real preview handlers use only the preview connection, reject production tokens and reject upstream receipts from another environment. Google is simulated.');
