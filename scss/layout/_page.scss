@@ -1,0 +1,38 @@
+/* Actual MTS composition and primitives, adapted to the catalog's existing IDs and data contract. */
+body {
+  margin: 0 auto;
+  color: var(--color-ink);
+  background-color: var(--color-butter);
+  position: relative;
+  isolation: isolate;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+}
+/* A fixed layer avoids iOS Safari's background-attachment limitations. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(var(--color-cobalt) 1.4px, transparent 1.4px),
+    radial-gradient(var(--color-orange) 1.4px, transparent 1.4px);
+  background-size: 32px 32px;
+  background-position:
+    0 0,
+    16px 16px;
+}
+.shell {
+  width: min(calc(100% - clamp(24px, 2.78vw, 40px)), var(--container));
+  margin-inline: auto;
+}
+.site-alert {
+  background: var(--color-ink);
+  color: var(--color-yellow);
+  text-align: center;
+  font: 700 clamp(9px, 0.8vw, 11px) var(--font-mono);
+  letter-spacing: 0.1em;
+  padding: 8px 12px;
+}

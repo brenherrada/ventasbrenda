@@ -5,7 +5,7 @@
 # This migration is verified through the separately authorized deploy-preview.
 # A plain push must not create an unconfigured second preview or expand secrets.
 [context.branch-deploy]
-  ignore = 'test "$BRANCH" = "codex/catalogo-mejoras-y-migracion"'
+  ignore = 'test "$BRANCH" = "codex/catalogo-mejoras-y-migracion" || test "$BRANCH" = "codex/collective-product-intake-preview"'
 
 [functions]
   directory = "netlify/functions"

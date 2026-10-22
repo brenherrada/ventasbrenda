@@ -60,7 +60,7 @@ const script = vm.createContext({
     if (failFlush) throw new Error('Write response lost');
   }
 });
-vm.runInContext(source, script);
+vm.runInContext(await readFile(new URL('../integrations/waitlist/Environment.gs', import.meta.url), 'utf8') + '\n' + source, script);
 const post = body => JSON.parse(script.doPost({ postData: { contents: JSON.stringify(body) } }).body);
 const payload = { ...valid, secret: 'unit-test-secret', policy: 'waitlist-v1' };
 rows = [headers]; locked = false; failFlush = false;

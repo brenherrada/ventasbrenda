@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as sass from 'sass';
+import { createHash } from 'node:crypto';
 import { verifyWaitlistBuildConfig } from './waitlist-build-config.mjs';
 import { verifyCatalogBuildConfig } from './catalog-build-config.mjs';
 
@@ -11,28 +12,24 @@ if (verifyCatalogBuildConfig()) console.log('PASS: catalog build configuration; 
 const root = process.cwd();
 const out = path.join(root, 'dist');
 const files = [
-  'index.html', 'app.js', 'navigation.js', 'waitlist.js', 'config.js', 'styles.css',
-  'tokens.css', 'promo.css', 'no-script.css', '_headers', 'robots.txt',
+  'index.html', 'form-validation.js', 'waitlist.js', 'products.mjs', 'product-options.mjs', 'collective.css',
+  'tokens.css', '_headers', 'robots.txt',
   'favicon-192.png', 'favicon-32.png', 'apple-touch-icon.png',
 ];
 const images = [
-  'badge-recien-agregado.webp',
   'venta-red-280.webp', 'venta-red-560.webp',
   'mts-hero-mobile-horizontal-540.avif', 'mts-hero-mobile-horizontal-720.avif',
-  'mts-hero-mobile-horizontal.avif', 'mts-hero-tablet.avif', 'mts-hero-desktop.avif',
-  'plot-twist-desktop.webp', 'plot-twist-mobile.webp', 'mts-hero-desktop.webp',
+  'mts-hero-mobile-horizontal.avif', 'mts-hero-tablet.avif',
+  'plot-twist-desktop.webp', 'plot-twist-mobile.webp',
   'mts-hero-mobile-horizontal-540.webp', 'mts-hero-mobile-horizontal-720.webp', 'mts-hero-mobile-horizontal.webp',
-  'mts-hero-tablet.webp', 'perrito-cabeza-67.webp', 'perrito-cabeza-134.webp', 'perrito-cabeza-201.webp', 'venta-por-mudanza-share.jpg',
-  'legxercise/mancha-cyan-puntos.webp', 'legxercise/mancha-amarilla.webp',
-  'legxercise/cinta-rosa.webp',
-  'legxercise/producto-480.webp', 'legxercise/producto-960.webp',
+  'mts-hero-tablet.webp',
 ];
 
 // Only this generated directory is replaced. Source and QA evidence are preserved.
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 for (const file of files) await cp(file, path.join(out, file));
-for (const dir of ['fonts', 'icons']) {
+for (const dir of ['fonts']) {
   await mkdir(path.join(out, dir), { recursive: true });
   for (const file of await readdir(dir)) {
     const publicAsset = /\.(woff2|css|js|svg|webp)$/.test(file);
@@ -46,13 +43,10 @@ for (const file of images) {
   await mkdir(path.dirname(path.join(out, 'images', file)), { recursive: true });
   await cp(path.join('images', file), path.join(out, 'images', file));
 }
-await cp('images/social', path.join(out, 'images/social'), {
-  recursive: true,
-  filter: source => !source.endsWith('.DS_Store'),
-});
-
+await mkdir(path.join(out, 'icons'), { recursive: true });
+for (const file of ['remove-product.svg', 'select-chevrons.svg']) await cp(path.join('icons', file), path.join(out, 'icons', file));
 // Preserve source order and URLs while delivering one render-blocking stylesheet.
-const stylesheets = ['fonts/fonts.css', 'tokens.css', 'styles.css', 'promo.css'];
+const stylesheets = ['fonts/fonts.css', 'tokens.css', 'collective.css'];
 const styles = await Promise.all(stylesheets.map(async file => {
   const css = await readFile(path.join(root, file), 'utf8');
   return file.startsWith('fonts/') ? css.replace(/url\(([^)]+)\)/g, 'url(fonts/$1)') : css;
@@ -64,8 +58,12 @@ const publicStyles = sass.compileString(styles.join('\n'), {
 }).css;
 await writeFile(path.join(out, 'site.css'), publicStyles);
 let page = await readFile(path.join(out, 'index.html'), 'utf8');
-page = page.replace(/  <link rel="stylesheet" href="(?:fonts\/fonts|tokens|styles|promo)\.css[^"]*" \/>\n/g, '');
-page = page.replace('  <script src="fonts/font-loading.js', '  <link rel="stylesheet" href="site.css?v=20261008-performance" />\n  <script src="fonts/font-loading.js');
+if (process.env.CONTEXT === 'deploy-preview') {
+  page = page.replace('<body>', '<body>\n  <aside class="collective-ribbon" aria-label="Entorno de prueba">VERSIÓN DE PRUEBA · Usá datos de prueba, sin información personal real.</aside>');
+}
+page = page.replace(/  <link rel="stylesheet" href="(?:fonts\/fonts|tokens|collective)\.css[^"]*" \/>\n/g, '');
+const styleVersion = createHash('sha256').update(publicStyles).digest('hex').slice(0, 12);
+page = page.replace('  <script src="fonts/font-loading.js', `  <link rel="stylesheet" href="site.css?v=${styleVersion}" />\n  <script src="fonts/font-loading.js`);
 await writeFile(path.join(out, 'index.html'), page);
 for (const file of stylesheets) await rm(path.join(out, file));
 

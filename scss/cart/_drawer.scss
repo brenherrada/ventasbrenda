@@ -264,12 +264,6 @@
   display: grid;
   gap: clamp(10px, 1vw, 14px);
 }
-label {
-  font-size: 0.9rem;
-  font-weight: 800;
-  display: grid;
-  gap: 8px;
-}
 #buyerForm input[aria-invalid='true'] {
   border: 3px dashed var(--orange);
 }

@@ -7,11 +7,13 @@
     "sass": "1.105.1"
   },
   "scripts": {
-    "build": "npm run styles:build && node scripts/build.mjs",
+    "build": "node scripts/product-contract.mjs && npm run styles:build && node scripts/build.mjs",
     "styles:build": "node scripts/styles.mjs",
     "styles:watch": "node scripts/styles.mjs --watch",
     "styles:check": "node scripts/styles.mjs --check",
     "test:styles": "node tests/styles.mjs",
+    "test:products": "node scripts/product-contract.mjs --check && node tests/products.mjs && node tests/intake-environment.mjs",
+    "test:collective": "node tests/waitlist-client.mjs && node tests/collective.mjs",
     "test:catalog-automation": "node tests/catalog-automation.mjs",
     "test:catalog-api": "node tests/catalog-api.mjs && node tests/catalog-direct.mjs && node tests/catalog-privacy.mjs && node tests/google-identities.mjs",
     "test:catalog-browser": "node tests/catalog-direct-browser.mjs",

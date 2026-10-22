@@ -35,6 +35,14 @@ export default async (request: Request, context: Context) => {
 
   const response = await context.next({ sendConditionalRequest: false });
   if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
+  let html = await response.text();
+  // Old shared category links now open the Collective announcement. Do not
+  // replace its metadata with the ended sale's titles, images or canonical.
+  if (html.includes('data-page="collective"')) {
+    const headers = new Headers(response.headers);
+    for (const header of ["content-length", "content-encoding", "etag"]) headers.delete(header);
+    return new Response(html, { status: response.status, headers });
+  }
   const [name, summary] = category;
   const title = `${name} · Venta por mudanza en Mar del Plata`;
   const description = `${summary} Venta local en Mar del Plata. Entregas únicamente en Mar del Plata.`;
@@ -54,7 +62,6 @@ export default async (request: Request, context: Context) => {
     "twitter:description": description,
     "twitter:image": image,
   };
-  let html = await response.text();
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttribute(title)}</title>`);
   html = html.replace(/<meta (name|property)="([^"]+)" content="[^"]*"\s*\/>/g,
     (tag, attribute, key) => replacements[key] === undefined ? tag

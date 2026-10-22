@@ -7,6 +7,7 @@ Esta carpeta es la fuente editable. Los CSS de la raíz y `fonts/fonts.css` son 
 | Fuente | Salida | Responsabilidad |
 | --- | --- | --- |
 | `styles.scss` | `styles.css` | Componentes y composición del catálogo |
+| `collective.scss` | `collective.css` | Landing vigente de Plot Twist Collective, con controles, acciones y fondo compartidos |
 | `tokens.scss` | `tokens.css` | Paleta, tipografía, geometría y roles semánticos |
 | `fonts.scss` | `fonts/fonts.css` | Fuentes locales; URLs relativas a la salida en `fonts/` |
 | `promo.scss` | `promo.css` | Invitación y popover del servicio de catálogo |
@@ -30,11 +31,11 @@ Esta carpeta es la fuente editable. Los CSS de la raíz y `fonts/fonts.css` son 
 3. Editar los archivos `.scss`, guardar y recargar localhost.
 4. Ejecutar `npm run styles:check` antes de entregar o commitear.
 
-`npm run styles:build` compila las cinco entradas. Si una contiene un error, no reemplaza ningún CSS y el watcher sigue escuchando para recuperarse al corregirlo. Escribe solo salidas que cambiaron.
+`npm run styles:build` compila las seis entradas. Si una contiene un error, no reemplaza ningún CSS y el watcher sigue escuchando para recuperarse al corregirlo. Escribe solo salidas que cambiaron.
 
 `npm run test:styles` verifica compilación, detección de CSS desactualizado, preservación de las salidas cuando Sass falla y recuperación automática del watcher, en una copia temporal aislada.
 
-`npm run build` compila primero y conserva el bundle público `site.css` del catálogo, comprimido para producción. `dist` excluye SCSS, herramientas de desarrollo, backups y documentación.
+`npm run build` compila primero y genera `site.css` con fuentes, tokens y Collective, comprimido para producción y versionado por contenido. El catálogo anterior conserva su CSS local para referencias; no se distribuye en la landing. `dist` excluye SCSS, herramientas de desarrollo, backups y documentación.
 
 ## Migración
 

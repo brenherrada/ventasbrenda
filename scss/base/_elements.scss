@@ -16,7 +16,8 @@ html {
 }
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
   color: inherit;
 }
@@ -31,7 +32,7 @@ a {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-:where(button, a, input, textarea):focus-visible {
+:where(button, a, input, textarea, select):focus-visible {
   outline: 3px solid var(--cobalt);
   outline-offset: 5px;
 }

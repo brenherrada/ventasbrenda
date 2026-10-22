@@ -3,7 +3,7 @@
 const WAITLIST_HEADERS = ['Fecha de inscripción', 'Nombre', 'Mail', 'Estado', 'Fecha de contacto', 'Consentimiento'];
 
 function result_(body) {
-  return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({ ...body, environment: INTAKE_ENVIRONMENT })).setMimeType(ContentService.MimeType.JSON);
 }
 
 function doGet() { return result_({ ok: false }); }
@@ -13,12 +13,15 @@ function doPost(event) {
   let acquired = false;
   try {
     const raw = event && event.postData && event.postData.contents;
-    if (!raw || raw.length > 4096) return result_({ ok: false });
+    if (!raw || raw.length > 4 * 1024 * 1024) return result_({ ok: false });
     const input = JSON.parse(raw);
     if (!input || typeof input !== 'object' || Array.isArray(input)) return result_({ ok: false });
-    const properties = PropertiesService.getScriptProperties();
+    const properties = intakeProperties_();
+    if ((input.environment !== undefined && input.environment !== INTAKE_ENVIRONMENT) || (INTAKE_ENVIRONMENT === 'preview' && input.environment !== 'preview' && input.action !== 'catalog.read')) return result_({ ok: false });
     const secret = properties.getProperty('WAITLIST_SECRET');
     if (!secret || typeof input.secret !== 'string' || input.secret !== secret) return result_({ ok: false });
+    if (input.action === 'product.submit') return result_(submitProduct_(input));
+    if (raw.length > 4096) return result_({ ok: false });
     if (input.action === 'catalog.read') {
       if (Object.keys(input).some(key => !['secret', 'action', 'sheet'].includes(key))) return result_({ ok: false });
       return result_({ ok: true, table: readPublicCatalog_(input.sheet) });
@@ -37,9 +40,10 @@ function doPost(event) {
     const headers = readSheetValues_('waitlist', "'Lista de espera'!A1:F1");
     if (JSON.stringify(headers[0]) !== JSON.stringify(WAITLIST_HEADERS)) return result_({ ok: false });
     const existing = readSheetValues_('waitlist', "'Lista de espera'!C2:C");
-    if (existing.some(row => String(row[0] || '').trim().toLowerCase() === email)) return result_({ ok: true });
+    const receipt = { ok: true, productsReady: !!properties.getProperty('PRODUCTS_SHEET_ID') && !!properties.getProperty('PRODUCTS_FOLDER_ID') };
+    if (existing.some(row => String(row[0] || '').trim().toLowerCase() === email)) return result_(receipt);
     appendWaitlist_(name, email);
-    return result_({ ok: true });
+    return result_(receipt);
   } catch (_) {
     return result_({ ok: false });
   } finally {
@@ -55,7 +59,8 @@ function readPublicCatalog_(name) {
     Ventas: ['concepto', 'importe']
   };
   if (!Object.prototype.hasOwnProperty.call(fields, name)) throw new Error('Invalid public resource');
-  const values = readSheetValues_('catalog', name + (name === 'Catalogo' ? '!A1:K' : '!A1:B'));
+  if (INTAKE_ENVIRONMENT === 'preview' && name !== 'Config') throw new Error('Preview has no production catalog');
+  const values = readSheetValues_(INTAKE_ENVIRONMENT === 'preview' ? 'waitlist' : 'catalog', name + (name === 'Catalogo' ? '!A1:K' : '!A1:B'));
   if (!values.length) throw new Error('Missing public resource');
   const keys = ['titulo', 'intro', 'nota_reserva', 'whatsapp', 'actualizado', 'meta_total', 'mp_comision_inmediata', 'mp_comision_3_cuotas', 'mp_iva', 'mostrar_boton_vender'];
   let rows;

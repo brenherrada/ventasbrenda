@@ -29,7 +29,7 @@ const context = vm.createContext({
    return {getResponseCode:()=>fail?403:200,getContentText:()=>fail?'PRIVATE_SERVER_ERROR':JSON.stringify({values:[['safe']]})};
  }}
 });
-const source=await readFile(new URL('../integrations/waitlist/GoogleSheets.gs',import.meta.url),'utf8');vm.runInContext(source,context);
+const source=await readFile(new URL('../integrations/waitlist/GoogleSheets.gs',import.meta.url),'utf8');vm.runInContext(await readFile(new URL('../integrations/waitlist/Environment.gs',import.meta.url),'utf8')+'\n'+source,context);
 assert.equal(context.readSheetValues_('catalog','Config!A1:B')[0][0],'safe');
 context.readSheetValues_('catalog','Ventas!A1:B');assert.equal(calls.filter(x=>x.url.includes('oauth2')).length,1,'Token cache not reused');
 context.appendWaitlist_('=FORMULA()','qa@example.test');assert.equal(calls.filter(x=>x.url.includes('oauth2')).length,2,'Reader/writer tokens were mixed');
@@ -41,6 +41,6 @@ fail=true;assert.throws(()=>context.readSheetValues_('catalog','Config!A1:B'),/P
 properties.CATALOG_SERVICE_ACCOUNT=JSON.stringify(account('other@plot-twist-catalog.iam.gserviceaccount.com'));
 assert.throws(()=>context.readSheetValues_('catalog','Config!A1:B'),/Missing technical identity/);
 const manifest=JSON.parse(await readFile(new URL('../integrations/waitlist/appsscript.json',import.meta.url),'utf8'));
-assert.deepEqual(manifest.oauthScopes,['https://www.googleapis.com/auth/script.external_request']);
+assert.deepEqual(manifest.oauthScopes,['https://www.googleapis.com/auth/script.external_request','https://www.googleapis.com/auth/drive.file']);
 assert.ok(!source.includes('ScriptApp.getOAuthToken'));
 console.log('PASS: signed JWTs, separate reader/writer scopes and tokens, cache, fixed files/ranges, read-only enforcement, safe failures, no owner Sheets OAuth scope.');

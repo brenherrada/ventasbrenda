@@ -1,4 +1,34 @@
-# Plot Twist — diseño del catálogo standalone
+# Plot Twist Collective — landing y sistema visual
+
+## Etapa vigente — 22 de octubre de 2026
+
+Por pedido de Bren, la venta por viaje terminó y `index.html` pasa a presentar **Plot Twist Collective** como una convocatoria en desarrollo. No se anuncia precio de participación, fecha de lanzamiento ni alcance geográfico. La carga opcional admite hasta diez propuestas por sesión; no es un mínimo ni una condición comercial. Inscribirse significa recibir la invitación por mail; no confirma un lugar, un pago o el alta de productos.
+
+- Objetivo: entender la propuesta y anotarse. Recorrido: anuncio → idea de venta compartida → cómo participar → formulario inline de nombre/mail → confirmación o reintento.
+- Identidad: logo e ilustraciones originales, paleta, fuentes locales y acciones existentes. El header móvil contiene solo el logo centrado; escritorio conserva el acceso al formulario. La composición cambia a una columna a 760 px. Motion bajo: feedback de controles y navegación nativa; sin loops nuevos ni revelados que oculten texto. Con movimiento reducido se elimina el desplazamiento.
+- `scss/collective.scss` es la entrada de esta landing. Reutiliza `base/_elements.scss`, `base/_forms.scss`, `base/_font-loading.scss`, `layout/_page.scss` y `components/_actions.scss`. Los controles y el fondo se extrajeron sin cambiar sus valores del catálogo histórico; no se copia su motor de interfaz.
+- `waitlist.js` habilita el formulario después de leer únicamente Config. Respeta `mostrar_boton_vender`, pausa, fallo y reintento, conserva campos ante errores y confirma solo `{ok:true}`. Se conservan el endpoint, la finalidad del consentimiento de contacto y la lista privada. La carga opcional usa un consentimiento separado y requiere ampliar Google con drive.file antes de activarse. No se cargan Catalogo/Ventas ni se guardan contactos en el navegador.
+- El build incluye fuentes, tokens, Collective, formulario y los assets usados. Excluye app.js, navigation.js, config.js, estilos de catálogo, filtros, carrito, galería, countdown y recursos de la promoción terminada. Los endpoints privados existentes siguen disponibles para Config y la inscripción; no se migran sus credenciales ni sus datos. La función de preview social conserva la metadata de Collective al abrir enlaces antiguos con filtros.
+- Metadata y canonical apuntan a `https://plottwistcolectivo.ar/`. El CSS distribuido usa un identificador de contenido para renovar caché cuando cambia.
+- Criterio: logo completo, lectura y formulario accesibles entre 320 y 1440 px, sin overflow; estados loading/pausa/error/reintento/éxito; contrato de inscripción intacto; build sin UI comercial retirada. `npm run test:collective` cubre controlador y artefacto. Las pruebas locales de guardado son simuladas; publicar exige inscripción real, lectura de la fila y deduplicación/limpieza según `integrations/waitlist/README.md`.
+
+Validación local de esta ronda: Chromium del navegador integrado, anchos 320, 390, 759, 760, 761, 1024 y 1440 px; ventana baja 844 × 390, navegación al formulario, foco por teclado y scroll hasta la acción final. Logo centrado en mobile con diferencia medida de 0 px respecto del header y sin overflow horizontal. Error de configuración, pausa, campos obligatorios, error de envío con conservación y confirmación/foco se comprobaron en navegador con respuestas sintéticas locales; Config real se leyó sin modificar datos. Pasaron build, styles:check, test:styles, test:collective, los 39 checks del endpoint y test:waitlist-build. El preflight de Netlify verificó la conexión de producción y la clave protegida sin exponer valores. Dispositivos físicos, Safari/Firefox, zoom nativo, preferencia de movimiento reducido emulada y persistencia real de esta nueva UI no fueron probados. No hay nuevos loops; se revisó la regla de movimiento reducido en CSS.
+
+Estado: publicada y verificada en Deploy Preview; main y producción conservan la versión anterior. Ver la prueba real de preview documentada abajo. La referencia siguiente documenta el catálogo anterior y sus consumidores locales; no representa la landing vigente.
+
+## Propuestas opcionales — 22/10/2026
+
+Después de confirmar nombre/mail se ofrece Proponer mis productos. Es una sección aparte en la misma página, con consentimiento separado. Hasta diez propuestas por sesión, de a una, sin mínimo. Producto/categoría/estado/ciudad-país requeridos; descripción/precio/fotos opcionales. No anuncia condiciones comerciales ni publica automáticamente. Se reutilizan controles, acciones, tokens y fuentes existentes. Los selectores se distribuyen por espacio disponible con minmax/auto-fit para no cortar su lectura en tablet. El formulario opcional se descarga al abrirlo.
+
+UI revisada en Chromium integrado a 320, 390, 759, 760, 761, 1024 y 1440 px, y ventana baja 844×390. Se inspeccionaron render real, lectura, selección de categorías/estado, precio vacío, consentimiento, foco/teclado, acción final accesible, tres previews, límite y eliminación de fotos, error con conservación y reintento, éxito y un segundo producto que conserva ciudad pero reinicia campos/consentimiento. Sin overflow horizontal en esos tamaños. El JPEG generado por el navegador se envió al servidor local y pasó la misma validación de producto/fotos que usa Functions; no se escribió en Google desde esa UI. El logo móvil sigue centrado y sin botón de header. No se verificaron Safari/Firefox, dispositivos físicos, teclado virtual ni zoom nativo.
+
+Google real: planilla y carpeta PREVIEW separadas, Web app independiente versión 4 y variables Netlify limitadas a deploy-preview. Inscripción y propuestas con/sin fotos y precio verificadas desde el formulario público, con lectura independiente de Sheets y permisos de Drive. La repetición HTTP idéntica conservó una sola fila/foto. Se limpiaron exclusivamente el contacto, las tres propuestas y las dos fotos de QA. Producción no fue actualizada. Ver contrato, recuperación y activación en integrations/waitlist/README.md. La demo local anuncia explícitamente que no guarda en Google.
+
+Ronda de controles y preview: rama `codex/collective-product-intake-preview`, sin autorización de main/producción. Planilla nueva de prueba creada y revisada en Google Sheets. El puente de preview usa una versión con Environment=preview y propiedades prefijadas; su conexión remota está activada y probada únicamente en preview. Los errores de formulario se presentan en español mediante resumen y mensajes junto al campo, aria-invalid/describedby y foco al primer error; se limpian al corregir o reiniciar. Se reutiliza el tachito custom existente (acción de 44px con nombre accesible) y se agrega el SVG de chevron arriba/abajo compartido por todos los selectores. Se conserva la selección nativa y el ícono también con foco. En Chromium integrado se comprobaron campos vacíos, mail inválido, corrección, consentimiento, foto/eliminación y foco; anchos 320/390/759/760/761/1024/1440 sin overflow. Logo centrado con delta de 0px y sin CTA hasta 760px. Estos cambios aún no certifican Safari, Firefox, teclado virtual o dispositivos físicos. El aviso al cerrar un borrador sigue siendo controlado por el navegador.
+
+Validación real del preview `95291f0`: Chromium integrado a 1440×900 y 390×844, sin respuestas simuladas. Inscripción con doble clic, invitación opcional, propuesta con JPEG, segunda propuesta sin precio/fotos, consentimiento obligatorio, confirmaciones y foco correctos. Un segundo registro por API con el mismo mail conservó un contacto; una propuesta con foto repetida dos veces por HTTP conservó una fila y una foto. Readback: 1 contacto, 3 propuestas Por revisar y 2 JPEG privados de 143578/175631 bytes en la carpeta PREVIEW con permiso owner único. Limpieza: solo esas dos fotos a Papelera, A2:R4 y A2:F2 vacíos verificados; carpeta vacía tras recarga. Sin errores/warnings de aplicación en las sesiones de navegador. Una lectura adicional por Node sufrió ECONNRESET; el recorrido real de navegador y el reintento HTTP posterior finalizaron correctamente. Esto no certifica ausencia de fallas intermitentes de red. Safari/Firefox y dispositivos físicos siguen pendientes.
+
+## Catálogo anterior — referencia histórica
 
 Documento de referencia del diseño implementado. Relevado contra las fuentes locales el 16 de octubre de 2026. Describe este catálogo; no certifica el estado de un deploy ni reemplaza la revisión visual en navegador.
 
@@ -35,7 +65,7 @@ Los degradados actuales del hero, panel de selección y banner promocionado son 
 | [scss/fonts.scss](scss/fonts.scss) | Declaraciones de fuentes locales |
 | [scss/promo.scss](scss/promo.scss) | Invitación al servicio y su popover |
 | [scss/no-script.scss](scss/no-script.scss) | Presentación sin JavaScript |
-| [scripts/styles.mjs](scripts/styles.mjs) | Compilación de las cinco entradas de producción |
+| [scripts/styles.mjs](scripts/styles.mjs) | Compilación de las seis entradas de producción |
 | [scripts/build.mjs](scripts/build.mjs) | Lista de recursos públicos y composición de `site.css` |
 
 Editar Sass; no editar directamente `tokens.css`, `styles.css`, `promo.css`, `fonts/fonts.css` ni `no-script.css`. Tras un cambio de estilos, ejecutar `npm run styles:build` y `npm run styles:check` desde standalone. El build combina las fuentes de CSS en `site.css` para distribución. Este documento no se incluye en el sitio público.
@@ -141,7 +171,7 @@ Conservar dimensiones, `srcset`, `sizes`, prioridad y lazy loading según el uso
 
 [sistema-visual-calmo.html](sistema-visual-calmo.html) es un estudio separado con overrides propios. **No es el diseño activo de `index.html` ni un modo de personalidad integrado.** No aplicar sus fuentes, paleta o geometría al catálogo sin una decisión explícita.
 
-En el build inspeccionado, estas páginas, `sistema-visual.css`, `scss/sistema-visual.scss` e `images/system-preview/` no forman parte de la lista pública. El compilador de producción mantiene cinco entradas; no asumir que compila el sistema visual. Mantener clara la diferencia entre referencia local, componente ejecutable y recurso distribuido.
+En el build inspeccionado, estas páginas, `sistema-visual.css`, `scss/sistema-visual.scss` e `images/system-preview/` no forman parte de la lista pública. El compilador de producción mantiene seis entradas; no asumir que compila el sistema visual. Mantener clara la diferencia entre referencia local, componente ejecutable y recurso distribuido.
 
 ## Mantenimiento y criterio de aceptación
 

@@ -8,7 +8,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const fixture = await mkdtemp(path.join(tmpdir(), 'plot-twist-sass-'));
-const outputs = ['styles.css', 'tokens.css', 'promo.css', 'fonts/fonts.css', 'no-script.css'];
+const outputs = ['styles.css', 'collective.css', 'tokens.css', 'promo.css', 'fonts/fonts.css', 'no-script.css'];
 let watcher;
 async function waitFor(condition, message) {
   const deadline = Date.now() + 10000;

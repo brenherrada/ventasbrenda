@@ -76,7 +76,7 @@ try {
   reset();
   const read = createDirectReader({ fetchImpl: upstream() });
   const script = vm.createContext({ readSheetValues_: (_, range) => data[range.split('!')[0]] });
-  vm.runInContext(await readFile(new URL('../integrations/waitlist/Code.gs', import.meta.url), 'utf8'), script);
+  vm.runInContext(await readFile(new URL('../integrations/waitlist/Environment.gs', import.meta.url), 'utf8') + '\n' + await readFile(new URL('../integrations/waitlist/Code.gs', import.meta.url), 'utf8'), script);
   const tables = await Promise.all(['Catalogo','Config','Ventas'].map(sheet => read(sheet, get)));
   for (const [index, sheet] of ['Catalogo','Config','Ventas'].entries()) assert.deepEqual(tables[index], JSON.parse(JSON.stringify(script.readPublicCatalog_(sheet))));
   assert.equal(state.auth, 1, 'Concurrent first reads must share authentication');
