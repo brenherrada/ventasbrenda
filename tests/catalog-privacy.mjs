@@ -15,7 +15,7 @@ const context = vm.createContext({
   ContentService: { MimeType: { JSON: 'json' }, createTextOutput: body => ({ body, setMimeType() { return this; } }) },
   readSheetValues_: (purpose, range) => { reads++; assert.equal(purpose, 'catalog'); return data[range.split('!')[0]]; }
 });
-vm.runInContext(source, context);
+vm.runInContext(await readFile(new URL('../integrations/waitlist/Environment.gs', import.meta.url), 'utf8') + '\n' + source, context);
 const post = input => JSON.parse(context.doPost({ postData: { contents: JSON.stringify(input) } }).body);
 const read = sheet => post({ action: 'catalog.read', sheet, secret: 'fixture-secret' });
 for (const input of [null, [], {}, {action:'catalog.read',sheet:'Ventas'}, {action:'catalog.read',sheet:'Ventas',secret:'wrong'}]) {

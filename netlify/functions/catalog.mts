@@ -2,8 +2,10 @@ import { catalogSource } from '../lib/catalog-config.mjs';
 import { isPublicSheet } from '../lib/catalog-contract.mjs';
 import { readBridge } from '../lib/catalog-bridge.mjs';
 import { readDirect } from '../lib/catalog-direct.mjs';
+import { intakeGetter } from '../lib/intake-environment.mjs';
+import type { Context } from '@netlify/functions';
 
-export default async (request: Request) => {
+export default async (request: Request, context?: Pick<Context, 'deploy'>) => {
   const params = new URL(request.url).searchParams;
   const sheet = params.get('sheet') || 'Catalogo';
   const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
@@ -11,7 +13,8 @@ export default async (request: Request) => {
   if (request.method !== 'GET') return new Response('Method not allowed', { status: 405 });
   if ([...params.keys()].some(key => key !== 'sheet') || params.getAll('sheet').length > 1) return new Response(JSON.stringify({ error: 'Invalid catalog request' }), { status: 400, headers });
   try {
-    const get = (key: string) => Netlify.env.get(key);
+    const environment = context?.deploy?.context === 'deploy-preview' && Netlify.env.get('WAITLIST_PREVIEW_ENABLED') === 'true' ? 'preview' : 'production';
+    const get = intakeGetter((key: string) => Netlify.env.get(key), environment);
     const table = catalogSource(get) === 'direct' ? await readDirect(sheet, get, request.signal) : await readBridge(sheet, get);
     const payload = JSON.stringify({ table });
     if (Buffer.byteLength(payload) > 4 * 1024 * 1024) throw new Error('Catalog response too large');

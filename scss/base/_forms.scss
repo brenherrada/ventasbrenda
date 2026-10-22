@@ -1,0 +1,49 @@
+// Controles compartidos del catálogo y la convocatoria.
+input,
+textarea,
+.product-form select {
+  width: 100%;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: white;
+  padding-block: 12px;
+  padding-inline: 14px;
+  font-size: 16px;
+  min-height: 50px;
+}
+input:focus,
+textarea:focus,
+.product-form select:focus {
+  background-color: #fff9cc;
+}
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+label {
+  font-size: 0.9rem;
+  font-weight: 800;
+  display: grid;
+  gap: 8px;
+}
+
+.product-form select {
+  appearance: none;
+  padding-right: 48px;
+  background-image: url('icons/select-chevrons.svg');
+  background-position: right 12px center;
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+}
+.form-field { min-width: 0; display: grid; gap: 8px; }
+.field-error, .form-error-summary {
+  margin: 0;
+  padding: clamp(10px, 1vw, 14px);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-peach);
+  color: var(--color-ink);
+  font: 700 13px/1.5 var(--font-body);
+}
+.form-error-summary { box-shadow: var(--shadow-xs); }
+[aria-invalid='true'] { border-color: var(--color-discount-value); }

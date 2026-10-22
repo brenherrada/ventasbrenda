@@ -1,7 +1,8 @@
 import { catalogSource, bridgeConfig, directConfig } from '../netlify/lib/catalog-config.mjs';
+import { intakeGetter } from '../netlify/lib/intake-environment.mjs';
 
 export function verifyCatalogBuildConfig(env = process.env) {
-  const get = key => env[key];
+  const get = intakeGetter(key => env[key], env.CONTEXT === 'deploy-preview' && env.WAITLIST_PREVIEW_ENABLED === 'true' ? 'preview' : 'production');
   const source = catalogSource(get);
   if (env.NETLIFY !== 'true' || env.CONTEXT === 'dev') return false;
   try {

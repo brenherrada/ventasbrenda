@@ -3,7 +3,7 @@
 function googleIdentity_(purpose) {
   const identities = {
     catalog: { property: 'CATALOG_SERVICE_ACCOUNT', email: 'catalog-reader@plot-twist-catalog.iam.gserviceaccount.com', scope: 'https://www.googleapis.com/auth/spreadsheets.readonly', book: '18tOI0_8yoLwXR4za7XVvsOUjVrktexYldoMAlRJ1BMA' },
-    waitlist: { property: 'WAITLIST_SERVICE_ACCOUNT', email: 'waitlist-writer@plot-twist-catalog.iam.gserviceaccount.com', scope: 'https://www.googleapis.com/auth/spreadsheets', book: PropertiesService.getScriptProperties().getProperty('WAITLIST_SHEET_ID') }
+    waitlist: { property: 'WAITLIST_SERVICE_ACCOUNT', email: 'waitlist-writer@plot-twist-catalog.iam.gserviceaccount.com', scope: 'https://www.googleapis.com/auth/spreadsheets', book: intakeProperties_().getProperty('WAITLIST_SHEET_ID') }
   };
   if (!Object.prototype.hasOwnProperty.call(identities, purpose)) throw new Error('Invalid technical identity');
   const identity = identities[purpose];
@@ -49,7 +49,7 @@ function googleApi_(purpose, path, method, body) {
 }
 
 function readSheetValues_(purpose, range) {
-  const ranges = { catalog: ['Catalogo!A1:K', 'Config!A1:B', 'Ventas!A1:B'], waitlist: ["'Lista de espera'!A1:F1", "'Lista de espera'!C2:C"] };
+  const ranges = { catalog: ['Catalogo!A1:K', 'Config!A1:B', 'Ventas!A1:B'], waitlist: ["'Lista de espera'!A1:F1", "'Lista de espera'!C2:C", "Config!A1:B"] };
   if (!Object.prototype.hasOwnProperty.call(ranges, purpose) || ranges[purpose].indexOf(range) === -1) throw new Error('Invalid private range');
   const data = googleApi_(purpose, '/values/' + encodeURIComponent(range) + '?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER', 'get');
   if (data.values !== undefined && !Array.isArray(data.values)) throw new Error('Invalid private values');
@@ -65,5 +65,7 @@ function appendWaitlist_(name, email) {
     { userEnteredValue: { numberValue: serial }, userEnteredFormat: { numberFormat: { type: 'DATE_TIME', pattern: 'dd/mm/yyyy hh:mm' } } },
     ...[literal(name), literal(email), 'En espera', '', 'waitlist-v1 · contacto por mail'].map(value => ({ userEnteredValue: { stringValue: value } }))
   ];
-  googleApi_('waitlist', ':batchUpdate', 'post', { requests: [{ appendCells: { sheetId: 906247871, rows: [{ values: values }], fields: 'userEnteredValue,userEnteredFormat.numberFormat' } }] });
+  const tab = intakeProperties_().getProperty('WAITLIST_TAB_ID');
+  if (INTAKE_ENVIRONMENT === 'preview' && !/^\d+$/.test(tab || '')) throw new Error('Preview contact tab required');
+  googleApi_('waitlist', ':batchUpdate', 'post', { requests: [{ appendCells: { sheetId: tab === null || tab === undefined ? 906247871 : Number(tab), rows: [{ values: values }], fields: 'userEnteredValue,userEnteredFormat.numberFormat' } }] });
 }

@@ -9,6 +9,7 @@ const entries = [
   ['scss/fonts.scss', 'fonts/fonts.css'],
   ['scss/tokens.scss', 'tokens.css'],
   ['scss/styles.scss', 'styles.css'],
+  ['scss/collective.scss', 'collective.css'],
   ['scss/promo.scss', 'promo.css'],
   ['scss/no-script.scss', 'no-script.css'],
 ];

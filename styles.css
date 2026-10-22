@@ -24,7 +24,8 @@ html {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
   color: inherit;
 }
@@ -43,7 +44,7 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
-:where(button, a, input, textarea):focus-visible {
+:where(button, a, input, textarea, select):focus-visible {
   outline: 3px solid var(--cobalt);
   outline-offset: 5px;
 }
@@ -91,6 +92,70 @@ h2 {
   margin: 0;
 }
 
+input,
+textarea,
+.product-form select {
+  width: 100%;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: white;
+  padding-block: 12px;
+  padding-inline: 14px;
+  font-size: 16px;
+  min-height: 50px;
+}
+
+input:focus,
+textarea:focus,
+.product-form select:focus {
+  background-color: #fff9cc;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 800;
+  display: grid;
+  gap: 8px;
+}
+
+.product-form select {
+  appearance: none;
+  padding-right: 48px;
+  background-image: url("icons/select-chevrons.svg");
+  background-position: right 12px center;
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+}
+
+.form-field {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.field-error, .form-error-summary {
+  margin: 0;
+  padding: clamp(10px, 1vw, 14px);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-peach);
+  color: var(--color-ink);
+  font: 700 13px/1.5 var(--font-body);
+}
+
+.form-error-summary {
+  box-shadow: var(--shadow-xs);
+}
+
+[aria-invalid=true] {
+  border-color: var(--color-discount-value);
+}
+
 .catalog-tools {
   position: sticky;
   top: calc(var(--nav-content-height) + 12px);
@@ -99,27 +164,6 @@ h2 {
   flex-direction: column;
   gap: 14px;
   margin-bottom: clamp(24px, 3vw, 38px);
-}
-
-input,
-textarea {
-  width: 100%;
-  border: 2px solid var(--color-border);
-  border-radius: 10px;
-  background: white;
-  padding: 12px 14px;
-  font-size: 16px;
-  min-height: 50px;
-}
-
-input:focus,
-textarea:focus {
-  background: #fff9cc;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 100px;
 }
 
 .category-rail {
@@ -632,13 +676,6 @@ textarea {
   padding-top: clamp(16px, 1.5vw, 22px);
   display: grid;
   gap: clamp(10px, 1vw, 14px);
-}
-
-label {
-  font-size: 0.9rem;
-  font-weight: 800;
-  display: grid;
-  gap: 8px;
 }
 
 #buyerForm input[aria-invalid=true] {
